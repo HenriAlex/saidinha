@@ -6,7 +6,7 @@
 | **4**  | Criação das Classes Model (`Perfil` e `Usuario`)        |          ✅         |
 | **5**  | Banco SQLite (Conexão e criação automática das tabelas) |          ✅         |
 | **6**  | Repository (Acesso aos dados)                           |          ✅         |
-| **7**  | Service (Regras de negócio)                             | **⬅ Estamos aqui** |
+| **7**  | Service (Regras de negócio)                             | **⬅ Estamos aqui**  |
 | **8**  | Controller / Rotas da API                               |          ⏳         |
 | **9**  | Interface Web (HTML/CSS/JavaScript)                     |          ⏳         |
 | **10** | Integração Front-End × Back-End                         |          ⏳         |
