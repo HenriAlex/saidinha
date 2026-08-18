@@ -1,6 +1,6 @@
 # Importa a classe Perfil.
 # Essa classe representa o modelo dos dados do perfil.
-# Teste pull
+# Teste pull - João Gabril Bisco (Testar pull request)
 from models.perfil import Perfil
 
 # Importa o Repository responsável pelo acesso
