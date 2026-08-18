@@ -1,17 +1,26 @@
+# Importa a classe responsável pela conexão com o banco.
 from database.conexao import Conexao
 
+
+# Classe responsável pela criação do banco
+# e das tabelas do sistema.
 class CriarBanco:
 
+    # Método estático.
+    # Pode ser executado sem criar um objeto da classe.
     @staticmethod
     def criar():
 
-        # Abre conexão
+        # Abre uma conexão com o banco SQLite.
+        #
+        # Caso o arquivo saidinha.db não exista,
+        # o SQLite irá criá-lo automaticamente.
         conexao = Conexao.conectar()
 
         # Cria um cursor para executar comandos SQL.
         cursor = conexao.cursor()
 
-        # Criação da tabela perfil
+        # Cria a tabela PERFIL caso ela ainda não exista.
         cursor.execute("""
 
         CREATE TABLE IF NOT EXISTS perfil (
@@ -24,7 +33,7 @@ class CriarBanco:
 
         """)
 
-        # Criação da tabela usuario
+        # Cria a tabela USUARIO caso ela ainda não exista.
         cursor.execute("""
 
         CREATE TABLE IF NOT EXISTS usuario (
@@ -50,6 +59,13 @@ class CriarBanco:
 
         """)
 
+        # Confirma as alterações realizadas no banco.
         conexao.commit()
 
+        # Fecha a conexão com o banco.
         conexao.close()
+
+
+# Executa o método responsável por criar
+# o banco de dados e suas tabelas.
+CriarBanco.criar()
