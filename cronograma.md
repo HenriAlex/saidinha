@@ -7,8 +7,8 @@
 | **5**  | Banco SQLite (Conexão e criação automática das tabelas)        |        ✅         |
 | **6**  | Repository (Acesso e persistência dos dados)                   |        ✅         |
 | **7**  | Service (Regras de negócio e autenticação)                     |        ✅         |
-| **8**  | API REST com FastAPI (Schemas, Controllers e Rotas)            | **⬅ Estamos aqui** |
-| **9**  | Interface Web (HTML/CSS/JavaScript)                            |        ⏳         |
+| **8**  | API REST com FastAPI (Schemas, Controllers e Rotas)            |        ✅         |
+| **9**  | Interface Web (HTML/CSS/JavaScript)                            |**⬅ Estamos aqui** |
 | **10** | Integração Front-End × Back-End                                |        ⏳         |
 | **11** | Login e autenticação                                           |        ⏳         |
 | **12** | Cadastro de Usuários                                           |        ⏳         |
