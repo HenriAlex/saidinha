@@ -8,8 +8,8 @@
 | **6**  | Repository (Acesso e persistência dos dados)                   |        ✅         |
 | **7**  | Service (Regras de negócio e autenticação)                     |        ✅         |
 | **8**  | API REST com FastAPI (Schemas, Controllers e Rotas)            |        ✅         |
-| **9**  | Interface Web (HTML/CSS/JavaScript)                            |**⬅ Estamos aqui** |
-| **10** | Integração Front-End × Back-End                                |        ⏳         |
+| **9**  | Interface Web (HTML/CSS/JavaScript)                            |        ✅         |
+| **10** | Integração Front-End × Back-End                                |**⬅ Estamos aqui** |
 | **11** | Login e autenticação                                           |        ⏳         |
 | **12** | Cadastro de Usuários                                           |        ⏳         |
 | **13** | Cadastro de Saídas                                             |        ⏳         |

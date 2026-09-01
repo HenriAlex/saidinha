@@ -2,14 +2,13 @@
 # Ele será utilizado para criar nossa aplicação.
 from fastapi import FastAPI
 
-
 # Importa o Controller de usuários.
 from controllers.usuario_controller import router as usuario_router
 
-
 # Importa o Controller de perfis.
 from controllers.perfil_controller import router as perfil_router
-
+# Importa o middleware responsável pelo CORS.
+from fastapi.middleware.cors import CORSMiddleware
 
 # Cria a aplicação FastAPI.
 app = FastAPI(
@@ -38,3 +37,22 @@ def inicio():
     return {
         "mensagem": "API Saidinha funcionando!"
     }
+
+# Configura as origens que poderão acessar a API.
+app.add_middleware(
+
+    # Define o middleware de CORS.
+    CORSMiddleware,
+
+    # Permite qualquer origem durante o desenvolvimento.
+    allow_origins=["*"],
+
+    # Permite envio de credenciais.
+    allow_credentials=True,
+
+    # Permite todos os métodos HTTP.
+    allow_methods=["*"],
+
+    # Permite todos os cabeçalhos HTTP.
+    allow_headers=["*"]
+)

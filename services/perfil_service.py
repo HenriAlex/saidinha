@@ -43,20 +43,15 @@ class PerfilService:
 
         # Percorre todos os perfis encontrados.
         for perfil_existente in perfis:
-
-            # Compara as descrições ignorando maiúsculas
-            # e minúsculas.
-            if perfil_existente.ds_perfil.lower() == perfil.ds_perfil.lower():
-
-                # Impede o cadastro de perfis duplicados.
-                raise ValueError(
-                    "Já existe um perfil com esta descrição."
-                )
+            # perfil_existente vem do repository como dicionário.
+            desc = perfil_existente.get('ds_perfil') if isinstance(perfil_existente, dict) else getattr(perfil_existente, 'ds_perfil', None)
+            if desc and desc.lower() == perfil.ds_perfil.lower():
+                raise ValueError("Já existe um perfil com esta descrição.")
 
 
-        # Depois das validações,
-        # envia o perfil para o Repository.
-        self.repository.inserir(perfil)
+        # Depois das validações, envia o perfil para o Repository
+        # e retorna o id criado.
+        return self.repository.inserir(perfil)
 
 
     # ============================================================
@@ -124,9 +119,7 @@ class PerfilService:
 
 
         # Verifica se o perfil existe.
-        perfil_existente = self.repository.buscar_por_id(
-            perfil.id_perfil
-        )
+        perfil_existente = self.repository.buscar_por_id(perfil.id_perfil)
 
 
         # Caso o perfil não exista,
@@ -144,19 +137,10 @@ class PerfilService:
 
         # Percorre os perfis existentes.
         for perfil_item in perfis:
-
-            # Verifica se encontrou outro perfil
-            # com a mesma descrição.
-            if (
-                perfil_item.ds_perfil.lower()
-                == perfil.ds_perfil.lower()
-                and perfil_item.id_perfil != perfil.id_perfil
-            ):
-
-                # Impede a duplicidade.
-                raise ValueError(
-                    "Já existe outro perfil com esta descrição."
-                )
+            desc = perfil_item.get('ds_perfil') if isinstance(perfil_item, dict) else getattr(perfil_item, 'ds_perfil', None)
+            pid = perfil_item.get('id_perfil') if isinstance(perfil_item, dict) else getattr(perfil_item, 'id_perfil', None)
+            if desc and desc.lower() == perfil.ds_perfil.lower() and pid != perfil.id_perfil:
+                raise ValueError("Já existe outro perfil com esta descrição.")
 
 
         # Depois das validações,

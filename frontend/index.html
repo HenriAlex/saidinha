@@ -9,42 +9,129 @@
     <!-- Título exibido na aba do navegador. -->
     <title>Saidinha</title>
     <!-- Importa o arquivo responsável pelo estilo da página. -->
-    <link rel="stylesheet" href="style.css">
+    <!-- Estilos principais organizados em pasta `css/` -->
+    <link rel="stylesheet" href="css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 
 <body>
-    <!-- Cabeçalho principal da aplicação. -->
-    <header>
-        <!-- Nome do sistema. -->
-        <h1>Saidinha</h1>
-        <!-- Descrição do sistema. -->
-        <p>Controle de saídas dos alunos</p>
-    </header>
+    <!-- App shell: trilha de navegação (nav-rail) + área principal (topbar + conteúdo) -->
+    <div class="app-shell">
 
-    <!-- Área principal da aplicação. -->
-    <main>
-        <!-- Seção de apresentação. -->
-        <section class="card">
-            <!-- Título da seção. -->
-            <h2>Bem-vindo!</h2>
-            <!-- Texto explicativo. -->
-            <p>
-                Sistema para controle e acompanhamento
-                das saídas dos alunos durante as aulas.
-            </p>
-            <!-- Botão utilizado para testar o JavaScript. -->
-            <button onclick="mostrarMensagem()">
-                Testar sistema
+        <!-- Trilha de navegação lateral fixa, estilo aplicativo -->
+        <nav class="nav-rail" aria-label="Navegação principal">
+            <div class="nav-brand" title="Saidinha">
+                <span class="nav-logo">S</span>
+            </div>
+
+            <button class="nav-item" data-screen="bemVindo" onclick="showScreen('bemVindo')" title="Início">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 3l9 8h-3v9h-5v-6H11v6H6v-9H3z"/></svg>
+                <span>Início</span>
             </button>
-        </section>
-    </main>
-    <!-- Rodapé da aplicação. -->
-    <footer>
-        <p>
-            Saidinha - Projeto TCC
-        </p>
-    </footer>
-    <!-- Importa o arquivo JavaScript. -->
-    <script src="script.js"></script>
+
+            <button class="nav-item" data-screen="telaLista" onclick="showScreen('telaLista')" title="Perfis">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 5h16v2H4zM4 11h16v2H4zM4 17h16v2H4z"/></svg>
+                <span>Perfis</span>
+            </button>
+
+            <button class="nav-item" data-screen="telaCadastro" onclick="showScreen('telaCadastro')" title="Novo Perfil">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
+                <span>Incluir</span>
+            </button>
+
+            <!-- Alternância de tema (claro/escuro), persistida no navegador -->
+            <button class="nav-item nav-item--bottom" onclick="toggleTheme()" title="Alternar tema" id="theme-toggle">
+                <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-5.4-5.4c0-1.68.72-3.19 1.86-4.24C12.92 3.04 12.46 3 12 3z"/></svg>
+                <span>Tema</span>
+            </button>
+        </nav>
+
+        <!-- Área principal: topbar + conteúdo rolável -->
+        <div class="app-main">
+
+            <!-- Barra superior com título dinâmico e busca -->
+            <header class="topbar">
+                <div class="topbar-title">
+                    <h1>Saidinha</h1>
+                    <p class="subtitle">Controle de saídas dos alunos</p>
+                </div>
+
+                <!-- Busca rápida por perfil (filtra o grid renderizado) -->
+                <div class="topbar-search">
+                    <input id="search" class="search" placeholder="Pesquisar perfis..." oninput="(typeof filterProfiles === 'function') && filterProfiles(this.value)">
+                </div>
+            </header>
+
+            <main class="content-area">
+
+                <!-- Painel de boas-vindas (tela inicial) -->
+                <section class="card hero" id="bemVindo">
+                    <div class="hero-text">
+                        <h2>Bem-vindo ao Saidinha 👋</h2>
+                        <p>Gerencie os perfis utilizados no controle de saídas dos alunos. Comece visualizando os perfis já cadastrados ou incluindo um novo.</p>
+                        <div class="card-actions">
+                            <button class="btn" onclick="showScreen('telaLista')">Ver perfis</button>
+                            <button class="btn ghost" onclick="showScreen('telaCadastro')">Incluir perfil</button>
+                        </div>
+                    </div>
+
+                    <!-- Cartão de estatística rápida (quantidade de perfis) -->
+                    <div class="stat-card">
+                        <span class="stat-value" id="statTotal">--</span>
+                        <span class="stat-label">perfis cadastrados</span>
+                    </div>
+                </section>
+
+                <!-- Tela: Cadastro de perfil -->
+                <section class="card" id="telaCadastro" style="display:none;">
+                    <h2>Cadastrar Perfil</h2>
+                    <!-- Formulário simples com label associado ao input para acessibilidade -->
+                    <form id="formPerfil" onsubmit="event.preventDefault(); cadastrarPerfil();">
+                        <label for="descricaoPerfil">Descrição do Perfil</label>
+                        <input type="text" id="descricaoPerfil" placeholder="Ex: Aluno, Professor" aria-label="Descrição do perfil">
+                        <div class="form-actions">
+                            <button class="btn" type="submit">Cadastrar</button>
+                            <button class="btn ghost" type="button" onclick="showScreen('bemVindo')">Cancelar</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Tela: Grid de perfis (cards com avatar e ações) -->
+                <section class="card" id="telaLista" style="display:none;">
+                    <div class="profiles-toolbar">
+                        <h2>Perfis cadastrados</h2>
+                        <div class="profiles-count muted" id="profilesCount">-- perfis</div>
+                    </div>
+                    <!-- Grid de cartões de perfil, atualizado dinamicamente via JS -->
+                    <div id="profilesGrid" class="profiles-grid" aria-live="polite"></div>
+                    <div class="list-footer">
+                        <button class="btn ghost" onclick="showScreen('bemVindo')">Voltar ao início</button>
+                    </div>
+                </section>
+            </main>
+        </div>
+    </div>
+
+    <!-- Botão flutuante (FAB) para incluir perfil rapidamente em telas pequenas -->
+    <button class="fab" onclick="showScreen('telaCadastro')" title="Novo Perfil" aria-label="Novo Perfil">+</button>
+
+    <!-- Toast container para mensagens não intrusivas -->
+    <div id="toast-container" aria-live="polite" aria-atomic="true"></div>
+
+    <!-- Modal de confirmação genérico (escondido por padrão) -->
+    <div id="modal-overlay" class="modal-overlay" style="display:none;" role="dialog" aria-modal="true">
+        <div class="modal" role="document">
+            <h3 id="modal-title">Confirmação</h3>
+            <p id="modal-body">Tem certeza?</p>
+            <div class="modal-actions">
+                <button id="modal-cancel" class="btn ghost">Cancelar</button>
+                <button id="modal-confirm" class="btn">Confirmar</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts organizados em `js/` -->
+    <script src="js/script.js"></script>
+    <script src="js/perfil.js"></script>
 </body>
 </html>

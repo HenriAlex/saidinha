@@ -30,25 +30,29 @@ class PerfilRepository:
         cursor = conexao.cursor()
 
         # Executa o comando SQL para inserir o perfil.
-        #
         # O símbolo ? representa um parâmetro.
-        cursor.execute("""
-            INSERT INTO perfil
-            (
-                ds_perfil
-            )
+        cursor.execute(
+            """
+            INSERT INTO perfil (ds_perfil)
             VALUES (?)
-        """, (
+        """,
+            (
+                # Envia a descrição do perfil para o banco.
+                perfil.ds_perfil,
+            ),
+        )
 
-            # Envia a descrição do perfil para o banco.
-            perfil.ds_perfil,
-        ))
+        # Obtém o id gerado pelo banco para o registro inserido.
+        last_id = cursor.lastrowid
 
         # Confirma a alteração realizada no banco.
         conexao.commit()
 
         # Fecha a conexão com o banco.
         conexao.close()
+
+        # Retorna o id do novo registro.
+        return last_id
 
 
     # ============================================================
@@ -80,8 +84,16 @@ class PerfilRepository:
         # Fecha a conexão com o banco.
         conexao.close()
 
-        # Retorna os registros encontrados.
-        return registros
+        # Converte os registros (tuplas) em uma lista de dicionários
+        # para que a API retorne JSON com chaves legíveis.
+        perfis = []
+        for registro in registros:
+            perfis.append({
+                "id_perfil": registro[0],
+                "ds_perfil": registro[1]
+            })
+
+        return perfis
 
 
     # ============================================================
@@ -117,9 +129,15 @@ class PerfilRepository:
         # Fecha a conexão.
         conexao.close()
 
-        # Retorna o registro encontrado.
+        # Se encontrou o registro, converte para dicionário.
+        if registro:
+            return {
+                "id_perfil": registro[0],
+                "ds_perfil": registro[1]
+            }
+
         # Caso não exista, será retornado None.
-        return registro
+        return None
 
 
     # ============================================================

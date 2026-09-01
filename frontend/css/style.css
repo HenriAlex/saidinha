@@ -1,0 +1,202 @@
+/* style.css (organizado em frontend/css)
+   Design system simples baseado em variáveis CSS para permitir tema claro/escuro.
+*/
+
+/* Reset simples */
+*{box-sizing:border-box;margin:0;padding:0}
+
+/* Variáveis de tema (padrão: claro) */
+:root{
+  --bg:#f4f6fb;
+  --surface:#ffffff;
+  --text:#161821;
+  --muted:#6b7280;
+  --border:#e6e9f0;
+  --primary:#3b82f6;
+  --primary-dark:#2563eb;
+  --danger:#dc2626;
+  --shadow:0 8px 24px rgba(16,24,40,.06);
+  --radius:12px;
+  --nav-w:76px;
+}
+
+/* Tema escuro: aplicado via classe no <html> para evitar flash de conteúdo */
+html.dark{
+  --bg:#0f1220;
+  --surface:#171a2b;
+  --text:#eef0f7;
+  --muted:#9aa0b4;
+  --border:#262a3f;
+  --primary:#60a5fa;
+  --primary-dark:#3b82f6;
+  --shadow:0 8px 24px rgba(0,0,0,.4);
+}
+
+body{
+  font-family:'Inter',Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+  line-height:1.5;
+  transition:background .2s ease,color .2s ease;
+}
+
+/* ============================================================
+   APP SHELL: trilha de navegação fixa + área principal
+   ============================================================ */
+.app-shell{display:flex;min-height:100vh}
+
+/* Trilha de navegação lateral, fixa e compacta, estilo aplicativo */
+.nav-rail{
+  width:var(--nav-w);
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+  padding:16px 8px;
+  position:sticky;
+  top:0;
+  height:100vh;
+}
+
+.nav-brand{margin-bottom:12px}
+.nav-logo{
+  width:40px;height:40px;border-radius:10px;
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:#fff;display:flex;align-items:center;justify-content:center;
+  font-weight:700;font-size:18px;
+}
+
+.nav-item{
+  background:none;border:none;cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;gap:4px;
+  color:var(--muted);width:100%;padding:10px 4px;border-radius:10px;
+  font-size:11px;transition:background .15s ease,color .15s ease;
+}
+.nav-item:hover{background:var(--bg);color:var(--primary)}
+.nav-item.active{color:var(--primary);background:var(--bg)}
+.nav-item--bottom{margin-top:auto}
+
+/* Área principal */
+.app-main{flex:1;display:flex;flex-direction:column;min-width:0}
+
+/* Barra superior */
+.topbar{
+  display:flex;align-items:center;justify-content:space-between;
+  padding:18px 28px;gap:16px;background:var(--surface);border-bottom:1px solid var(--border);
+}
+.topbar-title h1{font-size:20px}
+.subtitle{opacity:.8;margin-top:2px;font-size:13px;color:var(--muted)}
+.topbar-search .search{width:260px}
+
+/* Área de conteúdo rolável */
+.content-area{padding:24px 28px;max-width:1000px;width:100%;margin:0 auto}
+
+/* Cartões genéricos */
+.card{
+  background:var(--surface);padding:22px;border-radius:var(--radius);
+  box-shadow:var(--shadow);margin-bottom:18px;border:1px solid var(--border);
+}
+.card h2{margin-bottom:8px}
+
+/* Hero (tela de boas-vindas) com destaque estatístico */
+.hero{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.hero-text{flex:1;min-width:240px}
+.hero-text p{color:var(--muted);margin:8px 0 14px}
+.stat-card{
+  background:linear-gradient(135deg,var(--primary),var(--primary-dark));
+  color:#fff;border-radius:var(--radius);padding:20px 26px;text-align:center;min-width:160px;
+}
+.stat-value{display:block;font-size:32px;font-weight:700}
+.stat-label{font-size:12px;opacity:.9}
+
+/* Toolbar da listagem de perfis */
+.profiles-toolbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.profiles-count{font-size:13px;color:var(--muted)}
+.muted{color:var(--muted);font-size:13px}
+.list-footer{margin-top:14px;text-align:right}
+
+/* Busca */
+.search{padding:9px 12px;border-radius:9px;border:1px solid var(--border);background:var(--bg);color:var(--text)}
+.search:focus{outline:2px solid var(--primary);outline-offset:1px}
+
+/* Grid de perfis (cards com avatar) */
+.profiles-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-top:14px}
+.profile-card{
+  background:var(--bg);border:1px solid var(--border);padding:14px;border-radius:10px;
+  display:flex;flex-direction:column;gap:10px;transition:transform .15s ease,box-shadow .15s ease;
+}
+.profile-card:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+.profile-card.empty{align-items:center;justify-content:center;color:var(--muted);font-style:italic}
+.profile-head{display:flex;align-items:center;gap:10px}
+.profile-avatar{
+  width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;
+  color:#fff;font-weight:700;font-size:15px;flex-shrink:0;
+}
+.profile-title{font-weight:600}
+.profile-meta{color:var(--muted);font-size:12px}
+.profile-actions{margin-top:auto;display:flex;justify-content:flex-end}
+
+/* Skeleton loading (placeholder enquanto carrega os perfis) */
+.skeleton{background:linear-gradient(90deg,var(--border) 25%,var(--bg) 37%,var(--border) 63%);background-size:400% 100%;animation:skeleton-loading 1.4s ease infinite;border-radius:8px;height:70px}
+@keyframes skeleton-loading{0%{background-position:100% 50%}100%{background-position:0 50%}}
+
+/* Botões */
+.btn{background:var(--primary);color:#fff;padding:9px 14px;border-radius:9px;font-weight:600;border:none;cursor:pointer;transition:background .15s ease,opacity .15s ease}
+.btn:hover{background:var(--primary-dark)}
+.btn.ghost{background:transparent;color:var(--primary);border:1px solid var(--border)}
+.btn.ghost:hover{background:var(--bg)}
+
+/* Botão de remoção com estilo discreto */
+.delete-btn{background:transparent;border:1px solid rgba(220,38,38,.25);color:var(--danger);padding:6px 10px;border-radius:8px;cursor:pointer;font-size:13px}
+.delete-btn:hover{background:rgba(220,38,38,.08)}
+
+/* Botão flutuante (FAB) - atalho para incluir perfil em telas pequenas */
+.fab{
+  display:none;position:fixed;right:20px;bottom:20px;width:56px;height:56px;border-radius:50%;
+  background:var(--primary);color:#fff;font-size:26px;border:none;box-shadow:0 10px 30px rgba(0,0,0,.25);
+  cursor:pointer;z-index:9998;
+}
+
+/* Toasts (mensagens temporárias) */
+#toast-container{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px}
+.toast{min-width:220px;padding:10px 12px;border-radius:8px;color:#fff;box-shadow:0 6px 20px rgba(2,6,23,.2);opacity:0;transform:translateY(-8px);animation:toast-in .25s forwards}
+.toast--success{background:linear-gradient(90deg,#16a34a,#22c55e)}
+.toast--error{background:linear-gradient(90deg,#dc2626,#ef4444)}
+.toast--info{background:linear-gradient(90deg,#2563eb,#60a5fa)}
+@keyframes toast-in{to{opacity:1;transform:none}}
+
+/* Formulário */
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:4px}
+input[type="text"]{width:100%;padding:10px;border:1px solid var(--border);border-radius:8px;background:var(--bg);color:var(--text)}
+input[type="text"]:focus{outline:2px solid var(--primary);outline-offset:1px}
+.form-actions{display:flex;gap:10px;margin-top:14px}
+.card-actions{display:flex;gap:10px;flex-wrap:wrap}
+
+/* Modal de confirmação */
+.modal-overlay{position:fixed;inset:0;background:rgba(2,6,23,0.5);display:flex;align-items:center;justify-content:center;z-index:10000}
+.modal{background:var(--surface);color:var(--text);padding:20px;border-radius:var(--radius);max-width:420px;width:90%;box-shadow:0 10px 40px rgba(2,6,23,.3);text-align:left}
+.modal h3{margin:0 0 8px;font-size:18px}
+.modal p{margin:0 0 14px;color:var(--muted)}
+.modal-actions{display:flex;justify-content:flex-end;gap:10px}
+
+/* ============================================================
+   RESPONSIVIDADE: nav-rail vira rodapé fixo em telas pequenas
+   ============================================================ */
+@media (max-width:800px){
+  .app-shell{flex-direction:column}
+  .nav-rail{
+    position:fixed;bottom:0;left:0;right:0;top:auto;width:100%;height:64px;
+    flex-direction:row;justify-content:space-around;padding:6px;border-right:none;
+    border-top:1px solid var(--border);z-index:9000;
+  }
+  .nav-brand,.nav-item--bottom span{display:none}
+  .nav-item span{font-size:9px}
+  .app-main{padding-bottom:70px}
+  .topbar{padding:14px 16px;flex-wrap:wrap}
+  .topbar-search .search{width:100%}
+  .content-area{padding:16px}
+  .fab{display:flex;align-items:center;justify-content:center}
+  .hero{flex-direction:column;align-items:stretch}
+}
