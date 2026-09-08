@@ -12,9 +12,15 @@ function mostrarMensagem() {
 // Inicialização da interface: aplica tema salvo e mostra a tela de boas-vindas.
 function init() {
     aplicarTemaSalvo();
-    showScreen('bemVindo');
+    // Se houver hash na URL, tenta abrir a tela correspondente, caso contrário mostra a home
+    const hash = (location.hash || '').replace('#','');
+    const valid = ['bemVindo','telaLista','telaCadastro','telaUsuarios','telaUsuarioCadastro'];
+    if (hash && valid.includes(hash)) showScreen(hash);
+    else showScreen('bemVindo');
     // Carrega os perfis em segundo plano para popular o card de estatística.
     if (typeof carregarPerfis === 'function') carregarPerfis();
+    // Carrega usuários em segundo plano (se disponível) para agilizar a navegação
+    if (typeof carregarUsuarios === 'function') carregarUsuarios();
 }
 
 // Vincula inicialização ao evento de carregamento.
@@ -23,7 +29,7 @@ window.addEventListener('load', init);
 // Função responsável por alternar entre telas.
 // Recebe o id lógico da tela e mostra/oculta os containers.
 function showScreen(screen) {
-    const telas = ['bemVindo', 'telaLista', 'telaCadastro'];
+    const telas = ['bemVindo', 'telaLista', 'telaCadastro', 'telaUsuarios', 'telaUsuarioCadastro'];
     telas.forEach(function(t) {
         const el = document.getElementById(t);
         if (!el) return;
@@ -39,6 +45,31 @@ function showScreen(screen) {
     if (screen === 'telaLista' || screen === 'lista') {
         if (typeof carregarPerfis === 'function') carregarPerfis();
     }
+    if (screen === 'telaUsuarios' || screen === 'telaUsuarioCadastro') {
+        if (typeof carregarUsuarios === 'function') carregarUsuarios();
+        if (screen === 'telaUsuarioCadastro' && typeof popularSelectPerfis === 'function') popularSelectPerfis();
+    }
+}
+
+
+// Cancela qualquer edição em andamento e navega para a tela informada
+function cancelEditsAndGo(screen){
+    try{ window.perfilEditId = null; }catch(e){}
+    try{ window.usuarioEditId = null; }catch(e){}
+    // Reseta formulários
+    const formP = document.getElementById('formPerfil'); if (formP) formP.reset();
+    const formU = document.getElementById('formUsuario'); if (formU) formU.reset();
+    showScreen(screen);
+}
+
+
+// Função de busca genérica que encaminha para o filtro da tela ativa
+function filterCurrentScreen(text){
+    // se estiver na lista de perfis
+    const active = document.querySelector('.nav-item.active');
+    const screen = active ? active.getAttribute('data-screen') : null;
+    if (screen === 'telaLista' && typeof filterProfiles === 'function') return filterProfiles(text);
+    if (screen === 'telaUsuarios' && typeof filterUsers === 'function') return filterUsers(text);
 }
 
 

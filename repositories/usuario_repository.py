@@ -61,11 +61,17 @@ class UsuarioRepository:
             usuario.data_cadastro,
         ))
 
+        # Obtém o id gerado pelo banco para o registro inserido.
+        last_id = cursor.lastrowid
+
         # Confirma a inserção no banco.
         conexao.commit()
 
         # Fecha a conexão.
         conexao.close()
+
+        # Retorna o id do novo registro.
+        return last_id
 
 
     # ============================================================
@@ -108,8 +114,21 @@ class UsuarioRepository:
         # Fecha a conexão.
         conexao.close()
 
-        # Retorna os registros.
-        return registros
+        # Converte os registros (tuplas) em uma lista de dicionários
+        usuarios = []
+        for registro in registros:
+            usuarios.append({
+                "id_usuario": registro[0],
+                "ra": registro[1],
+                "nome": registro[2],
+                "id_perfil": registro[3],
+                "ds_perfil": registro[4],
+                "email": registro[5],
+                "senha": registro[6],
+                "data_cadastro": registro[7]
+            })
+
+        return usuarios
 
 
     # ============================================================
@@ -153,11 +172,20 @@ class UsuarioRepository:
         # Fecha a conexão.
         conexao.close()
 
-        # Retorna o registro.
-        #
-        # Caso o usuário não exista,
-        # será retornado None.
-        return registro
+        # Se encontrou o registro, converte para dicionário.
+        if registro:
+            return {
+                "id_usuario": registro[0],
+                "ra": registro[1],
+                "nome": registro[2],
+                "id_perfil": registro[3],
+                "ds_perfil": registro[4],
+                "email": registro[5],
+                "senha": registro[6],
+                "data_cadastro": registro[7]
+            }
+
+        return None
 
 
     # ============================================================
@@ -204,10 +232,20 @@ class UsuarioRepository:
         # Fecha a conexão.
         conexao.close()
 
-        # Retorna o usuário encontrado.
-        #
-        # Caso não exista, será retornado None.
-        return registro
+        # Se encontrou o registro, converte para dicionário.
+        if registro:
+            return {
+                "id_usuario": registro[0],
+                "ra": registro[1],
+                "nome": registro[2],
+                "id_perfil": registro[3],
+                "ds_perfil": registro[4],
+                "email": registro[5],
+                "senha": registro[6],
+                "data_cadastro": registro[7]
+            }
+
+        return None
 
 
     # ============================================================

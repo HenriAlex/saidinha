@@ -89,3 +89,26 @@ def excluir(id_perfil: int):
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"mensagem": "Perfil excluído com sucesso."}
+
+
+# ============================================================
+# ATUALIZAR PERFIL (API)
+# ============================================================
+
+
+@router.put("/{id_perfil}")
+def atualizar(id_perfil: int, perfil_schema: PerfilSchema):
+    # Cria um objeto Perfil com o id informado
+    perfil = Perfil(
+        id_perfil=id_perfil,
+        ds_perfil=perfil_schema.ds_perfil
+    )
+
+    try:
+        service.atualizar(perfil)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+    return {"mensagem": "Perfil atualizado com sucesso."}

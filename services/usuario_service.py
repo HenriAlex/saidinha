@@ -82,8 +82,8 @@ class UsuarioService:
 
         # Depois que todas as regras foram validadas,
         # envia o usuário para o Repository realizar
-        # a gravação no banco.
-        self.repository.inserir(usuario)
+        # a gravação no banco e retorna o id criado.
+        return self.repository.inserir(usuario)
 
 
     # ============================================================
@@ -185,22 +185,15 @@ class UsuarioService:
 
         # Verifica se já existe outro usuário utilizando
         # o mesmo e-mail.
-        usuario_email = self.repository.buscar_por_email(
-            usuario.email
-        )
-
+        usuario_email = self.repository.buscar_por_email(usuario.email)
 
         # Caso exista um usuário com o mesmo e-mail,
         # verifica se ele é diferente do usuário atual.
         if usuario_email:
-
-            # Compara os IDs dos usuários.
-            if usuario_email.id_usuario != usuario.id_usuario:
-
-                # Impede a utilização de e-mail duplicado.
-                raise ValueError(
-                    "O e-mail informado já está sendo utilizado."
-                )
+            # usuario_email pode ser um dicionário (repository) ou um objeto.
+            uid = usuario_email.get('id_usuario') if isinstance(usuario_email, dict) else getattr(usuario_email, 'id_usuario', None)
+            if uid != usuario.id_usuario:
+                raise ValueError("O e-mail informado já está sendo utilizado.")
 
 
         # Depois de todas as validações,
@@ -264,28 +257,19 @@ class UsuarioService:
         #
         # Observe que o Repository não está validando
         # o login. Ele apenas busca o usuário.
-        usuario = self.repository.buscar_por_email(email)
 
+
+        usuario = self.repository.buscar_por_email(email)
 
         # Verifica se o usuário foi encontrado.
         if not usuario:
-
-            # Não informa se o problema foi o e-mail ou senha.
-            # Isso é uma boa prática de segurança.
             raise ValueError("E-mail ou senha inválidos.")
 
+        # Obtém a senha armazenada (suporta dicionário ou objeto).
+        senha_armazenada = usuario.get('senha') if isinstance(usuario, dict) else getattr(usuario, 'senha', None)
 
-        # Compara a senha informada pelo usuário
-        # com a senha armazenada.
-        if usuario.senha != senha:
-
-            # Caso as senhas sejam diferentes,
-            # o login será recusado.
+        if senha_armazenada != senha:
             raise ValueError("E-mail ou senha inválidos.")
 
-
-        # Se chegou até aqui, significa que todas
-        # as validações foram aprovadas.
-        #
         # Retorna o usuário autenticado.
         return usuario

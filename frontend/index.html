@@ -34,6 +34,11 @@
                 <span>Perfis</span>
             </button>
 
+            <button class="nav-item" data-screen="telaUsuarios" onclick="showScreen('telaUsuarios')" title="Usuários">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z"/></svg>
+                <span>Usuários</span>
+            </button>
+
             <button class="nav-item" data-screen="telaCadastro" onclick="showScreen('telaCadastro')" title="Novo Perfil">
                 <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
                 <span>Incluir</span>
@@ -56,9 +61,9 @@
                     <p class="subtitle">Controle de saídas dos alunos</p>
                 </div>
 
-                <!-- Busca rápida por perfil (filtra o grid renderizado) -->
+                <!-- Busca rápida contextual (filtra perfis ou usuários conforme tela) -->
                 <div class="topbar-search">
-                    <input id="search" class="search" placeholder="Pesquisar perfis..." oninput="(typeof filterProfiles === 'function') && filterProfiles(this.value)">
+                    <input id="search" class="search" placeholder="Pesquisar..." oninput="(typeof filterCurrentScreen === 'function') && filterCurrentScreen(this.value)">
                 </div>
             </header>
 
@@ -67,18 +72,18 @@
                 <!-- Painel de boas-vindas (tela inicial) -->
                 <section class="card hero" id="bemVindo">
                     <div class="hero-text">
-                        <h2>Bem-vindo ao Saidinha 👋</h2>
-                        <p>Gerencie os perfis utilizados no controle de saídas dos alunos. Comece visualizando os perfis já cadastrados ou incluindo um novo.</p>
-                        <div class="card-actions">
-                            <button class="btn" onclick="showScreen('telaLista')">Ver perfis</button>
-                            <button class="btn ghost" onclick="showScreen('telaCadastro')">Incluir perfil</button>
-                        </div>
-                    </div>
-
-                    <!-- Cartão de estatística rápida (quantidade de perfis) -->
-                    <div class="stat-card">
-                        <span class="stat-value" id="statTotal">--</span>
-                        <span class="stat-label">perfis cadastrados</span>
+                        <h1>Saidinha</h1>
+                        <h3>Controle de saídas de forma simples e organizada</h3>
+                        <p>
+                            O <strong>Saidinha</strong> é um sistema desenvolvido para facilitar o controle e o acompanhamento das saídas de alunos durante as aulas.
+                        </p>
+                        <p>
+                            Com uma interface simples e intuitiva, o sistema permite registrar as saídas, consultar informações e acompanhar os registros de forma organizada, contribuindo para uma rotina escolar mais segura e eficiente.
+                        </p>
+                        <p><strong>Organize. Registre. Acompanhe.</strong></p>
+                        <p>
+                            O Saidinha transforma o controle das saídas em um processo mais rápido, prático e transparente.
+                        </p>
                     </div>
                 </section>
 
@@ -86,12 +91,12 @@
                 <section class="card" id="telaCadastro" style="display:none;">
                     <h2>Cadastrar Perfil</h2>
                     <!-- Formulário simples com label associado ao input para acessibilidade -->
-                    <form id="formPerfil" onsubmit="event.preventDefault(); cadastrarPerfil();">
+                    <form id="formPerfil" onsubmit="event.preventDefault(); cadastrarPerfil(); return false;">
                         <label for="descricaoPerfil">Descrição do Perfil</label>
                         <input type="text" id="descricaoPerfil" placeholder="Ex: Aluno, Professor" aria-label="Descrição do perfil">
                         <div class="form-actions">
                             <button class="btn" type="submit">Cadastrar</button>
-                            <button class="btn ghost" type="button" onclick="showScreen('bemVindo')">Cancelar</button>
+                            <button class="btn ghost" type="button" onclick="cancelEditsAndGo('bemVindo')">Cancelar</button>
                         </div>
                     </form>
                 </section>
@@ -105,8 +110,48 @@
                     <!-- Grid de cartões de perfil, atualizado dinamicamente via JS -->
                     <div id="profilesGrid" class="profiles-grid" aria-live="polite"></div>
                     <div class="list-footer">
+                        <button class="btn" onclick="showScreen('telaCadastro')">Incluir perfil</button>
                         <button class="btn ghost" onclick="showScreen('bemVindo')">Voltar ao início</button>
                     </div>
+                </section>
+
+                <!-- Tela: Usuários -->
+                <section class="card" id="telaUsuarios" style="display:none;">
+                    <div class="profiles-toolbar">
+                        <h2>Usuários cadastrados</h2>
+                        <div class="profiles-count muted" id="usersCount">-- usuários</div>
+                    </div>
+                    <div id="usersGrid" class="profiles-grid" aria-live="polite"></div>
+                    <div class="list-footer">
+                        <button class="btn" onclick="showScreen('telaUsuarioCadastro')">Incluir usuário</button>
+                        <button class="btn ghost" onclick="showScreen('bemVindo')">Voltar ao início</button>
+                    </div>
+                </section>
+
+                <!-- Tela: Cadastro de usuário -->
+                <section class="card" id="telaUsuarioCadastro" style="display:none;">
+                    <h2>Cadastrar Usuário</h2>
+                    <form id="formUsuario" onsubmit="event.preventDefault(); cadastrarUsuario(); return false;">
+                        <label for="inputRa">RA</label>
+                        <input type="text" id="inputRa" placeholder="RA do aluno">
+
+                        <label for="inputNome">Nome</label>
+                        <input type="text" id="inputNome" placeholder="Nome completo">
+
+                        <label for="selectPerfil">Perfil</label>
+                        <select id="selectPerfil"></select>
+
+                        <label for="inputEmail">E-mail</label>
+                        <input type="text" id="inputEmail" placeholder="email@exemplo.com">
+
+                        <label for="inputSenha">Senha</label>
+                        <input type="text" id="inputSenha" placeholder="Senha">
+
+                        <div class="form-actions">
+                            <button class="btn" type="submit">Cadastrar</button>
+                            <button class="btn ghost" type="button" onclick="cancelEditsAndGo('telaUsuarios')">Cancelar</button>
+                        </div>
+                    </form>
                 </section>
             </main>
         </div>
@@ -133,5 +178,6 @@
     <!-- Scripts organizados em `js/` -->
     <script src="js/script.js"></script>
     <script src="js/perfil.js"></script>
+    <script src="js/usuario.js"></script>
 </body>
 </html>

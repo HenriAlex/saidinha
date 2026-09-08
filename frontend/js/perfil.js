@@ -68,12 +68,19 @@ async function carregarPerfis() {
             const actions = document.createElement('div');
             actions.className = 'profile-actions';
 
-            const btnRemove = document.createElement('button');
-            btnRemove.className = 'delete-btn';
-            btnRemove.textContent = 'Remover';
-            btnRemove.onclick = function(){ removerPerfil(perfil.id_perfil); };
+                const btnEdit = document.createElement('button');
+                btnEdit.className = 'btn ghost';
+                btnEdit.style.marginRight = '8px';
+                btnEdit.textContent = 'Editar';
+                btnEdit.onclick = function(){ editarPerfil(perfil); };
 
-            actions.appendChild(btnRemove);
+                const btnRemove = document.createElement('button');
+                btnRemove.className = 'delete-btn';
+                btnRemove.textContent = 'Remover';
+                btnRemove.onclick = function(){ removerPerfil(perfil.id_perfil); };
+
+                actions.appendChild(btnEdit);
+                actions.appendChild(btnRemove);
 
             card.appendChild(head);
             card.appendChild(meta);
@@ -100,6 +107,39 @@ async function cadastrarPerfil() {
         return;
     }
 
+    // Se estivermos em modo edição, realiza PUT, caso contrário POST
+    if (window.perfilEditId) {
+        const dados = { ds_perfil: descricao };
+        try {
+            const resposta = await fetch(`${API_BASE}/perfis/${window.perfilEditId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(dados)
+            });
+
+            if (resposta.ok) {
+                const resultado = await resposta.json();
+                if (typeof showToast === 'function') showToast(resultado.mensagem || 'Perfil atualizado.', 'success');
+                descricaoInput.value = '';
+                window.perfilEditId = null;
+                await carregarPerfis();
+                // Exibe a lista e marca o menu 'Perfis' como ativo
+                showScreen('telaLista');
+                document.querySelectorAll('.nav-item[data-screen]').forEach(function(btn){ btn.classList.toggle('active', btn.getAttribute('data-screen') === 'telaLista'); });
+                return;
+            } else {
+                let erro = { detail: 'Erro desconhecido' };
+                try { erro = await resposta.json(); } catch (e) {}
+                alert(erro.detail || JSON.stringify(erro));
+                return;
+            }
+        } catch (err) {
+            if (typeof showToast === 'function') showToast(err.message || 'Erro ao atualizar perfil', 'error');
+            else alert(err.message || 'Erro ao atualizar perfil');
+            return;
+        }
+    }
+
     const dados = { ds_perfil: descricao };
 
     try {
@@ -115,9 +155,12 @@ async function cadastrarPerfil() {
             if (typeof showToast === 'function') showToast(resultado.mensagem || 'Perfil cadastrado.', 'success');
             else alert(resultado.mensagem || 'Perfil cadastrado.');
             descricaoInput.value = '';
-            // Atualiza a lista e mostra a tela de listagem
-            await carregarPerfis();
-            showScreen('telaLista');
+                // Atualiza a lista e mostra a tela de listagem
+                await carregarPerfis();
+                // Define hash para persistir tela caso ocorra reload
+                location.hash = '#telaLista';
+                showScreen('telaLista');
+                document.querySelectorAll('.nav-item[data-screen]').forEach(function(btn){ btn.classList.toggle('active', btn.getAttribute('data-screen') === 'telaLista'); });
         } else {
             let erro = { detail: 'Erro desconhecido' };
             try { erro = await resposta.json(); } catch(e){}
@@ -193,4 +236,12 @@ function corPorTexto(texto){
         hash = texto.charCodeAt(i) + ((hash << 5) - hash);
     }
     return paleta[Math.abs(hash) % paleta.length];
+}
+
+// Inicia modo de edição para um perfil: pré-preenche o formulário e abre a tela
+function editarPerfil(perfil){
+    const descricaoInput = document.getElementById('descricaoPerfil');
+    descricaoInput.value = perfil.ds_perfil || '';
+    window.perfilEditId = perfil.id_perfil;
+    showScreen('telaCadastro');
 }
