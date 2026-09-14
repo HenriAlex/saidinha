@@ -39,11 +39,6 @@
                 <span>Usuários</span>
             </button>
 
-            <button class="nav-item" data-screen="telaCadastro" onclick="showScreen('telaCadastro')" title="Novo Perfil">
-                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M11 5h2v6h6v2h-6v6h-2v-6H5v-2h6z"/></svg>
-                <span>Incluir</span>
-            </button>
-
             <!-- Alternância de tema (claro/escuro), persistida no navegador -->
             <button class="nav-item nav-item--bottom" onclick="toggleTheme()" title="Alternar tema" id="theme-toggle">
                 <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-5.4-5.4c0-1.68.72-3.19 1.86-4.24C12.92 3.04 12.46 3 12 3z"/></svg>
@@ -64,6 +59,12 @@
                 <!-- Busca rápida contextual (filtra perfis ou usuários conforme tela) -->
                 <div class="topbar-search">
                     <input id="search" class="search" placeholder="Pesquisar..." oninput="(typeof filterCurrentScreen === 'function') && filterCurrentScreen(this.value)">
+                </div>
+
+                <!-- Área do usuário logado / login -->
+                <div class="topbar-user" id="userArea">
+                    <!-- Será preenchido dinamicamente via JS -->
+                    <button id="btnEntrar" class="btn" onclick="showScreen('telaLogin')">Entrar</button>
                 </div>
             </header>
 
@@ -86,6 +87,8 @@
                         </p>
                     </div>
                 </section>
+
+                <!-- Tela: Login (movida para o topo-level para funcionar como modal) -->
 
                 <!-- Tela: Cadastro de perfil -->
                 <section class="card" id="telaCadastro" style="display:none;">
@@ -179,5 +182,44 @@
     <script src="js/script.js"></script>
     <script src="js/perfil.js"></script>
     <script src="js/usuario.js"></script>
+
+    <!-- Tela: Login (modal de nível superior) -->
+    <section class="card" id="telaLogin" style="display:none;">
+        <div class="login-grid">
+            <div class="login-visual">
+                <div class="login-visual__brand">S</div>
+                <h3 class="login-visual__headline">Saidinha</h3>
+                <p class="login-visual__sub">Acesso administrativo ao painel</p>
+            </div>
+
+            <div class="login-card">
+                <h2 class="login-title">Bem-vindo(a)</h2>
+                <p class="login-desc muted">Faça login para continuar</p>
+
+                <form id="formLogin" class="login-form" onsubmit="event.preventDefault(); fazerLogin(); return false;">
+                    <div class="input-group">
+                        <label for="loginEmail" class="sr-only">Usuário ou e-mail</label>
+                        <div class="input-icon">👤</div>
+                        <input type="text" id="loginEmail" placeholder="email@exemplo.com ou admin" required autofocus>
+                    </div>
+
+                    <div class="input-group">
+                        <label for="loginSenha" class="sr-only">Senha</label>
+                        <div class="input-icon">🔒</div>
+                        <input type="password" id="loginSenha" placeholder="Senha" required>
+                    </div>
+
+                    <div id="loginError" class="muted" style="margin-top:6px;margin-bottom:6px"></div>
+
+                    <div class="form-actions" style="justify-content:space-between;align-items:center;">
+                        <label class="remember"><input type="checkbox" id="rememberMe"> Lembrar-me</label>
+                        <button class="btn btn--primary btn--full" type="submit">Entrar</button>
+                    </div>
+                </form>
+
+                <div class="login-footer muted">Contato de suporte: suporte@saidinha.local</div>
+            </div>
+        </div>
+    </section>
 </body>
 </html>

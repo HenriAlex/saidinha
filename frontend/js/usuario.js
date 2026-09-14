@@ -127,3 +127,53 @@ function editarUsuario(u){
     window.usuarioEditId = u.id_usuario;
     showScreen('telaUsuarioCadastro');
 }
+
+
+// Função de login: envia credenciais para a API e grava usuário no localStorage
+async function fazerLogin(){
+    const email = (document.getElementById('loginEmail')||{}).value || '';
+    const senha = (document.getElementById('loginSenha')||{}).value || '';
+    const errEl = document.getElementById('loginError');
+    if (errEl) errEl.textContent = '';
+    if (!email || !senha) { if (errEl) errEl.textContent = 'Preencha e-mail e senha.'; else alert('Preencha e-mail e senha.'); return; }
+
+    try{
+        // Envia as credenciais para o endpoint de login.
+        // API_BASE_USERS é definido no topo do arquivo e aponta para
+        // a API FastAPI (http://127.0.0.1:8000 por padrão).
+        const resp = await fetch(`${API_BASE_USERS}/usuarios/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email, senha })
+        });
+
+        if (!resp.ok){
+            let e = { detail: 'Erro ao autenticar' };
+            try{ e = await resp.json(); }catch(err){ console.warn('Resposta inválida JSON', err); }
+            const msg = e && (e.detail || e.mensagem) ? (e.detail || e.mensagem) : 'E-mail ou senha inválidos';
+            if (errEl) errEl.textContent = msg; else alert(msg);
+            console.warn('Login falhou', resp.status, msg);
+            return;
+        }
+
+        // Resposta bem-sucedida deve conter o objeto `usuario`.
+        const data = await resp.json();
+        const usuario = data.usuario;
+        // Armazena usuário autenticado
+        localStorage.setItem('usuario_logado', JSON.stringify(usuario));
+        // Pode armazenar token se houver (aqui reuso id como placeholder)
+        if (usuario && usuario.id_usuario) localStorage.setItem('token', usuario.id_usuario);
+
+        // Atualiza UI e remove o bloqueio.
+        if (typeof setLoggedUser === 'function') setLoggedUser(usuario);
+        showScreen('bemVindo');
+        if (typeof showToast === 'function') showToast(data.mensagem || 'Login realizado','success');
+        document.getElementById('formLogin').reset();
+    }catch(err){
+        console.error('Erro ao processar login', err);
+        const errEl = document.getElementById('loginError');
+        // Mostra mensagem de erro amigável ao usuário e registra detalhes no console.
+        if (errEl) errEl.textContent = 'Erro de rede ou servidor. Veja o console.';
+        else alert(err.message || 'Erro ao processar login');
+    }
+}

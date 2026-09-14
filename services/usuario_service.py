@@ -258,6 +258,21 @@ class UsuarioService:
         # Observe que o Repository não está validando
         # o login. Ele apenas busca o usuário.
 
+        # Suporte temporário para usuário administrador local (hardcoded)
+        # Observação de segurança: este bloco é apenas para facilitar testes
+        # e deve ser removido ou substituído por autenticação segura (JWT
+        # + senhas hasheadas) em produção.
+        if email == 'admin' and senha == '1234':
+            # Retorna um usuário virtual representando o admin
+            return {
+                'id_usuario': 0,
+                'ra': '',
+                'nome': 'Administrador',
+                'id_perfil': 1,
+                'email': 'admin',
+                'senha': senha,
+                'ds_perfil': 'Administrador'
+            }
 
         usuario = self.repository.buscar_por_email(email)
 

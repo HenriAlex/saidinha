@@ -11,6 +11,7 @@ from models.usuario import Usuario
 # Importa o Schema utilizado pelo FastAPI.
 # Ele representa os dados recebidos pela API.
 from schemas.usuario_schema import UsuarioSchema
+from schemas.usuario_schema import LoginSchema
 
 
 # Importa o Service responsável pelas regras
@@ -125,3 +126,27 @@ def atualizar(id_usuario: int, usuario_schema: UsuarioSchema):
         raise HTTPException(status_code=500, detail=str(e))
 
     return {"mensagem": "Usuário atualizado com sucesso."}
+
+
+# ============================================================
+# LOGIN (AUTENTICAÇÃO)
+# ============================================================
+
+
+@router.post('/login')
+def login(login_schema: LoginSchema):
+    # Endpoint de autenticação.
+    # Recebe `LoginSchema`, delega validação/autenticação ao Service
+    # e retorna os dados do usuário autenticado.
+    try:
+        usuario = service.login(login_schema.email, login_schema.senha)
+        return {
+            "mensagem": "Login realizado com sucesso.",
+            "usuario": usuario
+        }
+    except ValueError as e:
+        # Erros de validação/credenciais incorretas retornam 401
+        raise HTTPException(status_code=401, detail=str(e))
+    except Exception as e:
+        # Erros inesperados são tratados como 500
+        raise HTTPException(status_code=500, detail=str(e))

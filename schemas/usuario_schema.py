@@ -22,3 +22,14 @@ class UsuarioSchema(BaseModel):
 
     # Senha utilizada para autenticação.
     senha: str
+
+
+class LoginSchema(BaseModel):
+    """Schema para requisição de login."""
+    email: str
+    senha: str
+
+# Observação:
+# - `LoginSchema` valida os dados recebidos na rota de autenticação.
+# - Usamos `email` como campo de identificação, mas o frontend aceita
+#   também o valor especial 'admin' (caso de desenvolvimento).

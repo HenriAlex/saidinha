@@ -200,3 +200,135 @@ input[type="text"]:focus{outline:2px solid var(--primary);outline-offset:1px}
   .fab{display:flex;align-items:center;justify-content:center}
   .hero{flex-direction:column;align-items:stretch}
 }
+
+/* ============================================================
+   UI: tela de login modal / bloqueio de fundo
+   - Quando o body recebe a classe `locked`, todo o app (exceto a tela de login)
+     é desfocado e desativado para priorizar a autenticação.
+   - Um overlay semitransparente é exibido para enfatizar o modal.
+   ============================================================ */
+body.locked::before{
+  content:'';position:fixed;inset:0;background:rgba(2,6,23,0.48);z-index:9990;pointer-events:none;
+}
+
+body.locked .app-main > *:not(#telaLogin){
+  filter:blur(6px) saturate(.9) brightness(.9);
+  transform:scale(.998);
+  transition:filter .18s ease,transform .18s ease;
+  pointer-events:none;user-select:none;opacity:.98;
+}
+
+/* Também desativa e suavemente desfoca a nav-rail para evitar navegação */
+body.locked .nav-rail{filter:blur(3px);pointer-events:none;opacity:.9;transition:filter .18s ease,opacity .18s ease}
+/* Transformar a tela de login em um modal popup fixo e centralizado */
+#telaLogin{
+  position:fixed;
+  inset:0; /* ocupa a viewport */
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  z-index:10001;
+  pointer-events:auto;
+  padding:20px;
+}
+
+/* Card do modal com destaque */
+#telaLogin .card{
+  width:100%;
+  max-width:480px;
+  margin:0; /* centralizado via flexbox do container */
+  padding:28px;
+  border-radius:12px;
+  box-shadow:0 20px 60px rgba(2,6,23,.45);
+}
+
+#telaLogin input[type="email"], #telaLogin input[type="password"]{padding:12px}
+
+/* Acessibilidade: animação sutil no foco do botão principal */
+#telaLogin .btn{box-shadow:0 8px 30px rgba(59,130,246,.12)}
+
+/* Garantir que o modal de login não seja afetado por filtros aplicados ao fundo */
+body.locked #telaLogin{
+  filter:none !important;
+  transform:none !important;
+  opacity:1 !important;
+  pointer-events:auto !important;
+  z-index:10002 !important;
+}
+
+.login-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.login-visual{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;background:linear-gradient(180deg,var(--primary),var(--primary-dark));border-radius:10px;color:#fff}
+.login-visual__brand{width:72px;height:72px;border-radius:14px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:28px;margin-bottom:12px}
+.login-visual__headline{margin:0;font-size:20px}
+.login-visual__sub{opacity:.95;margin-top:8px;font-size:13px}
+
+.login-card{display:flex;flex-direction:column;padding:6px}
+.login-title{margin:0 0 6px 0}
+.login-desc{margin:0 0 12px 0}
+
+.login-form .input-group{display:flex;align-items:center;border:1px solid var(--border);padding:10px;border-radius:10px;margin-bottom:10px;background:var(--bg)}
+.login-form .input-group input{flex:1;border:none;background:transparent;padding-left:8px;font-size:14px;color:var(--text)}
+.login-form .input-group input:focus{outline:none}
+.input-icon{font-size:16px;color:var(--muted);width:26px;text-align:center}
+
+.btn--full{width:180px}
+.btn--primary{background:linear-gradient(90deg,var(--primary),var(--primary-dark));border:none}
+
+.remember{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.remember input{width:16px;height:16px}
+
+.login-footer{margin-top:12px;font-size:12px;text-align:center}
+
+/* Mobile: empilha visual + form */
+@media (max-width:700px){
+  .login-grid{grid-template-columns:1fr;}
+  #telaLogin .card{padding:18px}
+  .btn--full{width:100%}
+}
+
+/* Small entrance animation */
+#telaLogin .card{animation:pop-in .18s ease both}
+@keyframes pop-in{from{transform:translateY(6px) scale(.995);opacity:0}to{transform:none;opacity:1}}
+
+/*
+  Notas sobre os estilos do modal de login:
+  - `.login-grid` separa a metade visual (marca) da metade do formulário.
+  - Inputs usam `.input-group` para posicionar o ícone e manter
+    aparência consistente em todos os navegadores.
+  - A classe `body.locked` continua desfocando o fundo; o modal
+    permanece interativo por ter `z-index` mais alto e `pointer-events` ativos.
+*/
+
+.login-grid{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.login-visual{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;background:linear-gradient(180deg,var(--primary),var(--primary-dark));border-radius:10px;color:#fff}
+.login-visual__brand{width:72px;height:72px;border-radius:14px;background:rgba(255,255,255,.12);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:28px;margin-bottom:12px}
+.login-visual__headline{margin:0;font-size:20px}
+.login-visual__sub{opacity:.95;margin-top:8px;font-size:13px}
+
+.login-card{display:flex;flex-direction:column;padding:6px}
+.login-title{margin:0 0 6px 0}
+.login-desc{margin:0 0 12px 0}
+
+.login-form .input-group{display:flex;align-items:center;border:1px solid var(--border);padding:10px;border-radius:10px;margin-bottom:10px;background:var(--bg)}
+.login-form .input-group input{flex:1;border:none;background:transparent;padding-left:8px;font-size:14px;color:var(--text)}
+.login-form .input-group input:focus{outline:none}
+.input-icon{font-size:16px;color:var(--muted);width:26px;text-align:center}
+
+.btn--full{width:180px}
+.btn--primary{background:linear-gradient(90deg,var(--primary),var(--primary-dark));border:none}
+
+.remember{font-size:13px;color:var(--muted);display:flex;align-items:center;gap:8px}
+.remember input{width:16px;height:16px}
+
+.login-footer{margin-top:12px;font-size:12px;text-align:center}
+
+/* Mobile: empilha visual + form */
+@media (max-width:700px){
+  .login-grid{grid-template-columns:1fr;}
+  #telaLogin .card{padding:18px}
+  .btn--full{width:100%}
+}
+
+/* Small entrance animation */
+#telaLogin .card{animation:pop-in .18s ease both}
+@keyframes pop-in{from{transform:translateY(6px) scale(.995);opacity:0}to{transform:none;opacity:1}}

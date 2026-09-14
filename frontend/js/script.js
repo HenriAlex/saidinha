@@ -12,11 +12,19 @@ function mostrarMensagem() {
 // Inicialização da interface: aplica tema salvo e mostra a tela de boas-vindas.
 function init() {
     aplicarTemaSalvo();
-    // Se houver hash na URL, tenta abrir a tela correspondente, caso contrário mostra a home
+    // Se houver usuário autenticado mostra a app, caso contrário abre tela de login
+    const usuario = localStorage.getItem('usuario_logado');
     const hash = (location.hash || '').replace('#','');
-    const valid = ['bemVindo','telaLista','telaCadastro','telaUsuarios','telaUsuarioCadastro'];
-    if (hash && valid.includes(hash)) showScreen(hash);
-    else showScreen('bemVindo');
+    const valid = ['bemVindo','telaLista','telaCadastro','telaUsuarios','telaUsuarioCadastro','telaLogin'];
+    if (usuario) {
+        setLoggedUser(JSON.parse(usuario));
+        if (hash && valid.includes(hash)) showScreen(hash);
+        else showScreen('bemVindo');
+    } else {
+        // aplica estado visual de bloqueio (blur + overlay)
+        document.body.classList.add('locked');
+        showScreen('telaLogin');
+    }
     // Carrega os perfis em segundo plano para popular o card de estatística.
     if (typeof carregarPerfis === 'function') carregarPerfis();
     // Carrega usuários em segundo plano (se disponível) para agilizar a navegação
@@ -29,7 +37,32 @@ window.addEventListener('load', init);
 // Função responsável por alternar entre telas.
 // Recebe o id lógico da tela e mostra/oculta os containers.
 function showScreen(screen) {
-    const telas = ['bemVindo', 'telaLista', 'telaCadastro', 'telaUsuarios', 'telaUsuarioCadastro'];
+    const telas = ['bemVindo', 'telaLista', 'telaCadastro', 'telaUsuarios', 'telaUsuarioCadastro', 'telaLogin'];
+
+    // Bloqueio global: exige autenticação para acessar qualquer tela diferente de 'telaLogin'
+    const usuario = localStorage.getItem('usuario_logado');
+    if (!usuario && screen !== 'telaLogin') {
+        if (typeof showToast === 'function') showToast('Faça login para acessar o sistema', 'error');
+        // força exibição da tela de login
+        screen = 'telaLogin';
+    }
+
+    // Restrições adicionais: apenas admin pode acessar telas de cadastro/edição
+    if (usuario) {
+        let userObj = null;
+        try { userObj = JSON.parse(usuario); } catch(e){ userObj = null; }
+        const requiresAdmin = ['telaUsuarioCadastro', 'telaCadastro'];
+        if (requiresAdmin.includes(screen)) {
+            const isAdmin = userObj && (userObj.email === 'admin' || userObj.id_usuario === 0);
+            if (!isAdmin) {
+                if (typeof showToast === 'function') showToast('Acesso negado: somente administrador', 'error');
+                screen = 'telaUsuarios';
+            }
+        }
+    }
+
+    // Atualiza o hash da URL para permitir navegação direta/recarregamento
+    try { location.hash = '#' + screen; } catch(e) {}
     telas.forEach(function(t) {
         const el = document.getElementById(t);
         if (!el) return;
@@ -49,6 +82,40 @@ function showScreen(screen) {
         if (typeof carregarUsuarios === 'function') carregarUsuarios();
         if (screen === 'telaUsuarioCadastro' && typeof popularSelectPerfis === 'function') popularSelectPerfis();
     }
+}
+
+
+
+// Atualiza a área da topbar com informações do usuário logado
+function setLoggedUser(usuario) {
+    const area = document.getElementById('userArea');
+    if (!area) return;
+    if (!usuario) {
+        area.innerHTML = '<button id="btnEntrar" class="btn" onclick="showScreen(\'telaLogin\')">Entrar</button>';
+        // aplica bloqueio visual quando não autenticado
+        document.body.classList.add('locked');
+        return;
+    }
+
+    const nome = usuario.nome || usuario.email || 'Usuário';
+    area.innerHTML = `
+        <div class="user-info">
+            <span class="user-name">Olá, ${nome}</span>
+            <button class="btn ghost" onclick="logout()">Sair</button>
+        </div>
+    `;
+    // remove o bloqueio visual quando o usuário está autenticado
+    document.body.classList.remove('locked');
+}
+
+
+function logout(){
+    localStorage.removeItem('usuario_logado');
+    localStorage.removeItem('token');
+    setLoggedUser(null);
+    // garante que o estado visual bloqueado seja aplicado
+    document.body.classList.add('locked');
+    showScreen('telaLogin');
 }
 
 

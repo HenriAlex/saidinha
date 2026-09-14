@@ -10,10 +10,10 @@
 | **8**  | API REST com FastAPI (Schemas, Controllers e Rotas)            |        ✅         |
 | **9**  | Interface Web (HTML/CSS/JavaScript)                            |        ✅         |
 | **10** | Integração Front-End × Back-End                                |        ✅         |
-| **11** | Cadastro de Usuários                                           |**⬅ Estamos aqui** |
-| **12** | Login e autenticação                                           |        ⏳         |
-| **12** | Cadastro de Usuários                                           |        ⏳         |
-| **13** | Cadastro de Saídas                                             |        ⏳         |
+| **11** | Cadastro de Usuários                                           |        ✅         |
+| **12** | Login e autenticação                                           |        ✅         |
+| **12** | Cadastro de Usuários                                           |        ✅         |
+| **13** | Cadastro de Saídas                                             |**⬅ Estamos aqui**|
 | **14** | Dashboard e Consultas                                          |        ⏳         |
 | **15** | Testes, validações e ajustes                                   |        ⏳         |
 | **16** | Publicação e Apresentação do Projeto                           |        ⏳         |
