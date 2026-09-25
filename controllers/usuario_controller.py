@@ -18,6 +18,10 @@ from schemas.usuario_schema import LoginSchema
 # de negócio dos usuários.
 from services.usuario_service import UsuarioService
 
+# Importa as funções de permissão.
+# Apenas admin pode gerenciar usuários.
+from utils.permissoes import pode_gerenciar_usuarios
+
 
 # Cria o agrupador de rotas dos usuários.
 router = APIRouter(
@@ -31,12 +35,45 @@ service = UsuarioService()
 
 
 # ============================================================
+# FUNÇÃO AUXILIAR DE VALIDAÇÃO
+# ============================================================
+
+def validar_permissao_gerenciar_usuario(usuario_logado):
+    """
+    Valida se o usuário logado pode gerenciar usuários.
+
+    Apenas Admin pode gerenciar usuários.
+    Se a permissão for negada, lança uma exceção HTTP 403.
+
+    Args:
+        usuario_logado (dict): Dados do usuário logado
+
+    Raises:
+        HTTPException: Com status 403 se acesso negado
+    """
+
+    if not pode_gerenciar_usuarios(usuario_logado):
+        raise HTTPException(
+            status_code=403,
+            detail="Acesso negado: apenas administrador pode gerenciar usuários."
+        )
+
+
+# ============================================================
 # CADASTRAR USUÁRIO
 # ============================================================
 
 # Define a rota POST para cadastrar um usuário.
 @router.post("/", status_code=201)
-def cadastrar(usuario_schema: UsuarioSchema):
+def cadastrar(usuario_schema: UsuarioSchema, id_usuario_logado: int = 0, id_perfil_logado: int = 0):
+
+    # VALIDAÇÃO DE PERMISSÃO
+    # Apenas admin pode cadastrar usuários
+    usuario_logado = {
+        "id_usuario": id_usuario_logado,
+        "id_perfil": id_perfil_logado
+    }
+    validar_permissao_gerenciar_usuario(usuario_logado)
 
     # Cria um objeto do nosso Model Usuario.
     usuario = Usuario(
@@ -91,7 +128,14 @@ def listar():
 
 
 @router.delete("/{id_usuario}")
-def excluir(id_usuario: int):
+def excluir(id_usuario: int, id_usuario_logado: int = 0, id_perfil_logado: int = 0):
+    # VALIDAÇÃO DE PERMISSÃO
+    usuario_logado = {
+        "id_usuario": id_usuario_logado,
+        "id_perfil": id_perfil_logado
+    }
+    validar_permissao_gerenciar_usuario(usuario_logado)
+
     try:
         service.excluir(id_usuario)
     except ValueError as e:
@@ -108,7 +152,14 @@ def excluir(id_usuario: int):
 
 
 @router.put("/{id_usuario}")
-def atualizar(id_usuario: int, usuario_schema: UsuarioSchema):
+def atualizar(id_usuario: int, usuario_schema: UsuarioSchema, id_usuario_logado: int = 0, id_perfil_logado: int = 0):
+    # VALIDAÇÃO DE PERMISSÃO
+    usuario_logado = {
+        "id_usuario": id_usuario_logado,
+        "id_perfil": id_perfil_logado
+    }
+    validar_permissao_gerenciar_usuario(usuario_logado)
+
     usuario = Usuario(
         id_usuario=id_usuario,
         ra=usuario_schema.ra,

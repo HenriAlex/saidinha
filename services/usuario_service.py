@@ -263,12 +263,18 @@ class UsuarioService:
         # e deve ser removido ou substituído por autenticação segura (JWT
         # + senhas hasheadas) em produção.
         if email == 'admin' and senha == '1234':
-            # Retorna um usuário virtual representando o admin
+            # Retorna um usuário virtual representando o admin.
+            #
+            # IMPORTANTE: id_perfil = 0 aqui, pois nenhum perfil real
+            # da tabela "perfil" usa esse ID (Aluno=1, Professor=2,
+            # Equipe de Apoio=3). Usar um número que já pertence a um
+            # perfil real (como 1) faria o sistema de permissões
+            # confundir o admin com aquele perfil.
             return {
                 'id_usuario': 0,
                 'ra': '',
                 'nome': 'Administrador',
-                'id_perfil': 1,
+                'id_perfil': 0,
                 'email': 'admin',
                 'senha': senha,
                 'ds_perfil': 'Administrador'

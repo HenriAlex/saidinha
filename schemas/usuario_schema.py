@@ -23,6 +23,14 @@ class UsuarioSchema(BaseModel):
     # Senha utilizada para autenticação.
     senha: str
 
+    # ID do usuário logado (para validação de permissão).
+    # Usado apenas para verificar se tem direito de gerenciar usuários.
+    # Em produção, seria extraído do token JWT.
+    id_usuario_logado: int = 0
+
+    # Perfil do usuário logado (opcional, para validação).
+    id_perfil_logado: int = 0
+
 
 class LoginSchema(BaseModel):
     """Schema para requisição de login."""

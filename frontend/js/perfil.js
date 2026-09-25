@@ -107,9 +107,17 @@ async function cadastrarPerfil() {
         return;
     }
 
+    // Obtém usuário logado do localStorage para validação
+    const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+
     // Se estivermos em modo edição, realiza PUT, caso contrário POST
     if (window.perfilEditId) {
-        const dados = { ds_perfil: descricao };
+        const dados = {
+            ds_perfil: descricao,
+            // Adiciona ID e perfil do usuário logado para validação de permissão
+            id_usuario_logado: usuarioLogado.id_usuario || 0,
+            id_perfil_logado: usuarioLogado.id_perfil || 0
+        };
         try {
             const resposta = await fetch(`${API_BASE}/perfis/${window.perfilEditId}`, {
                 method: 'PUT',
@@ -140,7 +148,12 @@ async function cadastrarPerfil() {
         }
     }
 
-    const dados = { ds_perfil: descricao };
+    const dados = {
+        ds_perfil: descricao,
+        // Adiciona ID e perfil do usuário logado para validação de permissão
+        id_usuario_logado: usuarioLogado.id_usuario || 0,
+        id_perfil_logado: usuarioLogado.id_perfil || 0
+    };
 
     try {
         const resposta = await fetch(`${API_BASE}/perfis/`, {
@@ -179,7 +192,10 @@ async function removerPerfil(id_perfil) {
     if (!confirmado) return;
 
     try {
-        const resposta = await fetch(`${API_BASE}/perfis/${id_perfil}`, {
+        // Obtém usuário logado do localStorage para validação
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+
+        const resposta = await fetch(`${API_BASE}/perfis/${id_perfil}?id_usuario_logado=${usuarioLogado.id_usuario || 0}&id_perfil_logado=${usuarioLogado.id_perfil || 0}`, {
             method: 'DELETE'
         });
 

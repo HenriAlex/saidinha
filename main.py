@@ -14,6 +14,9 @@ from controllers.saida_controller import router as saida_router
 # Importa o Controller de retornos.
 from controllers.retorno_controller import router as retorno_router
 
+# Importa o Controller de relatórios.
+from controllers.relatorio_controller import router as relatorio_router
+
 # Importa o middleware responsável pelo CORS.
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -43,6 +46,11 @@ app.include_router(saida_router)
 # Adiciona as rotas relacionadas aos retornos
 # à aplicação principal.
 app.include_router(retorno_router)
+
+
+# Adiciona as rotas de relatórios/estatísticas
+# à aplicação principal.
+app.include_router(relatorio_router)
 
 
 # Cria uma rota simples para verificar

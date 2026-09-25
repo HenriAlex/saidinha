@@ -15,7 +15,7 @@ function init() {
     // Se houver usuário autenticado mostra a app, caso contrário abre tela de login
     const usuario = localStorage.getItem('usuario_logado');
     const hash = (location.hash || '').replace('#','');
-    const valid = ['bemVindo','telaLista','telaCadastro','telaUsuarios','telaUsuarioCadastro','telaSaidas','telaSaidaCadastro','telaRetornos','telaRetornoCadastro','telaLogin'];
+    const valid = ['bemVindo','telaLista','telaCadastro','telaUsuarios','telaUsuarioCadastro','telaSaidas','telaSaidaCadastro','telaRetornos','telaConsultas','telaLogin'];
     if (usuario) {
         setLoggedUser(JSON.parse(usuario));
         if (hash && valid.includes(hash)) showScreen(hash);
@@ -31,8 +31,8 @@ function init() {
     if (typeof carregarUsuarios === 'function') carregarUsuarios();
     // Carrega as saídas em segundo plano para agilizar a navegação
     if (typeof carregarSaidas === 'function') carregarSaidas();
-    // Carrega os retornos em segundo plano para agilizar a navegação
-    if (typeof carregarRetornos === 'function') carregarRetornos();
+    // Carrega saídas pendentes (sem retorno) em segundo plano
+    if (typeof carregarSaidasPendentes === 'function') carregarSaidasPendentes();
 }
 
 // Vincula inicialização ao evento de carregamento.
@@ -41,7 +41,7 @@ window.addEventListener('load', init);
 // Função responsável por alternar entre telas.
 // Recebe o id lógico da tela e mostra/oculta os containers.
 function showScreen(screen) {
-    const telas = ['bemVindo', 'telaLista', 'telaCadastro', 'telaUsuarios', 'telaUsuarioCadastro', 'telaSaidas', 'telaSaidaCadastro', 'telaRetornos', 'telaRetornoCadastro', 'telaLogin'];
+    const telas = ['bemVindo', 'telaLista', 'telaCadastro', 'telaUsuarios', 'telaUsuarioCadastro', 'telaSaidas', 'telaSaidaCadastro', 'telaRetornos', 'telaConsultas', 'telaLogin'];
 
     // Bloqueio global: exige autenticação para acessar qualquer tela diferente de 'telaLogin'
     const usuario = localStorage.getItem('usuario_logado');
@@ -51,11 +51,14 @@ function showScreen(screen) {
         screen = 'telaLogin';
     }
 
-    // Restrições adicionais: apenas admin pode acessar telas de cadastro/edição
+    // Restrições adicionais: apenas admin pode Criar/Editar Perfil e Usuário.
+    // Registrar Saída (telaSaidaCadastro) NÃO exige admin: pela matriz de
+    // permissões, Aluno, Professor e Equipe de Apoio também podem criar
+    // saída (o Aluno só para si mesmo, o que já é validado pela API).
     if (usuario) {
         let userObj = null;
         try { userObj = JSON.parse(usuario); } catch(e){ userObj = null; }
-        const requiresAdmin = ['telaUsuarioCadastro', 'telaCadastro', 'telaSaidaCadastro', 'telaRetornoCadastro'];
+        const requiresAdmin = ['telaUsuarioCadastro', 'telaCadastro'];
         if (requiresAdmin.includes(screen)) {
             const isAdmin = userObj && (userObj.email === 'admin' || userObj.id_usuario === 0);
             if (!isAdmin) {
@@ -84,17 +87,19 @@ function showScreen(screen) {
     }
     if (screen === 'telaUsuarios' || screen === 'telaUsuarioCadastro') {
         if (typeof carregarUsuarios === 'function') carregarUsuarios();
-        if (screen === 'telaUsuarioCadastro' && typeof popularSelectPerfis === 'function') popularSelectPerfis();
+        // IMPORTANTE: Carrega perfis ANTES de exibir o select
+        if (screen === 'telaUsuarioCadastro' && typeof popularSelectPerfis === 'function') {
+            popularSelectPerfis(); // Não precisa aguardar, mas garante que inicia logo
+        }
     }
     // Ao exibir as saídas, solicita carregamento dos dados.
     if (screen === 'telaSaidas' || screen === 'telaSaidaCadastro') {
         if (typeof carregarSaidas === 'function') carregarSaidas();
         if (screen === 'telaSaidaCadastro' && typeof popularSelectUsuariosSaida === 'function') popularSelectUsuariosSaida();
     }
-    // Ao exibir os retornos, solicita carregamento dos dados.
-    if (screen === 'telaRetornos' || screen === 'telaRetornoCadastro') {
-        if (typeof carregarRetornos === 'function') carregarRetornos();
-        if (screen === 'telaRetornoCadastro' && typeof popularSelectSaidasRetorno === 'function') popularSelectSaidasRetorno();
+    // Ao exibir os retornos, carrega as saídas pendentes.
+    if (screen === 'telaRetornos') {
+        if (typeof carregarSaidasPendentes === 'function') carregarSaidasPendentes();
     }
 }
 

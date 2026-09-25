@@ -226,6 +226,21 @@ class SaidaService:
 
 
     # ============================================================
+    # BUSCAR SAÍDAS SEM RETORNO
+    # ============================================================
+
+    # Método responsável por buscar todas as saídas
+    # que ainda não têm um retorno registrado.
+    #
+    # Este método é utilizado para exibir apenas
+    # os alunos que saíram e ainda não voltaram.
+    def buscar_saidas_sem_retorno(self):
+
+        # Solicita ao Repository as saídas sem retorno.
+        return self.repository.buscar_saidas_sem_retorno()
+
+
+    # ============================================================
     # EXCLUIR SAÍDA
     # ============================================================
 

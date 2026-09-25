@@ -2,10 +2,16 @@
 # Ele permite criar e organizar as rotas da API.
 from fastapi import APIRouter, HTTPException
 
+# Importa datetime para preenchimento automático de data/hora.
+from datetime import datetime
 
 # Importa o modelo Saida.
 # Esse é o objeto utilizado internamente pela aplicação.
 from models.saida import Saida
+
+# Importa as funções de permissão.
+# Essas funções verificam se o usuário pode realizar a ação.
+from utils.permissoes import pode_registrar_saida, pode_editar_ou_excluir, eh_aluno
 
 
 # Importa o Schema utilizado pelo FastAPI.
@@ -34,6 +40,51 @@ service = SaidaService()
 
 
 # ============================================================
+# FUNÇÃO AUXILIAR DE VALIDAÇÃO
+# ============================================================
+
+def validar_permissao_saida(usuario_logado, id_usuario_saida):
+    """
+    Valida se o usuário logado pode registrar saída para outro usuário.
+
+    Se a permissão for negada, lança uma exceção HTTP 403.
+
+    Args:
+        usuario_logado (dict): Dados do usuário logado
+        id_usuario_saida (int): ID do usuário para qual quer registrar saída
+
+    Raises:
+        HTTPException: Com status 403 se acesso negado
+    """
+
+    # Verifica a permissão usando a função do módulo permissões
+    if not pode_registrar_saida(usuario_logado, id_usuario_saida):
+
+        # Se negado, lança exceção HTTP 403 Forbidden
+        raise HTTPException(
+            status_code=403,
+            detail="Acesso negado: você não pode registrar saída para este usuário."
+        )
+
+
+def validar_permissao_editar_excluir(usuario_logado):
+    """
+    Valida se o usuário logado pode Atualizar ou Eliminar uma saída.
+
+    Pela matriz de permissões, somente o admin pode fazer isso.
+
+    Raises:
+        HTTPException: Com status 403 se acesso negado
+    """
+
+    if not pode_editar_ou_excluir(usuario_logado):
+        raise HTTPException(
+            status_code=403,
+            detail="Acesso negado: apenas administrador pode atualizar ou excluir saídas."
+        )
+
+
+# ============================================================
 # REGISTRAR SAÍDA
 # ============================================================
 
@@ -42,16 +93,33 @@ service = SaidaService()
 @router.post("/", status_code=201)
 def registrar(saida_schema: SaidaSchema):
 
+    # VALIDAÇÃO DE PERMISSÃO
+    #
+    # Verifica se o usuário logado tem permissão
+    # de registrar saída para este aluno.
+    usuario_logado = {
+        "id_usuario": saida_schema.id_usuario_logado,
+        "id_perfil": saida_schema.id_perfil_logado
+    }
+
+    # Valida a permissão (lança exceção se negado)
+    validar_permissao_saida(usuario_logado, saida_schema.id_usuario)
+
     # Cria um objeto do nosso Model Saida.
     # O Model é utilizado internamente pela aplicação
     # e é diferente do Schema que é validado pelo FastAPI.
+    #
+    # IMPORTANTE: data_saida é preenchida AUTOMATICAMENTE
+    # aqui no servidor com a data/hora atual.
+    # O cliente (frontend) NÃO envia esse valor.
     saida = Saida(
 
         # Recebe o ID do usuário do Schema.
         id_usuario=saida_schema.id_usuario,
 
-        # Recebe a data de saída do Schema.
-        data_saida=saida_schema.data_saida,
+        # Data/hora de saída é AUTOMATICAMENTE
+        # preenchida com a data/hora do registro.
+        data_saida=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 
         # Recebe o motivo do Schema.
         motivo=saida_schema.motivo
@@ -86,15 +154,54 @@ def registrar(saida_schema: SaidaSchema):
 # LISTAR SAÍDAS
 # ============================================================
 
-# Define a rota GET para listar todas as saídas.
+# Define a rota GET para listar as saídas.
 # GET é utilizado quando se quer recuperar dados.
+#
+# Pela matriz de permissões, o Aluno só pode VER as suas
+# próprias saídas. Professor, Equipe de Apoio e Admin veem todas.
+# Por isso a rota recebe (opcionalmente) o usuário logado:
+# se for Aluno, a lista é filtrada; caso contrário, retorna tudo.
 @router.get("/")
-def listar():
+def listar(id_usuario_logado: int = 0, id_perfil_logado: int = 0):
 
-    # Solicita ao Service a lista de todas as saídas.
-    saidas = service.listar()
+    usuario_logado = {
+        "id_usuario": id_usuario_logado,
+        "id_perfil": id_perfil_logado
+    }
 
-    # Retorna a lista de saídas encontradas.
+    # Se quem está pedindo é Aluno, mostra somente as suas saídas.
+    if eh_aluno(usuario_logado):
+        return service.buscar_por_usuario(id_usuario_logado)
+
+    # Admin, Professor e Equipe de Apoio veem todas as saídas.
+    return service.listar()
+
+
+# ============================================================
+# LISTAR SAÍDAS SEM RETORNO (PENDENTES)
+# ============================================================
+
+# Define a rota GET para listar apenas saídas sem retorno.
+# Esta rota retorna os alunos que saíram e ainda não voltaram.
+#
+# O Aluno só pode ver a SUA PRÓPRIA pendência de retorno.
+# Professor, Equipe de Apoio e Admin veem as de todos os alunos.
+@router.get("/pendentes/lista")
+def listar_saidas_sem_retorno(id_usuario_logado: int = 0, id_perfil_logado: int = 0):
+
+    usuario_logado = {
+        "id_usuario": id_usuario_logado,
+        "id_perfil": id_perfil_logado
+    }
+
+    # Solicita ao Service as saídas que não têm retorno.
+    saidas = service.buscar_saidas_sem_retorno()
+
+    # Se for Aluno, filtra para mostrar somente a própria pendência.
+    if eh_aluno(usuario_logado):
+        saidas = [s for s in saidas if s['id_usuario'] == id_usuario_logado]
+
+    # Retorna a lista de saídas pendentes.
     return saidas
 
 
@@ -172,7 +279,22 @@ def buscar_por_usuario(id_usuario: int):
 @router.put("/{id_saida}")
 def atualizar(id_saida: int, saida_schema: SaidaSchema):
 
+    # VALIDAÇÃO DE PERMISSÃO
+    # Somente admin pode atualizar uma saída.
+    usuario_logado = {
+        "id_usuario": saida_schema.id_usuario_logado,
+        "id_perfil": saida_schema.id_perfil_logado
+    }
+    validar_permissao_editar_excluir(usuario_logado)
+
+    # Busca a saída anterior para manter a data original.
+    saida_anterior = service.buscar_por_id(id_saida)
+
+    if not saida_anterior:
+        raise HTTPException(status_code=404, detail="Saída não encontrada.")
+
     # Cria um objeto do nosso Model Saida com o ID informado.
+    # A data_saida MANTÉM o valor original (não pode ser alterada).
     saida = Saida(
 
         # Define o ID da saída que será atualizada.
@@ -181,8 +303,9 @@ def atualizar(id_saida: int, saida_schema: SaidaSchema):
         # Recebe o ID do usuário do Schema.
         id_usuario=saida_schema.id_usuario,
 
-        # Recebe a data de saída do Schema.
-        data_saida=saida_schema.data_saida,
+        # MANTÉM a data/hora original da saída.
+        # A data de saída nunca é alterada, apenas registrada uma vez.
+        data_saida=saida_anterior['data_saida'],
 
         # Recebe o motivo do Schema.
         motivo=saida_schema.motivo
@@ -218,7 +341,15 @@ def atualizar(id_saida: int, saida_schema: SaidaSchema):
 # Define a rota DELETE para excluir uma saída.
 # DELETE é utilizado quando se quer remover um recurso.
 @router.delete("/{id_saida}")
-def excluir(id_saida: int):
+def excluir(id_saida: int, id_usuario_logado: int = 0, id_perfil_logado: int = 0):
+
+    # VALIDAÇÃO DE PERMISSÃO
+    # Somente admin pode excluir uma saída.
+    usuario_logado = {
+        "id_usuario": id_usuario_logado,
+        "id_perfil": id_perfil_logado
+    }
+    validar_permissao_editar_excluir(usuario_logado)
 
     # Tenta excluir a saída.
     try:

@@ -2,10 +2,16 @@
 # Ele permite criar e organizar as rotas da API.
 from fastapi import APIRouter, HTTPException
 
+# Importa datetime para preenchimento automático de data/hora.
+from datetime import datetime
 
 # Importa o modelo Retorno.
 # Esse é o objeto utilizado internamente pela aplicação.
 from models.retorno import Retorno
+
+# Importa as funções de permissão.
+# Essas funções verificam se o usuário pode realizar a ação.
+from utils.permissoes import pode_registrar_retorno, pode_editar_ou_excluir
 
 
 # Importa o Schema utilizado pelo FastAPI.
@@ -34,6 +40,51 @@ service = RetornoService()
 
 
 # ============================================================
+# FUNÇÃO AUXILIAR DE VALIDAÇÃO
+# ============================================================
+
+def validar_permissao_retorno(usuario_logado, id_usuario_retorno):
+    """
+    Valida se o usuário logado pode registrar retorno para outro usuário.
+
+    Se a permissão for negada, lança uma exceção HTTP 403.
+
+    Args:
+        usuario_logado (dict): Dados do usuário logado
+        id_usuario_retorno (int): ID do usuário para qual quer registrar retorno
+
+    Raises:
+        HTTPException: Com status 403 se acesso negado
+    """
+
+    # Verifica a permissão usando a função do módulo permissões
+    if not pode_registrar_retorno(usuario_logado, id_usuario_retorno):
+
+        # Se negado, lança exceção HTTP 403 Forbidden
+        raise HTTPException(
+            status_code=403,
+            detail="Acesso negado: você não pode registrar retorno para este usuário."
+        )
+
+
+def validar_permissao_editar_excluir(usuario_logado):
+    """
+    Valida se o usuário logado pode Atualizar ou Eliminar um retorno.
+
+    Pela matriz de permissões, somente o admin pode fazer isso.
+
+    Raises:
+        HTTPException: Com status 403 se acesso negado
+    """
+
+    if not pode_editar_ou_excluir(usuario_logado):
+        raise HTTPException(
+            status_code=403,
+            detail="Acesso negado: apenas administrador pode atualizar ou excluir retornos."
+        )
+
+
+# ============================================================
 # REGISTRAR RETORNO
 # ============================================================
 
@@ -42,9 +93,25 @@ service = RetornoService()
 @router.post("/", status_code=201)
 def registrar(retorno_schema: RetornoSchema):
 
+    # VALIDAÇÃO DE PERMISSÃO
+    #
+    # Verifica se o usuário logado tem permissão
+    # de registrar retorno para este aluno.
+    usuario_logado = {
+        "id_usuario": retorno_schema.id_usuario_logado,
+        "id_perfil": retorno_schema.id_perfil_logado
+    }
+
+    # Valida a permissão (lança exceção se negado)
+    validar_permissao_retorno(usuario_logado, retorno_schema.id_usuario)
+
     # Cria um objeto do nosso Model Retorno.
     # O Model é utilizado internamente pela aplicação
     # e é diferente do Schema que é validado pelo FastAPI.
+    #
+    # IMPORTANTE: data_retorno é preenchida AUTOMATICAMENTE
+    # aqui no servidor com a data/hora atual.
+    # O cliente (frontend) NÃO envia esse valor.
     retorno = Retorno(
 
         # Recebe o ID da saída do Schema.
@@ -53,8 +120,9 @@ def registrar(retorno_schema: RetornoSchema):
         # Recebe o ID do usuário do Schema.
         id_usuario=retorno_schema.id_usuario,
 
-        # Recebe a data de retorno do Schema.
-        data_retorno=retorno_schema.data_retorno,
+        # Data/hora de retorno é AUTOMATICAMENTE
+        # preenchida com a data/hora do registro.
+        data_retorno=datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
 
         # Recebe as observações do Schema.
         observacoes=retorno_schema.observacoes
@@ -206,6 +274,14 @@ def buscar_por_usuario(id_usuario: int):
 @router.put("/{id_retorno}")
 def atualizar(id_retorno: int, retorno_schema: RetornoSchema):
 
+    # VALIDAÇÃO DE PERMISSÃO
+    # Somente admin pode atualizar um retorno.
+    usuario_logado = {
+        "id_usuario": retorno_schema.id_usuario_logado,
+        "id_perfil": retorno_schema.id_perfil_logado
+    }
+    validar_permissao_editar_excluir(usuario_logado)
+
     # Cria um objeto do nosso Model Retorno com o ID informado.
     retorno = Retorno(
 
@@ -255,7 +331,15 @@ def atualizar(id_retorno: int, retorno_schema: RetornoSchema):
 # Define a rota DELETE para excluir um retorno.
 # DELETE é utilizado quando se quer remover um recurso.
 @router.delete("/{id_retorno}")
-def excluir(id_retorno: int):
+def excluir(id_retorno: int, id_usuario_logado: int = 0, id_perfil_logado: int = 0):
+
+    # VALIDAÇÃO DE PERMISSÃO
+    # Somente admin pode excluir um retorno.
+    usuario_logado = {
+        "id_usuario": id_usuario_logado,
+        "id_perfil": id_perfil_logado
+    }
+    validar_permissao_editar_excluir(usuario_logado)
 
     # Tenta excluir o retorno.
     try:

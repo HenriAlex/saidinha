@@ -285,6 +285,65 @@ class SaidaRepository:
 
 
     # ============================================================
+    # BUSCAR SAÍDAS SEM RETORNO
+    # ============================================================
+
+    # Método responsável por buscar todas as saídas
+    # que ainda NÃO têm um retorno associado.
+    #
+    # Este método é importante para mostrar apenas
+    # os alunos que saíram e ainda não voltaram.
+    def buscar_saidas_sem_retorno(self):
+
+        # Abre uma conexão.
+        conexao = Conexao.conectar()
+
+        # Cria um cursor.
+        cursor = conexao.cursor()
+
+        # Busca todas as saídas que não têm retorno.
+        # Usa LEFT JOIN para encontrar saídas sem retorno relacionado.
+        cursor.execute("""
+            SELECT
+                s.id_saida,
+                s.id_usuario,
+                u.nome,
+                u.ra,
+                s.data_saida,
+                s.motivo,
+                s.data_cadastro
+            FROM saida s
+            INNER JOIN usuario u
+                ON u.id_usuario = s.id_usuario
+            LEFT JOIN retorno r
+                ON r.id_saida = s.id_saida
+            WHERE r.id_retorno IS NULL
+            ORDER BY s.data_saida ASC
+        """)
+
+        # Recupera todos os registros encontrados.
+        registros = cursor.fetchall()
+
+        # Fecha a conexão.
+        conexao.close()
+
+        # Converte os registros em uma lista de dicionários.
+        saidas = []
+        for registro in registros:
+            saidas.append({
+                "id_saida": registro[0],
+                "id_usuario": registro[1],
+                "nome_usuario": registro[2],
+                "ra_usuario": registro[3],
+                "data_saida": registro[4],
+                "motivo": registro[5],
+                "data_cadastro": registro[6]
+            })
+
+        return saidas
+
+
+    # ============================================================
     # EXCLUIR
     # ============================================================
 

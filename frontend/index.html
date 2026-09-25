@@ -49,6 +49,11 @@
                 <span>Retornos</span>
             </button>
 
+            <button class="nav-item" data-screen="telaConsultas" onclick="abrirConsultas()" title="Consultas">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M3 13h2v8H3zm4-8h2v16H7zm4-2h2v18h-2zm4-2h2v20h-2zm4 4h2v16h-2z"/></svg>
+                <span>Consultas</span>
+            </button>
+
             <!-- Alternância de tema (claro/escuro), persistida no navegador -->
             <button class="nav-item nav-item--bottom" onclick="toggleTheme()" title="Alternar tema" id="theme-toggle">
                 <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-5.4-5.4c0-1.68.72-3.19 1.86-4.24C12.92 3.04 12.46 3 12 3z"/></svg>
@@ -158,7 +163,7 @@
                         <input type="text" id="inputEmail" placeholder="email@exemplo.com">
 
                         <label for="inputSenha">Senha</label>
-                        <input type="text" id="inputSenha" placeholder="Senha">
+                        <input type="password" id="inputSenha" placeholder="Senha">
 
                         <div class="form-actions">
                             <button class="btn" type="submit">Cadastrar</button>
@@ -181,70 +186,57 @@
                     </div>
                 </section>
 
-                <!-- Tela: Registro de saída -->
+                <!-- Tela: Registro de saída (Form simples e intuitivo) -->
                 <section class="card" id="telaSaidaCadastro" style="display:none;">
                     <h2>Registrar Saída</h2>
+                    <p class="muted" style="margin-bottom: 20px;">A data e hora são registradas automaticamente no momento</p>
+
                     <!-- Formulário para registrar uma nova saída de um aluno -->
                     <form id="formSaida" onsubmit="event.preventDefault(); registrarSaida(); return false;">
                         <!-- Campo para selecionar o aluno que está saindo -->
-                        <label for="selectUsuarioSaida">Aluno</label>
-                        <select id="selectUsuarioSaida" required></select>
-
-                        <!-- Campo para data e hora de saída -->
-                        <label for="inputDataSaida">Data e Hora de Saída</label>
-                        <input type="datetime-local" id="inputDataSaida" required>
+                        <label for="selectUsuarioSaida">👤 Selecione o Aluno</label>
+                        <select id="selectUsuarioSaida" required style="font-size: 16px; padding: 12px;"></select>
 
                         <!-- Campo para motivo da saída -->
-                        <label for="inputMotivoSaida">Motivo da Saída</label>
-                        <input type="text" id="inputMotivoSaida" placeholder="Ex: Intervalo, Consulta médica, Aula terminada" required>
+                        <label for="inputMotivoSaida">📝 Motivo da Saída</label>
+                        <input type="text" id="inputMotivoSaida" placeholder="Ex: Intervalo, Consulta médica, Aula terminada" required style="font-size: 16px; padding: 12px;">
 
                         <div class="form-actions">
-                            <button class="btn" type="submit">Registrar</button>
-                            <button class="btn ghost" type="button" onclick="cancelEditsAndGo('telaSaidas')">Cancelar</button>
+                            <button class="btn btn--primary" type="submit" style="width: 100%;">✓ Registrar Saída</button>
+                            <button class="btn ghost" type="button" onclick="cancelEditsAndGo('telaSaidas')" style="width: 100%;">Cancelar</button>
                         </div>
                     </form>
                 </section>
 
-                <!-- Tela: Retornos (listagem) -->
+                <!-- Tela: Retornos (alunos que saíram e não voltaram) -->
                 <section class="card" id="telaRetornos" style="display:none;">
-                    <div class="profiles-toolbar">
-                        <h2>Retornos registrados</h2>
-                        <div class="profiles-count muted" id="retornosCount">-- retornos</div>
-                    </div>
-                    <!-- Grid de cartões de retorno, atualizado dinamicamente via JS -->
-                    <div id="retornosGrid" class="profiles-grid" aria-live="polite"></div>
+                    <h2>👥 Alunos que Saíram</h2>
+                    <p class="muted" style="margin-bottom: 20px;">Clique em "Voltar" para registrar o retorno do aluno</p>
+
+                    <!-- Grid de cartões com alunos que saíram e não retornaram -->
+                    <div id="saidasPendentesGrid" class="profiles-grid" aria-live="polite"></div>
+
                     <div class="list-footer">
-                        <button class="btn" onclick="showScreen('telaRetornoCadastro')">Registrar retorno</button>
-                        <button class="btn ghost" onclick="showScreen('bemVindo')">Voltar ao início</button>
+                        <button class="btn ghost" onclick="showScreen('bemVindo')" style="width: 100%;">← Voltar ao início</button>
                     </div>
                 </section>
 
-                <!-- Tela: Registro de retorno -->
-                <section class="card" id="telaRetornoCadastro" style="display:none;">
-                    <h2>Registrar Retorno</h2>
-                    <!-- Formulário para registrar um novo retorno de um aluno -->
-                    <form id="formRetorno" onsubmit="event.preventDefault(); registrarRetorno(); return false;">
-                        <!-- Campo para selecionar a saída do aluno -->
-                        <label for="selectSaidaRetorno">Saída (Aluno)</label>
-                        <select id="selectSaidaRetorno" required></select>
+                <!-- Tela: Consultas e Relatórios -->
+                <section class="card" id="telaConsultas" style="display:none;">
+                    <div style="margin-bottom: 20px;">
+                        <h2>📊 Relatórios e Estatísticas</h2>
+                        <p class="muted">Análise completa de saídas e permanência fora</p>
+                    </div>
 
-                        <!-- Campo de ID do usuário (preenchido automaticamente) -->
-                        <label for="inputUsuarioRetorno">ID do Usuário</label>
-                        <input type="text" id="inputUsuarioRetorno" readonly>
+                    <!-- Container de estatísticas gerais -->
+                    <div id="estatisticasContainer" aria-live="polite"></div>
 
-                        <!-- Campo para data e hora de retorno -->
-                        <label for="inputDataRetorno">Data e Hora de Retorno</label>
-                        <input type="datetime-local" id="inputDataRetorno" required>
+                    <!-- Container de histórico individual (inicialmente oculto) -->
+                    <div id="historicoContainer" style="display: none;" aria-live="polite"></div>
 
-                        <!-- Campo para observações (opcional) -->
-                        <label for="inputObservacoes">Observações</label>
-                        <input type="text" id="inputObservacoes" placeholder="Observações adicionais (opcional)">
-
-                        <div class="form-actions">
-                            <button class="btn" type="submit">Registrar</button>
-                            <button class="btn ghost" type="button" onclick="cancelEditsAndGo('telaRetornos')">Cancelar</button>
-                        </div>
-                    </form>
+                    <div class="list-footer">
+                        <button class="btn ghost" onclick="showScreen('bemVindo')" style="width: 100%;">← Voltar ao início</button>
+                    </div>
                 </section>
             </main>
         </div>
@@ -274,6 +266,7 @@
     <script src="js/usuario.js"></script>
     <script src="js/saida.js"></script>
     <script src="js/retorno.js"></script>
+    <script src="js/consultas.js"></script>
 
     <!-- Tela: Login (modal de nível superior) -->
     <section class="card" id="telaLogin" style="display:none;">

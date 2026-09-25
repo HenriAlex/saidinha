@@ -60,7 +60,15 @@ async function cadastrarUsuario(){
 
     if (!nome || !ra || !email || !senha || !id_perfil){ alert('Preencha todos os campos.'); return; }
 
-    const dados = { ra, nome, id_perfil, email, senha };
+    // Obtém usuário logado do localStorage
+    const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+
+    const dados = {
+        ra, nome, id_perfil, email, senha,
+        // Adiciona ID e perfil do usuário logado para validação de permissão
+        id_usuario_logado: usuarioLogado.id_usuario || 0,
+        id_perfil_logado: usuarioLogado.id_perfil || 0
+    };
 
     // Se estiver em modo edição, usa PUT
     if (window.usuarioEditId) {
@@ -88,7 +96,10 @@ async function removerUsuario(id_usuario){
     const confirmado = await (typeof showModal === 'function' ? showModal('Confirmar remoção','Deseja remover este usuário?') : Promise.resolve(confirm('Deseja remover este usuário?')));
     if (!confirmado) return;
     try{
-        const resp = await fetch(`${API_BASE_USERS}/usuarios/${id_usuario}`, { method:'DELETE' });
+        // Obtém usuário logado do localStorage para validação
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+
+        const resp = await fetch(`${API_BASE_USERS}/usuarios/${id_usuario}?id_usuario_logado=${usuarioLogado.id_usuario || 0}&id_perfil_logado=${usuarioLogado.id_perfil || 0}`, { method:'DELETE' });
         if (resp.ok){ const res = await resp.json(); if (typeof showToast==='function') showToast(res.mensagem||'Usuário removido','success'); await carregarUsuarios(); }
         else { let e={detail:'Erro'}; try{ e = await resp.json(); }catch{} if (typeof showToast==='function') showToast(e.detail||JSON.stringify(e),'error'); else alert(e.detail||JSON.stringify(e)); }
     }catch(err){ alert(err.message || 'Erro ao remover usuário'); }
@@ -102,17 +113,48 @@ function filterUsers(text){
 }
 
 // Preenche o select de perfis no formulário de cadastro de usuário
+// Esta função carrega todos os perfis disponíveis e popula o select
 async function popularSelectPerfis(){
     const sel = document.getElementById('selectPerfil');
     if (!sel) return;
+
     try{
+        // Requisita a lista de perfis da API
         const r = await fetch(`${API_BASE_USERS}/perfis/`);
-        if (!r.ok) return;
-        const perfis = await r.json(); sel.innerHTML = '<option value="">Selecione um perfil</option>';
-        perfis.forEach(p => { const o = document.createElement('option'); o.value = p.id_perfil; o.textContent = p.ds_perfil; sel.appendChild(o); });
-        // Se houver perfis, pre-seleciona o primeiro para evitar envio com campo vazio
-        if (perfis && perfis.length > 0) sel.value = perfis[0].id_perfil;
-    }catch(e){}
+
+        // Verifica se a requisição foi bem-sucedida
+        if (!r.ok) {
+            console.error('Erro ao carregar perfis. Status:', r.status);
+            sel.innerHTML = '<option value="">Erro ao carregar perfis</option>';
+            return;
+        }
+
+        // Converte a resposta JSON
+        const perfis = await r.json();
+
+        // Limpa o select e adiciona opção padrão
+        sel.innerHTML = '<option value="">Selecione um perfil</option>';
+
+        // Adiciona cada perfil como uma opção
+        if (perfis && perfis.length > 0) {
+            perfis.forEach(p => {
+                const o = document.createElement('option');
+                o.value = p.id_perfil;
+                o.textContent = p.ds_perfil;
+                sel.appendChild(o);
+            });
+
+            // Pré-seleciona o primeiro perfil
+            sel.value = perfis[0].id_perfil;
+        } else {
+            console.warn('Nenhum perfil encontrado');
+            sel.innerHTML = '<option value="">Nenhum perfil disponível</option>';
+        }
+
+    } catch(e){
+        console.error('Erro ao popular select de perfis:', e);
+        sel.innerHTML = '<option value="">Erro ao carregar perfis</option>';
+    }
 }
 
 
