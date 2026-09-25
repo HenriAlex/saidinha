@@ -1,0 +1,31 @@
+<svg width="280" height="80" viewBox="0 0 280 80" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="280" height="80" fill="none"/>
+
+  <!-- Icon: Arrow exit (saída) -->
+  <g transform="translate(10, 10)">
+    <!-- Circle background -->
+    <circle cx="30" cy="30" r="28" fill="#667eea" opacity="0.1"/>
+
+    <!-- Exit door icon -->
+    <rect x="18" y="15" width="24" height="30" rx="2" fill="none" stroke="#667eea" stroke-width="2"/>
+    <line x1="30" y1="15" x2="30" y2="45" stroke="#667eea" stroke-width="2"/>
+    <circle cx="40" cy="30" r="2" fill="#667eea"/>
+
+    <!-- Arrow pointing right (saída) -->
+    <path d="M 50 25 L 58 30 L 50 35" stroke="#667eea" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <!-- Text: Saidinha -->
+  <text x="75" y="35" font-family="Inter, -apple-system, sans-serif" font-size="28" font-weight="700" fill="#333333">
+    Saidinha
+  </text>
+
+  <!-- Subtitle: Mais Controle, mais gestão -->
+  <text x="75" y="57" font-family="Inter, -apple-system, sans-serif" font-size="12" font-weight="400" fill="#666666">
+    Mais Controle, mais gestão
+  </text>
+
+  <!-- Accent line -->
+  <line x1="75" y1="63" x2="140" y2="63" stroke="#667eea" stroke-width="2" stroke-linecap="round"/>
+</svg>
