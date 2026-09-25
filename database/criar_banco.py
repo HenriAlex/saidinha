@@ -60,7 +60,7 @@ class CriarBanco:
         """)
 
         # Cria a tabela SAIDA caso ela ainda não exista.
-        # Esta tabela armazena os registros de saída dos alunos
+        # Esta tabela armazena os registros de SAÍDA dos alunos
         # com informações sobre quando e por qual motivo saíram.
         cursor.execute("""
 
@@ -70,13 +70,40 @@ class CriarBanco:
 
             id_usuario INTEGER NOT NULL,
 
-            data_entrada TEXT NOT NULL,
-
             data_saida TEXT NOT NULL,
 
             motivo TEXT NOT NULL,
 
             data_cadastro TEXT NOT NULL,
+
+            FOREIGN KEY(id_usuario)
+                REFERENCES usuario(id_usuario)
+
+        )
+
+        """)
+
+        # Cria a tabela RETORNO caso ela ainda não exista.
+        # Esta tabela armazena os registros de RETORNO dos alunos
+        # relacionando quando retornaram a uma saída anterior.
+        cursor.execute("""
+
+        CREATE TABLE IF NOT EXISTS retorno (
+
+            id_retorno INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            id_saida INTEGER NOT NULL,
+
+            id_usuario INTEGER NOT NULL,
+
+            data_retorno TEXT NOT NULL,
+
+            observacoes TEXT,
+
+            data_cadastro TEXT NOT NULL,
+
+            FOREIGN KEY(id_saida)
+                REFERENCES saida(id_saida),
 
             FOREIGN KEY(id_usuario)
                 REFERENCES usuario(id_usuario)

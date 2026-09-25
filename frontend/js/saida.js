@@ -2,7 +2,8 @@
    Local: frontend/js/saida.js
 
    Este arquivo contém todas as funções responsáveis por gerenciar
-   a interface de saídas dos alunos. As operações incluem:
+   a interface de SAÍDAS dos alunos (quando saem da instituição).
+   As operações incluem:
    - Carregamento e exibição de saídas
    - Registro de novas saídas
    - Edição de saídas existentes
@@ -153,9 +154,6 @@ async function registrarSaida(){
     // Obtém o ID do usuário do campo select.
     const id_usuario = parseInt(document.getElementById('selectUsuarioSaida').value || '0');
 
-    // Obtém a data e hora de entrada.
-    const data_entrada = document.getElementById('inputDataEntrada').value.trim();
-
     // Obtém a data e hora de saída.
     const data_saida = document.getElementById('inputDataSaida').value.trim();
 
@@ -163,7 +161,7 @@ async function registrarSaida(){
     const motivo = document.getElementById('inputMotivoSaida').value.trim();
 
     // Valida se todos os campos obrigatórios foram preenchidos.
-    if (!id_usuario || !data_entrada || !data_saida || !motivo){
+    if (!id_usuario || !data_saida || !motivo){
         alert('Preencha todos os campos.');
         return;
     }
@@ -171,7 +169,6 @@ async function registrarSaida(){
     // Cria o objeto com os dados da saída para enviar à API.
     const dados = {
         id_usuario,
-        data_entrada,
         data_saida,
         motivo
     };
@@ -404,9 +401,6 @@ function editarSaida(s){
             document.getElementById('selectUsuarioSaida').value = s.id_usuario;
         }catch(e){}
     });
-
-    // Preenche o campo de data e hora de entrada.
-    document.getElementById('inputDataEntrada').value = s.data_entrada || '';
 
     // Preenche o campo de data e hora de saída.
     document.getElementById('inputDataSaida').value = s.data_saida || '';

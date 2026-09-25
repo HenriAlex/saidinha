@@ -5,7 +5,7 @@ from pydantic import BaseModel
 
 
 # Cria o Schema utilizado para receber
-# os dados de um registro de saída.
+# os dados de um registro de SAÍDA.
 #
 # O Pydantic irá validar automaticamente
 # os tipos de dados e garantir que os campos
@@ -15,11 +15,6 @@ class SaidaSchema(BaseModel):
     # Identificador do usuário (aluno) que está saindo.
     # Este campo é obrigatório.
     id_usuario: int
-
-    # Data e hora de entrada do aluno.
-    # Formato esperado: "2024-12-25 10:30:00"
-    # Este campo é obrigatório.
-    data_entrada: str
 
     # Data e hora de saída do aluno.
     # Formato esperado: "2024-12-25 14:30:00"

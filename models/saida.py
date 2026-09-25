@@ -4,7 +4,8 @@ from datetime import datetime
 
 
 # Classe que representa a tabela saida.
-# Esta classe mapeia os dados de saída dos alunos.
+# Esta classe mapeia os dados de SAÍDA dos alunos
+# (quando saem da instituição).
 class Saida:
 
     # Método construtor da classe.
@@ -12,7 +13,6 @@ class Saida:
     def __init__(self,
                  id_saida=0,
                  id_usuario=0,
-                 data_entrada=None,
                  data_saida=None,
                  motivo="",
                  data_cadastro=None):
@@ -23,10 +23,6 @@ class Saida:
         # Código identificador do usuário (aluno).
         # Estabelece uma relação com a tabela usuario.
         self.id_usuario = id_usuario
-
-        # Data e hora de entrada do aluno.
-        # Representa quando o aluno chegou na instituição.
-        self.data_entrada = data_entrada
 
         # Data e hora de saída do aluno.
         # Representa quando o aluno saiu da instituição.

@@ -50,9 +50,6 @@ def registrar(saida_schema: SaidaSchema):
         # Recebe o ID do usuário do Schema.
         id_usuario=saida_schema.id_usuario,
 
-        # Recebe a data de entrada do Schema.
-        data_entrada=saida_schema.data_entrada,
-
         # Recebe a data de saída do Schema.
         data_saida=saida_schema.data_saida,
 
@@ -183,9 +180,6 @@ def atualizar(id_saida: int, saida_schema: SaidaSchema):
 
         # Recebe o ID do usuário do Schema.
         id_usuario=saida_schema.id_usuario,
-
-        # Recebe a data de entrada do Schema.
-        data_entrada=saida_schema.data_entrada,
 
         # Recebe a data de saída do Schema.
         data_saida=saida_schema.data_saida,

@@ -44,6 +44,11 @@
                 <span>Saídas</span>
             </button>
 
+            <button class="nav-item" data-screen="telaRetornos" onclick="showScreen('telaRetornos')" title="Retornos">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                <span>Retornos</span>
+            </button>
+
             <!-- Alternância de tema (claro/escuro), persistida no navegador -->
             <button class="nav-item nav-item--bottom" onclick="toggleTheme()" title="Alternar tema" id="theme-toggle">
                 <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-5.4-5.4c0-1.68.72-3.19 1.86-4.24C12.92 3.04 12.46 3 12 3z"/></svg>
@@ -185,10 +190,6 @@
                         <label for="selectUsuarioSaida">Aluno</label>
                         <select id="selectUsuarioSaida" required></select>
 
-                        <!-- Campo para data e hora de entrada -->
-                        <label for="inputDataEntrada">Data e Hora de Entrada</label>
-                        <input type="datetime-local" id="inputDataEntrada" required>
-
                         <!-- Campo para data e hora de saída -->
                         <label for="inputDataSaida">Data e Hora de Saída</label>
                         <input type="datetime-local" id="inputDataSaida" required>
@@ -200,6 +201,48 @@
                         <div class="form-actions">
                             <button class="btn" type="submit">Registrar</button>
                             <button class="btn ghost" type="button" onclick="cancelEditsAndGo('telaSaidas')">Cancelar</button>
+                        </div>
+                    </form>
+                </section>
+
+                <!-- Tela: Retornos (listagem) -->
+                <section class="card" id="telaRetornos" style="display:none;">
+                    <div class="profiles-toolbar">
+                        <h2>Retornos registrados</h2>
+                        <div class="profiles-count muted" id="retornosCount">-- retornos</div>
+                    </div>
+                    <!-- Grid de cartões de retorno, atualizado dinamicamente via JS -->
+                    <div id="retornosGrid" class="profiles-grid" aria-live="polite"></div>
+                    <div class="list-footer">
+                        <button class="btn" onclick="showScreen('telaRetornoCadastro')">Registrar retorno</button>
+                        <button class="btn ghost" onclick="showScreen('bemVindo')">Voltar ao início</button>
+                    </div>
+                </section>
+
+                <!-- Tela: Registro de retorno -->
+                <section class="card" id="telaRetornoCadastro" style="display:none;">
+                    <h2>Registrar Retorno</h2>
+                    <!-- Formulário para registrar um novo retorno de um aluno -->
+                    <form id="formRetorno" onsubmit="event.preventDefault(); registrarRetorno(); return false;">
+                        <!-- Campo para selecionar a saída do aluno -->
+                        <label for="selectSaidaRetorno">Saída (Aluno)</label>
+                        <select id="selectSaidaRetorno" required></select>
+
+                        <!-- Campo de ID do usuário (preenchido automaticamente) -->
+                        <label for="inputUsuarioRetorno">ID do Usuário</label>
+                        <input type="text" id="inputUsuarioRetorno" readonly>
+
+                        <!-- Campo para data e hora de retorno -->
+                        <label for="inputDataRetorno">Data e Hora de Retorno</label>
+                        <input type="datetime-local" id="inputDataRetorno" required>
+
+                        <!-- Campo para observações (opcional) -->
+                        <label for="inputObservacoes">Observações</label>
+                        <input type="text" id="inputObservacoes" placeholder="Observações adicionais (opcional)">
+
+                        <div class="form-actions">
+                            <button class="btn" type="submit">Registrar</button>
+                            <button class="btn ghost" type="button" onclick="cancelEditsAndGo('telaRetornos')">Cancelar</button>
                         </div>
                     </form>
                 </section>
@@ -230,6 +273,7 @@
     <script src="js/perfil.js"></script>
     <script src="js/usuario.js"></script>
     <script src="js/saida.js"></script>
+    <script src="js/retorno.js"></script>
 
     <!-- Tela: Login (modal de nível superior) -->
     <section class="card" id="telaLogin" style="display:none;">

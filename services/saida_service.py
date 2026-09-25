@@ -41,8 +41,8 @@ class SaidaService:
     # REGISTRAR SAÍDA
     # ============================================================
 
-    # Método responsável por registrar uma nova saída
-    # de um aluno.
+    # Método responsável por registrar uma nova SAÍDA
+    # de um aluno (quando sai da instituição).
     def registrar(self, saida: Saida):
 
         # Verifica se o ID do usuário foi informado.
@@ -50,13 +50,6 @@ class SaidaService:
 
             # Interrompe a execução e informa o problema.
             raise ValueError("O ID do usuário é obrigatório.")
-
-
-        # Verifica se a data de entrada foi informada.
-        if not saida.data_entrada:
-
-            # Interrompe a execução e informa o problema.
-            raise ValueError("A data de entrada é obrigatória.")
 
 
         # Verifica se a data de saída foi informada.
@@ -200,13 +193,6 @@ class SaidaService:
 
             # Impede a atualização sem ID de usuário.
             raise ValueError("O ID do usuário é obrigatório.")
-
-
-        # Verifica se a data de entrada foi informada.
-        if not saida.data_entrada:
-
-            # Impede a atualização sem data de entrada.
-            raise ValueError("A data de entrada é obrigatória.")
 
 
         # Verifica se a data de saída foi informada.

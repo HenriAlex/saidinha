@@ -11,6 +11,9 @@ from controllers.perfil_controller import router as perfil_router
 # Importa o Controller de saídas.
 from controllers.saida_controller import router as saida_router
 
+# Importa o Controller de retornos.
+from controllers.retorno_controller import router as retorno_router
+
 # Importa o middleware responsável pelo CORS.
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -35,6 +38,11 @@ app.include_router(perfil_router)
 # Adiciona as rotas relacionadas às saídas
 # à aplicação principal.
 app.include_router(saida_router)
+
+
+# Adiciona as rotas relacionadas aos retornos
+# à aplicação principal.
+app.include_router(retorno_router)
 
 
 # Cria uma rota simples para verificar

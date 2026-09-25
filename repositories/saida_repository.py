@@ -36,19 +36,15 @@ class SaidaRepository:
             INSERT INTO saida
             (
                 id_usuario,
-                data_entrada,
                 data_saida,
                 motivo,
                 data_cadastro
             )
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?)
         """, (
 
             # Envia o ID do usuário (aluno).
             saida.id_usuario,
-
-            # Envia a data e hora de entrada.
-            saida.data_entrada,
 
             # Envia a data e hora de saída.
             saida.data_saida,
@@ -97,7 +93,6 @@ class SaidaRepository:
                 s.id_usuario,
                 u.nome,
                 u.ra,
-                s.data_entrada,
                 s.data_saida,
                 s.motivo,
                 s.data_cadastro
@@ -122,10 +117,9 @@ class SaidaRepository:
                 "id_usuario": registro[1],
                 "nome_usuario": registro[2],
                 "ra_usuario": registro[3],
-                "data_entrada": registro[4],
-                "data_saida": registro[5],
-                "motivo": registro[6],
-                "data_cadastro": registro[7]
+                "data_saida": registro[4],
+                "motivo": registro[5],
+                "data_cadastro": registro[6]
             })
 
         return saidas
@@ -152,7 +146,6 @@ class SaidaRepository:
                 s.id_usuario,
                 u.nome,
                 u.ra,
-                s.data_entrada,
                 s.data_saida,
                 s.motivo,
                 s.data_cadastro
@@ -179,10 +172,9 @@ class SaidaRepository:
                 "id_usuario": registro[1],
                 "nome_usuario": registro[2],
                 "ra_usuario": registro[3],
-                "data_entrada": registro[4],
-                "data_saida": registro[5],
-                "motivo": registro[6],
-                "data_cadastro": registro[7]
+                "data_saida": registro[4],
+                "motivo": registro[5],
+                "data_cadastro": registro[6]
             }
 
         return None
@@ -212,7 +204,6 @@ class SaidaRepository:
                 s.id_usuario,
                 u.nome,
                 u.ra,
-                s.data_entrada,
                 s.data_saida,
                 s.motivo,
                 s.data_cadastro
@@ -241,10 +232,9 @@ class SaidaRepository:
                 "id_usuario": registro[1],
                 "nome_usuario": registro[2],
                 "ra_usuario": registro[3],
-                "data_entrada": registro[4],
-                "data_saida": registro[5],
-                "motivo": registro[6],
-                "data_cadastro": registro[7]
+                "data_saida": registro[4],
+                "motivo": registro[5],
+                "data_cadastro": registro[6]
             })
 
         return saidas
@@ -269,7 +259,6 @@ class SaidaRepository:
             UPDATE saida
             SET
                 id_usuario = ?,
-                data_entrada = ?,
                 data_saida = ?,
                 motivo = ?
             WHERE id_saida = ?
@@ -277,9 +266,6 @@ class SaidaRepository:
 
             # Novo ID do usuário.
             saida.id_usuario,
-
-            # Nova data de entrada.
-            saida.data_entrada,
 
             # Nova data de saída.
             saida.data_saida,
