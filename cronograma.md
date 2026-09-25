@@ -25,6 +25,9 @@
 
 1. Baixar o código do repositório GitHub
 git clone https://github.com/HenriAlex/saidinha.git
+git clone https://github.com/gabrielzin2545/PatinhasSaudaveis.git
+git clone https://github.com/iasmym23matos-boop/MarqueMed.git
+
 e para baixar a versão mais atual: git pull | (o terminar precisa ser aberto na raiz do diretório Saidinha)
 
 2. Entrar na pasta do projeto
@@ -43,7 +46,7 @@ Depois de ativado, deverá aparecer algo parecido com: (.venv) PS C:\...\saidinh
 
 6. Instalar as dependências
 python -m pip install -r requirements.txt
-
+  
 7. Criar o banco de dados e suas tabelas
 python -m database.criar_banco
 

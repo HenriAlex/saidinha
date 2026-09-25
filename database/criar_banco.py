@@ -59,6 +59,32 @@ class CriarBanco:
 
         """)
 
+        # Cria a tabela SAIDA caso ela ainda não exista.
+        # Esta tabela armazena os registros de saída dos alunos
+        # com informações sobre quando e por qual motivo saíram.
+        cursor.execute("""
+
+        CREATE TABLE IF NOT EXISTS saida (
+
+            id_saida INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            id_usuario INTEGER NOT NULL,
+
+            data_entrada TEXT NOT NULL,
+
+            data_saida TEXT NOT NULL,
+
+            motivo TEXT NOT NULL,
+
+            data_cadastro TEXT NOT NULL,
+
+            FOREIGN KEY(id_usuario)
+                REFERENCES usuario(id_usuario)
+
+        )
+
+        """)
+
         # Confirma as alterações realizadas no banco.
         conexao.commit()
 

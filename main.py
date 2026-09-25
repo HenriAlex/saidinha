@@ -7,6 +7,10 @@ from controllers.usuario_controller import router as usuario_router
 
 # Importa o Controller de perfis.
 from controllers.perfil_controller import router as perfil_router
+
+# Importa o Controller de saídas.
+from controllers.saida_controller import router as saida_router
+
 # Importa o middleware responsável pelo CORS.
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -26,6 +30,11 @@ app.include_router(usuario_router)
 # Adiciona as rotas relacionadas aos perfis
 # à aplicação principal.
 app.include_router(perfil_router)
+
+
+# Adiciona as rotas relacionadas às saídas
+# à aplicação principal.
+app.include_router(saida_router)
 
 
 # Cria uma rota simples para verificar

@@ -39,6 +39,11 @@
                 <span>Usuários</span>
             </button>
 
+            <button class="nav-item" data-screen="telaSaidas" onclick="showScreen('telaSaidas')" title="Saídas">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
+                <span>Saídas</span>
+            </button>
+
             <!-- Alternância de tema (claro/escuro), persistida no navegador -->
             <button class="nav-item nav-item--bottom" onclick="toggleTheme()" title="Alternar tema" id="theme-toggle">
                 <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-5.4-5.4c0-1.68.72-3.19 1.86-4.24C12.92 3.04 12.46 3 12 3z"/></svg>
@@ -156,6 +161,48 @@
                         </div>
                     </form>
                 </section>
+
+                <!-- Tela: Saídas (listagem) -->
+                <section class="card" id="telaSaidas" style="display:none;">
+                    <div class="profiles-toolbar">
+                        <h2>Saídas registradas</h2>
+                        <div class="profiles-count muted" id="aidasCount">-- saídas</div>
+                    </div>
+                    <!-- Grid de cartões de saída, atualizado dinamicamente via JS -->
+                    <div id="aidasGrid" class="profiles-grid" aria-live="polite"></div>
+                    <div class="list-footer">
+                        <button class="btn" onclick="showScreen('telaSaidaCadastro')">Registrar saída</button>
+                        <button class="btn ghost" onclick="showScreen('bemVindo')">Voltar ao início</button>
+                    </div>
+                </section>
+
+                <!-- Tela: Registro de saída -->
+                <section class="card" id="telaSaidaCadastro" style="display:none;">
+                    <h2>Registrar Saída</h2>
+                    <!-- Formulário para registrar uma nova saída de um aluno -->
+                    <form id="formSaida" onsubmit="event.preventDefault(); registrarSaida(); return false;">
+                        <!-- Campo para selecionar o aluno que está saindo -->
+                        <label for="selectUsuarioSaida">Aluno</label>
+                        <select id="selectUsuarioSaida" required></select>
+
+                        <!-- Campo para data e hora de entrada -->
+                        <label for="inputDataEntrada">Data e Hora de Entrada</label>
+                        <input type="datetime-local" id="inputDataEntrada" required>
+
+                        <!-- Campo para data e hora de saída -->
+                        <label for="inputDataSaida">Data e Hora de Saída</label>
+                        <input type="datetime-local" id="inputDataSaida" required>
+
+                        <!-- Campo para motivo da saída -->
+                        <label for="inputMotivoSaida">Motivo da Saída</label>
+                        <input type="text" id="inputMotivoSaida" placeholder="Ex: Intervalo, Consulta médica, Aula terminada" required>
+
+                        <div class="form-actions">
+                            <button class="btn" type="submit">Registrar</button>
+                            <button class="btn ghost" type="button" onclick="cancelEditsAndGo('telaSaidas')">Cancelar</button>
+                        </div>
+                    </form>
+                </section>
             </main>
         </div>
     </div>
@@ -182,6 +229,7 @@
     <script src="js/script.js"></script>
     <script src="js/perfil.js"></script>
     <script src="js/usuario.js"></script>
+    <script src="js/saida.js"></script>
 
     <!-- Tela: Login (modal de nível superior) -->
     <section class="card" id="telaLogin" style="display:none;">

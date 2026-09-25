@@ -15,7 +15,7 @@ function init() {
     // Se houver usuário autenticado mostra a app, caso contrário abre tela de login
     const usuario = localStorage.getItem('usuario_logado');
     const hash = (location.hash || '').replace('#','');
-    const valid = ['bemVindo','telaLista','telaCadastro','telaUsuarios','telaUsuarioCadastro','telaLogin'];
+    const valid = ['bemVindo','telaLista','telaCadastro','telaUsuarios','telaUsuarioCadastro','telaSaidas','telaSaidaCadastro','telaLogin'];
     if (usuario) {
         setLoggedUser(JSON.parse(usuario));
         if (hash && valid.includes(hash)) showScreen(hash);
@@ -29,6 +29,8 @@ function init() {
     if (typeof carregarPerfis === 'function') carregarPerfis();
     // Carrega usuários em segundo plano (se disponível) para agilizar a navegação
     if (typeof carregarUsuarios === 'function') carregarUsuarios();
+    // Carrega as saídas em segundo plano para agilizar a navegação
+    if (typeof carregarSaidas === 'function') carregarSaidas();
 }
 
 // Vincula inicialização ao evento de carregamento.
@@ -37,7 +39,7 @@ window.addEventListener('load', init);
 // Função responsável por alternar entre telas.
 // Recebe o id lógico da tela e mostra/oculta os containers.
 function showScreen(screen) {
-    const telas = ['bemVindo', 'telaLista', 'telaCadastro', 'telaUsuarios', 'telaUsuarioCadastro', 'telaLogin'];
+    const telas = ['bemVindo', 'telaLista', 'telaCadastro', 'telaUsuarios', 'telaUsuarioCadastro', 'telaSaidas', 'telaSaidaCadastro', 'telaLogin'];
 
     // Bloqueio global: exige autenticação para acessar qualquer tela diferente de 'telaLogin'
     const usuario = localStorage.getItem('usuario_logado');
@@ -51,12 +53,12 @@ function showScreen(screen) {
     if (usuario) {
         let userObj = null;
         try { userObj = JSON.parse(usuario); } catch(e){ userObj = null; }
-        const requiresAdmin = ['telaUsuarioCadastro', 'telaCadastro'];
+        const requiresAdmin = ['telaUsuarioCadastro', 'telaCadastro', 'telaSaidaCadastro'];
         if (requiresAdmin.includes(screen)) {
             const isAdmin = userObj && (userObj.email === 'admin' || userObj.id_usuario === 0);
             if (!isAdmin) {
                 if (typeof showToast === 'function') showToast('Acesso negado: somente administrador', 'error');
-                screen = 'telaUsuarios';
+                screen = 'telaSaidas';
             }
         }
     }
@@ -81,6 +83,11 @@ function showScreen(screen) {
     if (screen === 'telaUsuarios' || screen === 'telaUsuarioCadastro') {
         if (typeof carregarUsuarios === 'function') carregarUsuarios();
         if (screen === 'telaUsuarioCadastro' && typeof popularSelectPerfis === 'function') popularSelectPerfis();
+    }
+    // Ao exibir as saídas, solicita carregamento dos dados.
+    if (screen === 'telaSaidas' || screen === 'telaSaidaCadastro') {
+        if (typeof carregarSaidas === 'function') carregarSaidas();
+        if (screen === 'telaSaidaCadastro' && typeof popularSelectUsuariosSaida === 'function') popularSelectUsuariosSaida();
     }
 }
 
