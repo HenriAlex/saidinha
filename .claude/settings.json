@@ -15,7 +15,9 @@
       "Bash(curl -s http://127.0.0.1:8000/faltas/usuario/1)",
       "Bash(curl -s http://127.0.0.1:8000/saidas/)",
       "Bash(curl -s http://127.0.0.1:8000/retornos/)",
-      "Bash(git commit -m 'Fix: Corrigir data nas faltas e relatório de consulta *)"
+      "Bash(git commit -m 'Fix: Corrigir data nas faltas e relatório de consulta *)",
+      "PowerShell(netstat -ano)",
+      "PowerShell(Stop-Process -Id 8876 -Force -ErrorAction SilentlyContinue)"
     ]
   }
 }
