@@ -14,8 +14,7 @@ from typing import Optional
 #
 # NOTA: data_retorno é preenchida AUTOMATICAMENTE
 # no servidor com a data/hora atual do registro,
-# a menos que retorno_manual seja True.
-# Nesse caso, data_retorno_customizada deve ser enviada.
+# a menos que data_retorno_customizada seja enviada.
 class RetornoSchema(BaseModel):
 
     # Identificador da saída associada a este retorno.
@@ -33,14 +32,9 @@ class RetornoSchema(BaseModel):
     # Pode ser deixado em branco.
     observacoes: str = ""
 
-    # Flag que indica se foi um retorno manual.
-    # Se True, significa que o aluno foi embora e retornou
-    # com data/hora customizada (data_retorno_customizada).
-    # Se False (padrão), usa a data/hora automática do servidor.
-    retorno_manual: bool = False
-
     # Data e hora customizadas de retorno (opcional).
-    # Apenas necessário quando retorno_manual = True.
+    # Se fornecida, usa essa data/hora (retorno manual).
+    # Se não fornecida, usa a data/hora automática do servidor.
     # Formato esperado: "YYYY-MM-DD HH:MM:SS"
     # Exemplo: "2024-09-28 14:30:00"
     data_retorno_customizada: Optional[str] = None

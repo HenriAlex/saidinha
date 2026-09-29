@@ -409,14 +409,12 @@ async function registrarRetornoManual(saida, dataHora){
         const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
 
         // Cria o objeto de dados para enviar à API.
-        // retorno_manual = true indica que é um retorno com data customizada.
         // data_retorno_customizada contém a data/hora fornecida pelo usuário.
         const dados = {
             id_saida: saida.id_saida,
             id_usuario: saida.id_usuario,
             observacoes: `Retorno manual registrado em ${new Date().toLocaleString('pt-BR')}`,
-            retorno_manual: true,  // Flag que indica retorno manual.
-            data_retorno_customizada: dataHora,  // Data/hora customizada.
+            data_retorno_customizada: dataHora,  // Data/hora customizada (retorno manual).
             id_usuario_logado: usuarioLogado.id_usuario || 0,
             id_perfil_logado: usuarioLogado.id_perfil || 0
         };

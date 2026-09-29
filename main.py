@@ -2,6 +2,10 @@
 # Ele será utilizado para criar nossa aplicação.
 from fastapi import FastAPI
 
+# Importa o módulo que cria o banco de dados.
+# Isso garante que o banco será criado na inicialização.
+from database.criar_banco import CriarBanco
+
 # Importa o Controller de usuários.
 from controllers.usuario_controller import router as usuario_router
 

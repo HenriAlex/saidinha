@@ -8,6 +8,14 @@
    - Registrar novas faltas
    - Visualizar lista de faltas registradas
    - Filtrar faltas por aluno ou data
+*/
+
+// Helper para converter string de data (YYYY-MM-DD) para Date respeitando fuso horário local
+function parseDataLocal(dataString) {
+    if (!dataString) return new Date();
+    const [ano, mes, dia] = dataString.split('-').map(Number);
+    return new Date(ano, mes - 1, dia);
+}
    - Atualizar ou excluir faltas (apenas admin)
 */
 
@@ -96,7 +104,7 @@ async function carregarFaltas(){
             meta.style.fontWeight='600';
 
             // Formata data da falta.
-            const dataFaltaObj = new Date(f.data_falta);
+            const dataFaltaObj = parseDataLocal(f.data_falta);
             const dataFormatada = dataFaltaObj.toLocaleDateString('pt-BR');
 
             meta.innerHTML = `📅 Falta em <strong>${dataFormatada}</strong>`;
@@ -332,7 +340,7 @@ function mostrarDetalhesFalta(falta){
             <strong>📌 RA:</strong> ${falta.ra_usuario}
         </div>
         <div style="margin-bottom: 12px;">
-            <strong>📅 Data da Falta:</strong> ${new Date(falta.data_falta).toLocaleDateString('pt-BR')}
+            <strong>📅 Data da Falta:</strong> ${parseDataLocal(falta.data_falta).toLocaleDateString('pt-BR')}
         </div>
         <div style="margin-bottom: 12px;">
             <strong>🎯 Motivo:</strong> ${falta.motivo || 'Não justificada'}

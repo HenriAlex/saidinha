@@ -100,8 +100,6 @@ class CriarBanco:
 
             observacoes TEXT,
 
-            retorno_manual INTEGER DEFAULT 0,
-
             data_cadastro TEXT NOT NULL,
 
             FOREIGN KEY(id_saida)
@@ -221,6 +219,47 @@ class CriarBanco:
                     "INSERT INTO usuario (ra, nome, id_perfil, email, senha, data_cadastro) VALUES (?, ?, ?, ?, ?, ?)",
                     (ra, nome, 1, email, senha, data_cadastro)
                 )
+
+        # ============================================================
+        # MIGRAÇÃO: Remover coluna retorno_manual se existir
+        # ============================================================
+        # Esta migração remove a coluna retorno_manual se ela existir
+        # de versões anteriores (usávamos um boolean desnecessário)
+        try:
+            cursor.execute("PRAGMA table_info(retorno)")
+            colunas = cursor.fetchall()
+            colunas_nomes = [col[1] for col in colunas]
+
+            if 'retorno_manual' in colunas_nomes:
+                # Se a coluna existe, recria a tabela sem ela
+                cursor.execute("""
+                    CREATE TABLE retorno_temp AS
+                    SELECT id_retorno, id_saida, id_usuario, data_retorno,
+                           observacoes, data_cadastro
+                    FROM retorno
+                """)
+                cursor.execute("DROP TABLE retorno")
+                cursor.execute("""
+                    CREATE TABLE retorno (
+                        id_retorno INTEGER PRIMARY KEY AUTOINCREMENT,
+                        id_saida INTEGER NOT NULL,
+                        id_usuario INTEGER NOT NULL,
+                        data_retorno TEXT NOT NULL,
+                        observacoes TEXT,
+                        data_cadastro TEXT NOT NULL,
+                        FOREIGN KEY(id_saida)
+                            REFERENCES saida(id_saida),
+                        FOREIGN KEY(id_usuario)
+                            REFERENCES usuario(id_usuario)
+                    )
+                """)
+                cursor.execute("""
+                    INSERT INTO retorno
+                    SELECT * FROM retorno_temp
+                """)
+                cursor.execute("DROP TABLE retorno_temp")
+        except:
+            pass
 
         # Confirma as alterações realizadas no banco.
         conexao.commit()

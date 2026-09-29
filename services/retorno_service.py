@@ -77,21 +77,6 @@ class RetornoService:
             raise ValueError("A data de retorno é obrigatória.")
 
 
-        # Se foi um retorno manual, valida a data customizada.
-        # Um retorno manual ocorre quando o aluno foi embora
-        # e retornou em horário diferente do esperado.
-        if retorno.retorno_manual:
-
-            # Verifica se uma data customizada foi fornecida.
-            # Esta data substitui a data/hora automática do servidor.
-            if not retorno.data_retorno:
-
-                # Erro: retorno manual requer data customizada.
-                raise ValueError(
-                    "Para retorno manual, a data de retorno é obrigatória."
-                )
-
-
         # Consulta o banco para verificar se a saída existe.
         saida = self.saida_repository.buscar_por_id(retorno.id_saida)
 
@@ -240,17 +225,6 @@ class RetornoService:
 
             # Impede a atualização sem data de retorno.
             raise ValueError("A data de retorno é obrigatória.")
-
-
-        # Se for um retorno manual, valida a data customizada.
-        if retorno.retorno_manual:
-
-            # Para retorno manual, a data é obrigatória.
-            if not retorno.data_retorno:
-
-                raise ValueError(
-                    "Para retorno manual, a data de retorno é obrigatória."
-                )
 
 
         # Depois de todas as validações,

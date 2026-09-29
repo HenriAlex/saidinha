@@ -105,24 +105,12 @@ def registrar(retorno_schema: RetornoSchema):
     # Valida a permissão (lança exceção se negado)
     validar_permissao_retorno(usuario_logado, retorno_schema.id_usuario)
 
-    # Define a data de retorno com base no tipo de retorno.
-    #
-    # Se retorno_manual for True, significa que o aluno foi embora
-    # e retorna com uma data customizada (informada pelo usuário).
-    #
-    # Se retorno_manual for False (padrão), a data é AUTOMATICAMENTE
-    # preenchida com a data/hora atual do servidor.
-    if retorno_schema.retorno_manual:
-
-        # Retorno manual: usa a data customizada
-        # que o usuário informou no frontend.
+    # Define a data de retorno.
+    # Se data_retorno_customizada foi informada, usa ela (retorno manual).
+    # Caso contrário, usa a data/hora atual do servidor (retorno automático).
+    if retorno_schema.data_retorno_customizada:
         data_retorno = retorno_schema.data_retorno_customizada
-
     else:
-
-        # Retorno automático: usa a data/hora do servidor.
-        # Este é o comportamento padrão quando o aluno retorna
-        # normalmente no mesmo dia (ex: volta do intervalo).
         data_retorno = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Cria um objeto do nosso Model Retorno.
@@ -140,12 +128,7 @@ def registrar(retorno_schema: RetornoSchema):
         data_retorno=data_retorno,
 
         # Recebe as observações do Schema.
-        observacoes=retorno_schema.observacoes,
-
-        # Flag que indica se foi retorno manual.
-        # True = aluno foi embora, retornou com data customizada.
-        # False = retorno normal/automático.
-        retorno_manual=retorno_schema.retorno_manual
+        observacoes=retorno_schema.observacoes
     )
 
     # Envia o Model para o Service e trata possíveis erros.
@@ -302,18 +285,13 @@ def atualizar(id_retorno: int, retorno_schema: RetornoSchema):
     }
     validar_permissao_editar_excluir(usuario_logado)
 
-    # Define a data de retorno com base no tipo de retorno.
-    # Se for retorno manual, usa a data customizada.
-    # Se for retorno automático, usa a data fornecida no schema.
-    if retorno_schema.retorno_manual:
-
-        # Retorno manual: usa a data customizada.
+    # Define a data de retorno.
+    # Se data_retorno_customizada foi informada, usa ela.
+    # Caso contrário, usa a data atual.
+    if retorno_schema.data_retorno_customizada:
         data_retorno = retorno_schema.data_retorno_customizada
-
     else:
-
-        # Retorno automático: usa a data fornecida.
-        data_retorno = retorno_schema.data_retorno
+        data_retorno = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     # Cria um objeto do nosso Model Retorno com o ID informado.
     retorno = Retorno(
@@ -327,14 +305,11 @@ def atualizar(id_retorno: int, retorno_schema: RetornoSchema):
         # Recebe o ID do usuário do Schema.
         id_usuario=retorno_schema.id_usuario,
 
-        # Define a data de retorno (automática ou customizada).
+        # Define a data de retorno.
         data_retorno=data_retorno,
 
         # Recebe as observações do Schema.
-        observacoes=retorno_schema.observacoes,
-
-        # Flag que indica se foi retorno manual.
-        retorno_manual=retorno_schema.retorno_manual
+        observacoes=retorno_schema.observacoes
     )
 
     # Tenta atualizar o retorno.

@@ -1,0 +1,21 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(cd \"G:\\\\Meu Drive\\\\Ensino Profissionalzante\\\\Desenvolvimento de Sistemas\\\\TCC\\\\Saidinha\"; $process = Start-Process python -ArgumentList \"main.py\" -NoNewWindow -PassThru -RedirectStandardOutput \"C:\\\\temp\\\\python_stdout.log\" -RedirectStandardError \"C:\\\\temp\\\\python_stderr.log\"; Start-Sleep -Seconds 3; if \\($process.HasExited\\) { \"Process exited with code: \" + $process.ExitCode } else { \"Process is running\" }; Get-Content \"C:\\\\temp\\\\python_stderr.log\" 2>/dev/null | Select-Object -First 20)",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/retornos/ -H \"Content-Type: application/json\" -d '{\"id_saida\":1,\"id_usuario\":1,\"observacoes\":\"teste\",\"data_retorno_customizada\":\"2024-09-28 14:30:00\",\"id_usuario_logado\":0,\"id_perfil_logado\":0}')",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/saidas/ -H \"Content-Type: application/json\" -d '{\"id_usuario\":1,\"motivo\":\"Consulta médica\",\"id_usuario_logado\":0,\"id_perfil_logado\":0}')",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/saidas/ -H \"Content-Type: application/json\" -d \"{\\\\\"id_usuario\\\\\":1,\\\\\"motivo\\\\\":\\\\\"Consulta médica\\\\\",\\\\\"id_usuario_logado\\\\\":0,\\\\\"id_perfil_logado\\\\\":0}\")",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/saidas/ -H \"Content-Type: application/json\" -d @-)",
+      "Bash(curl -s -X POST http://127.0.0.1:8000/retornos/ -H \"Content-Type: application/json\" -d @-)",
+      "Bash(curl -s http://127.0.0.1:8000/relatorios/geral)",
+      "Bash(rm -f saidinha.db)",
+      "Bash(python -c \"from database.criar_banco import CriarBanco; print\\('Banco recriado com estrutura corrigida'\\)\")",
+      "PowerShell(cd \"G:\\\\Meu Drive\\\\Ensino Profissionalzante\\\\Desenvolvimento de Sistemas\\\\TCC\\\\Saidinha\"; $process = Start-Process python -ArgumentList \"main.py\" -NoNewWindow -PassThru -RedirectStandardOutput \"$env:TEMP\\\\python_stdout.log\" -RedirectStandardError \"$env:TEMP\\\\python_stderr.log\"; Start-Sleep -Seconds 3; if \\($process.HasExited\\) { \"Process exited with code: \" + $process.ExitCode; Get-Content \"$env:TEMP\\\\python_stderr.log\" 2>$null | Select-Object -First 30 } else { \"Process is running\" })",
+      "Bash(curl -s http://127.0.0.1:8000/)",
+      "Bash(curl -s http://127.0.0.1:8000/faltas/usuario/1)",
+      "Bash(curl -s http://127.0.0.1:8000/saidas/)",
+      "Bash(curl -s http://127.0.0.1:8000/retornos/)",
+      "Bash(git commit -m 'Fix: Corrigir data nas faltas e relatório de consulta *)"
+    ]
+  }
+}
