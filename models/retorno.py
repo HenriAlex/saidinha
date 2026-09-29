@@ -16,6 +16,7 @@ class Retorno:
                  id_usuario=0,
                  data_retorno=None,
                  observacoes="",
+                 retorno_manual=False,
                  data_cadastro=None):
 
         # Código identificador único do retorno.
@@ -39,6 +40,12 @@ class Retorno:
         # Campo opcional para notas, observações ou observações
         # relevantes sobre o retorno.
         self.observacoes = observacoes
+
+        # Flag que indica se foi um retorno manual.
+        # Se True (1), o aluno foi embora e retornou em horário customizado.
+        # Se False (0), usa o comportamento padrão (data/hora automática).
+        # Este campo permite registrar retornos com data/hora personalizadas.
+        self.retorno_manual = retorno_manual
 
         # Caso nenhuma data seja informada,
         # utiliza a data e hora atuais.

@@ -32,6 +32,8 @@ class RetornoRepository:
         cursor = conexao.cursor()
 
         # Executa o comando SQL de inserção na tabela retorno.
+        # O novo campo retorno_manual é incluído para indicar
+        # se foi um retorno com data customizada.
         cursor.execute("""
             INSERT INTO retorno
             (
@@ -39,9 +41,10 @@ class RetornoRepository:
                 id_usuario,
                 data_retorno,
                 observacoes,
+                retorno_manual,
                 data_cadastro
             )
-            VALUES (?, ?, ?, ?, ?)
+            VALUES (?, ?, ?, ?, ?, ?)
         """, (
 
             # Envia o ID da saída relacionada.
@@ -55,6 +58,11 @@ class RetornoRepository:
 
             # Envia as observações (pode ser vazio).
             retorno.observacoes,
+
+            # Envia a flag de retorno_manual (0 ou 1).
+            # 1 = retorno manual com data customizada
+            # 0 = retorno automático com data/hora do servidor
+            int(retorno.retorno_manual),
 
             # Envia a data de cadastro.
             retorno.data_cadastro,
@@ -91,6 +99,8 @@ class RetornoRepository:
         #
         # O INNER JOIN permite trazer também
         # os dados do usuário relacionado ao retorno.
+        # Inclui o campo retorno_manual para indicar
+        # se foi um retorno manual ou automático.
         cursor.execute("""
             SELECT
                 r.id_retorno,
@@ -100,6 +110,7 @@ class RetornoRepository:
                 u.ra,
                 r.data_retorno,
                 r.observacoes,
+                r.retorno_manual,
                 r.data_cadastro,
                 s.data_saida,
                 s.motivo
@@ -129,9 +140,10 @@ class RetornoRepository:
                 "ra_usuario": registro[4],
                 "data_retorno": registro[5],
                 "observacoes": registro[6],
-                "data_cadastro": registro[7],
-                "data_saida": registro[8],
-                "motivo_saida": registro[9]
+                "retorno_manual": bool(registro[7]),
+                "data_cadastro": registro[8],
+                "data_saida": registro[9],
+                "motivo_saida": registro[10]
             })
 
         return retornos
@@ -152,6 +164,8 @@ class RetornoRepository:
         cursor = conexao.cursor()
 
         # Busca o retorno pelo ID.
+        # Inclui o campo retorno_manual para saber
+        # se foi um retorno manual ou automático.
         cursor.execute("""
             SELECT
                 r.id_retorno,
@@ -161,6 +175,7 @@ class RetornoRepository:
                 u.ra,
                 r.data_retorno,
                 r.observacoes,
+                r.retorno_manual,
                 r.data_cadastro,
                 s.data_saida,
                 s.motivo
@@ -192,9 +207,10 @@ class RetornoRepository:
                 "ra_usuario": registro[4],
                 "data_retorno": registro[5],
                 "observacoes": registro[6],
-                "data_cadastro": registro[7],
-                "data_saida": registro[8],
-                "motivo_saida": registro[9]
+                "retorno_manual": bool(registro[7]),
+                "data_cadastro": registro[8],
+                "data_saida": registro[9],
+                "motivo_saida": registro[10]
             }
 
         return None
@@ -215,6 +231,7 @@ class RetornoRepository:
         cursor = conexao.cursor()
 
         # Busca todos os retornos da saída.
+        # Inclui o campo retorno_manual.
         cursor.execute("""
             SELECT
                 r.id_retorno,
@@ -224,6 +241,7 @@ class RetornoRepository:
                 u.ra,
                 r.data_retorno,
                 r.observacoes,
+                r.retorno_manual,
                 r.data_cadastro,
                 s.data_saida,
                 s.motivo
@@ -257,9 +275,10 @@ class RetornoRepository:
                 "ra_usuario": registro[4],
                 "data_retorno": registro[5],
                 "observacoes": registro[6],
-                "data_cadastro": registro[7],
-                "data_saida": registro[8],
-                "motivo_saida": registro[9]
+                "retorno_manual": bool(registro[7]),
+                "data_cadastro": registro[8],
+                "data_saida": registro[9],
+                "motivo_saida": registro[10]
             })
 
         return retornos
@@ -280,6 +299,7 @@ class RetornoRepository:
         cursor = conexao.cursor()
 
         # Busca todos os retornos do usuário.
+        # Inclui o campo retorno_manual.
         cursor.execute("""
             SELECT
                 r.id_retorno,
@@ -289,6 +309,7 @@ class RetornoRepository:
                 u.ra,
                 r.data_retorno,
                 r.observacoes,
+                r.retorno_manual,
                 r.data_cadastro,
                 s.data_saida,
                 s.motivo
@@ -322,9 +343,10 @@ class RetornoRepository:
                 "ra_usuario": registro[4],
                 "data_retorno": registro[5],
                 "observacoes": registro[6],
-                "data_cadastro": registro[7],
-                "data_saida": registro[8],
-                "motivo_saida": registro[9]
+                "retorno_manual": bool(registro[7]),
+                "data_cadastro": registro[8],
+                "data_saida": registro[9],
+                "motivo_saida": registro[10]
             })
 
         return retornos
@@ -345,11 +367,13 @@ class RetornoRepository:
         cursor = conexao.cursor()
 
         # Executa o comando UPDATE para alterar os dados.
+        # Agora inclui a atualização do campo retorno_manual.
         cursor.execute("""
             UPDATE retorno
             SET
                 data_retorno = ?,
-                observacoes = ?
+                observacoes = ?,
+                retorno_manual = ?
             WHERE id_retorno = ?
         """, (
 
@@ -358,6 +382,9 @@ class RetornoRepository:
 
             # Novas observações.
             retorno.observacoes,
+
+            # Nova flag de retorno_manual.
+            int(retorno.retorno_manual),
 
             # Identifica qual retorno será alterado.
             retorno.id_retorno,

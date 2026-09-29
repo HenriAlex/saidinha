@@ -100,10 +100,38 @@ class CriarBanco:
 
             observacoes TEXT,
 
+            retorno_manual INTEGER DEFAULT 0,
+
             data_cadastro TEXT NOT NULL,
 
             FOREIGN KEY(id_saida)
                 REFERENCES saida(id_saida),
+
+            FOREIGN KEY(id_usuario)
+                REFERENCES usuario(id_usuario)
+
+        )
+
+        """)
+
+        # Cria a tabela FALTA caso ela ainda não exista.
+        # Esta tabela armazena os registros de FALTAS dos alunos
+        # permitindo gerenciar ausências e justificativas.
+        cursor.execute("""
+
+        CREATE TABLE IF NOT EXISTS falta (
+
+            id_falta INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            id_usuario INTEGER NOT NULL,
+
+            data_falta TEXT NOT NULL,
+
+            motivo TEXT,
+
+            observacoes TEXT,
+
+            data_cadastro TEXT NOT NULL,
 
             FOREIGN KEY(id_usuario)
                 REFERENCES usuario(id_usuario)

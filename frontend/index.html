@@ -49,6 +49,11 @@
                 <span>Retornos</span>
             </button>
 
+            <button class="nav-item" data-screen="telaFaltas" onclick="showScreen('telaFaltas')" title="Faltas">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span>Faltas</span>
+            </button>
+
             <button class="nav-item" data-screen="telaConsultas" onclick="abrirConsultas()" title="Consultas">
                 <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M3 13h2v8H3zm4-8h2v16H7zm4-2h2v18h-2zm4-2h2v20h-2zm4 4h2v16h-2z"/></svg>
                 <span>Consultas</span>
@@ -177,12 +182,28 @@
                         <h2>Saídas registradas</h2>
                         <div class="profiles-count muted" id="aidasCount">-- saídas</div>
                     </div>
-                    <!-- Grid de cartões de saída, atualizado dinamicamente via JS -->
-                    <div id="aidasGrid" class="profiles-grid" aria-live="polite"></div>
-                    <div class="list-footer">
-                        <button class="btn" onclick="showScreen('telaSaidaCadastro')">Registrar saída</button>
-                        <button class="btn ghost" onclick="showScreen('bemVindo')">Voltar ao início</button>
-                    </div>
+                        <!-- Formulário de registro colocado no topo para fácil acesso -->
+                        <div style="margin-bottom:16px;">
+                            <h3 style="margin:0 0 8px 0;">Registrar Saída</h3>
+                            <form id="formSaidaInline" onsubmit="event.preventDefault(); registrarSaida(); return false;" style="background:#fff;padding:12px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                                <label for="selectUsuarioSaida">👤 Selecione o Aluno</label>
+                                <select id="selectUsuarioSaida" required style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;"></select>
+
+                                <label for="inputMotivoSaida">📝 Motivo da Saída</label>
+                                <input type="text" id="inputMotivoSaida" placeholder="Ex: Intervalo, Consulta médica, Aula terminada" required style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;">
+
+                                <div class="form-actions" style="display:flex;gap:8px;">
+                                    <button class="btn btn--primary" type="submit" style="flex:1;">✓ Registrar Saída</button>
+                                    <button class="btn ghost" type="button" onclick="document.getElementById('formSaidaInline').reset();" style="flex:1;">Cancelar</button>
+                                </div>
+                            </form>
+                        </div>
+
+                        <!-- Grid de cartões de saída (exibe apenas saídas sem retorno) -->
+                        <div id="aidasGrid" class="profiles-grid" aria-live="polite"></div>
+                        <div class="list-footer">
+                            <button class="btn ghost" onclick="showScreen('bemVindo')">Voltar ao início</button>
+                        </div>
                 </section>
 
                 <!-- Tela: Registro de saída (Form simples e intuitivo) -->
@@ -214,6 +235,44 @@
 
                     <!-- Grid de cartões com alunos que saíram e não retornaram -->
                     <div id="saidasPendentesGrid" class="profiles-grid" aria-live="polite"></div>
+
+                    <div class="list-footer">
+                        <button class="btn ghost" onclick="showScreen('bemVindo')" style="width: 100%;">← Voltar ao início</button>
+                    </div>
+                </section>
+
+                <!-- Tela: Faltas (listagem e registro) -->
+                <section class="card" id="telaFaltas" style="display:none;">
+                    <div class="profiles-toolbar">
+                        <h2>📋 Registro de Faltas</h2>
+                        <div class="profiles-count muted" id="faltasCount">-- falta(s)</div>
+                    </div>
+
+                    <!-- Formulário de registro colocado no topo para fácil acesso -->
+                    <div style="margin-bottom:16px;">
+                        <h3 style="margin:0 0 8px 0;">Registrar Falta</h3>
+                        <form id="formFaltaInline" onsubmit="event.preventDefault(); registrarFalta(); return false;" style="background:#fff;padding:12px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                            <label for="selectUsuarioFalta">👤 Selecione o Aluno</label>
+                            <select id="selectUsuarioFalta" required style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;"></select>
+
+                            <label for="inputDataFalta">📅 Data da Falta</label>
+                            <input type="date" id="inputDataFalta" required style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;">
+
+                            <label for="inputMotivoFalta">🎯 Motivo (opcional)</label>
+                            <input type="text" id="inputMotivoFalta" placeholder="Ex: Doença, Compromisso pessoal, Não informado" style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;">
+
+                            <label for="inputObsFalta">📝 Observações (opcional)</label>
+                            <textarea id="inputObsFalta" placeholder="Adicione observações..." style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px; min-height:60px;"></textarea>
+
+                            <div class="form-actions" style="display:flex;gap:8px;">
+                                <button class="btn btn--primary" type="submit" style="flex:1;">✓ Registrar Falta</button>
+                                <button class="btn ghost" type="button" onclick="document.getElementById('formFaltaInline').reset();" style="flex:1;">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <!-- Grid de cartões de faltas registradas -->
+                    <div id="faltasGrid" class="profiles-grid" aria-live="polite"></div>
 
                     <div class="list-footer">
                         <button class="btn ghost" onclick="showScreen('bemVindo')" style="width: 100%;">← Voltar ao início</button>
@@ -265,6 +324,7 @@
     <script src="js/usuario.js"></script>
     <script src="js/saida.js"></script>
     <script src="js/retorno.js"></script>
+    <script src="js/faltas.js"></script>
     <script src="js/consultas.js"></script>
 
     <!-- Tela: Login (modal de nível superior) -->

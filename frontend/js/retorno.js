@@ -108,28 +108,53 @@ async function carregarSaidasPendentes(){
             ra.className='profile-meta muted';
             ra.textContent = `ID: ${s.ra_usuario}`;
 
-            // BOTÃO VOLTAR (ação principal).
+            // BOTÕES DE RETORNO (automático e manual).
             const actions = document.createElement('div');
             actions.className='profile-actions';
             actions.style.marginTop='15px';
+            actions.style.display='flex';
+            actions.style.gap='8px';
+            actions.style.flexDirection='column';
 
+            // Botão 1: VOLTAR (retorno automático/rápido)
+            // Registra o retorno com a data/hora atual do servidor.
             const btnVoltar = document.createElement('button');
             btnVoltar.className='btn';
             btnVoltar.style.backgroundColor='#51cf66';
             btnVoltar.style.color='white';
             btnVoltar.style.width='100%';
             btnVoltar.style.fontSize='16px';
-            btnVoltar.style.padding='14px';
+            btnVoltar.style.padding='12px';
             btnVoltar.style.fontWeight='600';
             btnVoltar.style.border='none';
             btnVoltar.style.borderRadius='6px';
             btnVoltar.style.cursor='pointer';
-            btnVoltar.textContent='✓ VOLTAR';
+            btnVoltar.textContent='✓ VOLTAR (Agora)';
             btnVoltar.onclick = function(){
                 registrarRetornoRapido(s);
             };
 
+            // Botão 2: RETORNO MANUAL
+            // Abre um formulário para informar data/hora customizada.
+            // Usado quando o aluno foi embora e retorna em outro horário.
+            const btnManual = document.createElement('button');
+            btnManual.className='btn';
+            btnManual.style.backgroundColor='#4ecdc4';
+            btnManual.style.color='white';
+            btnManual.style.width='100%';
+            btnManual.style.fontSize='16px';
+            btnManual.style.padding='12px';
+            btnManual.style.fontWeight='600';
+            btnManual.style.border='none';
+            btnManual.style.borderRadius='6px';
+            btnManual.style.cursor='pointer';
+            btnManual.textContent='📅 Retorno Manual';
+            btnManual.onclick = function(){
+                abrirFormularioRetornoManual(s);
+            };
+
             actions.appendChild(btnVoltar);
+            actions.appendChild(btnManual);
 
             // Monta o card.
             card.appendChild(head);
@@ -212,6 +237,213 @@ async function registrarRetornoRapido(saida){
     }catch(err){
         if (typeof showToast==='function')
             showToast(err.message||'Erro ao registrar retorno','error');
+        else
+            alert(err.message);
+    }
+}
+
+// ============================================================
+// RETORNO MANUAL COM DATA CUSTOMIZADA
+// ============================================================
+
+// Abre um formulário modal para registrar retorno com data/hora customizada.
+// Usado quando o aluno foi embora (saída) e retorna em outro horário.
+function abrirFormularioRetornoManual(saida){
+
+    // Cria um overlay (fundo escuro) para destacar o formulário.
+    const overlay = document.createElement('div');
+    overlay.style.position='fixed';
+    overlay.style.top='0';
+    overlay.style.left='0';
+    overlay.style.width='100%';
+    overlay.style.height='100%';
+    overlay.style.backgroundColor='rgba(0, 0, 0, 0.5)';
+    overlay.style.display='flex';
+    overlay.style.justifyContent='center';
+    overlay.style.alignItems='center';
+    overlay.style.zIndex='9999';
+
+    // Cria a caixa (card) do formulário.
+    const formCard = document.createElement('div');
+    formCard.style.backgroundColor='white';
+    formCard.style.borderRadius='12px';
+    formCard.style.padding='24px';
+    formCard.style.maxWidth='400px';
+    formCard.style.width='90%';
+    formCard.style.boxShadow='0 4px 12px rgba(0, 0, 0, 0.15)';
+    formCard.style.color='#333';
+
+    // Título do formulário.
+    const titulo = document.createElement('h3');
+    titulo.textContent = `Retorno Manual - ${saida.nome_usuario}`;
+    titulo.style.margin='0 0 8px 0';
+    titulo.style.fontSize='18px';
+    titulo.style.fontWeight='700';
+
+    // Descrição.
+    const descricao = document.createElement('p');
+    descricao.textContent = 'O aluno foi embora? Registre aqui a data e hora em que retornou.';
+    descricao.style.margin='0 0 16px 0';
+    descricao.style.color='#666';
+    descricao.style.fontSize='14px';
+
+    // Label e input para DATA.
+    const labelData = document.createElement('label');
+    labelData.textContent = '📅 Data de Retorno';
+    labelData.style.display='block';
+    labelData.style.fontWeight='600';
+    labelData.style.marginTop='12px';
+    labelData.style.marginBottom='4px';
+    labelData.style.fontSize='14px';
+
+    const inputData = document.createElement('input');
+    inputData.type='date';
+    inputData.required=true;
+    inputData.style.width='100%';
+    inputData.style.padding='10px';
+    inputData.style.marginBottom='12px';
+    inputData.style.borderRadius='6px';
+    inputData.style.border='1px solid #ddd';
+    inputData.style.fontSize='14px';
+    inputData.style.boxSizing='border-box';
+    // Define a data padrão (hoje).
+    const hoje = new Date().toISOString().split('T')[0];
+    inputData.value = hoje;
+
+    // Label e input para HORA.
+    const labelHora = document.createElement('label');
+    labelHora.textContent = '🕐 Hora de Retorno';
+    labelHora.style.display='block';
+    labelHora.style.fontWeight='600';
+    labelHora.style.marginTop='12px';
+    labelHora.style.marginBottom='4px';
+    labelHora.style.fontSize='14px';
+
+    const inputHora = document.createElement('input');
+    inputHora.type='time';
+    inputHora.required=true;
+    inputHora.style.width='100%';
+    inputHora.style.padding='10px';
+    inputHora.style.marginBottom='16px';
+    inputHora.style.borderRadius='6px';
+    inputHora.style.border='1px solid #ddd';
+    inputHora.style.fontSize='14px';
+    inputHora.style.boxSizing='border-box';
+    // Define a hora padrão (hora atual).
+    const agora = new Date();
+    const horas = String(agora.getHours()).padStart(2, '0');
+    const minutos = String(agora.getMinutes()).padStart(2, '0');
+    inputHora.value = `${horas}:${minutos}`;
+
+    // Container para botões.
+    const botoes = document.createElement('div');
+    botoes.style.display='flex';
+    botoes.style.gap='8px';
+    botoes.style.marginTop='16px';
+
+    // Botão CANCELAR.
+    const btnCancelar = document.createElement('button');
+    btnCancelar.textContent='Cancelar';
+    btnCancelar.className='btn ghost';
+    btnCancelar.style.flex='1';
+    btnCancelar.style.padding='10px';
+    btnCancelar.style.cursor='pointer';
+    btnCancelar.onclick = function(){
+        document.body.removeChild(overlay);
+    };
+
+    // Botão CONFIRMAR.
+    const btnConfirmar = document.createElement('button');
+    btnConfirmar.textContent='✓ Registrar Retorno';
+    btnConfirmar.className='btn';
+    btnConfirmar.style.flex='1';
+    btnConfirmar.style.padding='10px';
+    btnConfirmar.style.backgroundColor='#51cf66';
+    btnConfirmar.style.color='white';
+    btnConfirmar.style.border='none';
+    btnConfirmar.style.borderRadius='6px';
+    btnConfirmar.style.cursor='pointer';
+    btnConfirmar.style.fontWeight='600';
+    btnConfirmar.onclick = async function(){
+        // Valida os campos.
+        if (!inputData.value || !inputHora.value){
+            alert('Preencha a data e a hora!');
+            return;
+        }
+
+        // Cria a string de data/hora no formato esperado.
+        const dataHora = `${inputData.value} ${inputHora.value}:00`;
+
+        // Registra o retorno manual.
+        await registrarRetornoManual(saida, dataHora);
+
+        // Fecha o formulário.
+        document.body.removeChild(overlay);
+
+        // Recarrega a lista.
+        await carregarSaidasPendentes();
+    };
+
+    // Monta o formulário.
+    botoes.appendChild(btnCancelar);
+    botoes.appendChild(btnConfirmar);
+
+    formCard.appendChild(titulo);
+    formCard.appendChild(descricao);
+    formCard.appendChild(labelData);
+    formCard.appendChild(inputData);
+    formCard.appendChild(labelHora);
+    formCard.appendChild(inputHora);
+    formCard.appendChild(botoes);
+
+    overlay.appendChild(formCard);
+    document.body.appendChild(overlay);
+}
+
+// Registra um retorno manual com data/hora customizada.
+// O aluno foi embora e retorna em outro horário.
+async function registrarRetornoManual(saida, dataHora){
+
+    try{
+        // Obtém usuário logado do localStorage para validação.
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+
+        // Cria o objeto de dados para enviar à API.
+        // retorno_manual = true indica que é um retorno com data customizada.
+        // data_retorno_customizada contém a data/hora fornecida pelo usuário.
+        const dados = {
+            id_saida: saida.id_saida,
+            id_usuario: saida.id_usuario,
+            observacoes: `Retorno manual registrado em ${new Date().toLocaleString('pt-BR')}`,
+            retorno_manual: true,  // Flag que indica retorno manual.
+            data_retorno_customizada: dataHora,  // Data/hora customizada.
+            id_usuario_logado: usuarioLogado.id_usuario || 0,
+            id_perfil_logado: usuarioLogado.id_perfil || 0
+        };
+
+        // Envia o retorno manual para a API.
+        const resp = await fetch(`${API_RETORNOS}/retornos/`, {
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body: JSON.stringify(dados)
+        });
+
+        if (resp.ok){
+            // Sucesso!
+            if (typeof showToast==='function')
+                showToast(`✓ ${saida.nome_usuario} retornou em ${dataHora}!`,'success');
+            else
+                alert(`${saida.nome_usuario} retornou em ${dataHora}!`);
+        }
+        else {
+            // Erro na API.
+            let e={detail:'Erro ao registrar retorno manual'};
+            try{ e = await resp.json(); }catch{}
+            throw new Error(e.detail || JSON.stringify(e));
+        }
+    }catch(err){
+        if (typeof showToast==='function')
+            showToast(err.message||'Erro ao registrar retorno manual','error');
         else
             alert(err.message);
     }

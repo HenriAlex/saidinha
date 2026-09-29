@@ -33,8 +33,9 @@ async function carregarSaidas(){
     try{
         // Envia o usuário logado: o Aluno recebe apenas as suas
         // próprias saídas; os demais perfis recebem todas.
+        // Carrega APENAS saídas pendentes (sem retorno) para esta tela
         const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
-        const resp = await fetch(`${API_SAIDAS}/saidas/?id_usuario_logado=${usuarioLogado.id_usuario || 0}&id_perfil_logado=${usuarioLogado.id_perfil || 0}`);
+        const resp = await fetch(`${API_SAIDAS}/saidas/pendentes/lista?id_usuario_logado=${usuarioLogado.id_usuario || 0}&id_perfil_logado=${usuarioLogado.id_perfil || 0}`);
         if (!resp.ok) throw new Error('Falha ao carregar saídas');
         const saidas = await resp.json();
 
@@ -111,6 +112,18 @@ async function carregarSaidas(){
     }
 }
 
+// Abre o formulário de saída inline (no topo da tela de saídas)
+function abrirFormularioSaida(){
+    showScreen('telaSaidas');
+    popularSelectUsuariosSaida().then(()=>{
+        const sel = document.getElementById('selectUsuarioSaida');
+        if (sel) sel.focus();
+    });
+    // Garante que o formulário inline seja usado
+    try{ document.getElementById('formSaidaInline').reset(); }catch(e){}
+    window.saidaEditId = null;
+}
+
 // ============================================================
 // REGISTRAR SAÍDA
 // ============================================================
@@ -149,7 +162,8 @@ async function registrarSaida(){
                 if (typeof showToast==='function')
                     showToast(res.mensagem||'Saída atualizada','success');
 
-                document.getElementById('formSaida').reset();
+                try{ document.getElementById('formSaida').reset(); }catch(e){}
+                try{ document.getElementById('formSaidaInline').reset(); }catch(e){}
                 window.saidaEditId = null;
                 await carregarSaidas();
                 showScreen('telaSaidas');
@@ -179,7 +193,8 @@ async function registrarSaida(){
             if (typeof showToast==='function')
                 showToast(res.mensagem||'Saída registrada','success');
 
-            document.getElementById('formSaida').reset();
+            try{ document.getElementById('formSaida').reset(); }catch(e){}
+            try{ document.getElementById('formSaidaInline').reset(); }catch(e){}
             await carregarSaidas();
             showScreen('telaSaidas');
         }
@@ -293,13 +308,16 @@ async function popularSelectUsuariosSaida(){
 // ============================================================
 
 function editarSaida(s){
+    // Prepara formulário inline para edição e abre a tela de saídas
     popularSelectUsuariosSaida().then(()=>{
-        try{
-            document.getElementById('selectUsuarioSaida').value = s.id_usuario;
-        }catch(e){}
+        try{ document.getElementById('selectUsuarioSaida').value = s.id_usuario; }catch(e){}
     });
 
-    document.getElementById('inputMotivoSaida').value = s.motivo || '';
+    // Preenche campos do formulário inline
+    const motivoEl = document.getElementById('inputMotivoSaida') || document.getElementById('inputMotivoSaida');
+    if (motivoEl) motivoEl.value = s.motivo || '';
     window.saidaEditId = s.id_saida;
-    showScreen('telaSaidaCadastro');
+    // Mostra tela e foca no formulário
+    showScreen('telaSaidas');
+    try{ window.scrollTo({ top: 0, behavior: 'smooth' }); }catch(e){}
 }

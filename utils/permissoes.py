@@ -16,12 +16,14 @@
 # 1 Aluno  Usuário    Todos                       Não   Sim   Não   Não
 # 1 Aluno  Saída      Somente do usuário logado   Sim   Sim   Não   Não
 # 1 Aluno  Retorno    Somente do usuário logado   Sim   Sim   Não   Não
+# 1 Aluno  Falta      Somente do usuário logado   Sim   Sim   Não   Não
 # 1 Aluno  Consulta   Todos                       Não   Sim   Não   Não
 #
 # 2 Prof.  Perfil     Todos                       Não   Sim   Não   Não
 # 2 Prof.  Usuário    Todos                       Não   Sim   Não   Não
 # 2 Prof.  Saída      Todos                       Sim   Sim   Não   Não
 # 2 Prof.  Retorno    Todos                       Sim   Sim   Não   Não
+# 2 Prof.  Falta      Todos                       Sim   Sim   Não   Não
 # 2 Prof.  Consulta   Todos                       Não   Sim   Não   Não
 #
 # 3 Equipe (mesmas permissões do Professor, perfil 2)
@@ -34,6 +36,11 @@
 #
 # - Saída e Retorno: qualquer pessoa logada pode Criar e Ver.
 #   O Aluno só pode Criar/Ver os SEUS PRÓPRIOS registros.
+#   Professor, Equipe de Apoio e Admin podem Criar/Ver de qualquer aluno.
+#   Só o admin pode Atualizar ou Eliminar.
+#
+# - Falta: qualquer pessoa logada pode Criar e Ver faltas.
+#   O Aluno só pode Criar/Ver as SUAS PRÓPRIAS faltas.
 #   Professor, Equipe de Apoio e Admin podem Criar/Ver de qualquer aluno.
 #   Só o admin pode Atualizar ou Eliminar.
 #
@@ -136,12 +143,25 @@ def pode_registrar_retorno(usuario_logado, id_usuario_alvo):
     return pode_registrar_saida(usuario_logado, id_usuario_alvo)
 
 
+def pode_registrar_falta(usuario_logado, id_usuario_alvo):
+    """
+    Verifica se o usuário logado pode registrar uma falta
+    para o usuário informado em "id_usuario_alvo".
+
+    A regra é idêntica à de registrar saída e retorno:
+    - Admin, Professor e Equipe de Apoio podem registrar
+      falta de qualquer aluno.
+    - Aluno só pode registrar a própria falta.
+    """
+    return pode_registrar_saida(usuario_logado, id_usuario_alvo)
+
+
 def pode_editar_ou_excluir(usuario_logado):
     """
     Verifica se o usuário logado pode Atualizar ou Eliminar
-    registros de Saída ou Retorno.
+    registros de Saída, Retorno ou Falta.
 
     Pela matriz de permissões, SÓ o admin pode fazer isso
-    (nenhum perfil comum tem "U" ou "D" em Saída/Retorno).
+    (nenhum perfil comum tem "U" ou "D" em Saída/Retorno/Falta).
     """
     return eh_admin(usuario_logado)

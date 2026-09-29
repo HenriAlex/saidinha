@@ -159,6 +159,48 @@ body{
   cursor:pointer;z-index:9998;
 }
 
+/* ============================================================
+   TELA DE CONSULTAS: filtro de período e ranking inverso
+   ============================================================ */
+
+/* Filtro de período (chips estilo segmented control) */
+.period-filter{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px}
+.period-filter button{
+  background:var(--surface);color:var(--text);border:1px solid var(--border);
+  padding:8px 16px;border-radius:999px;font-size:13px;font-weight:600;
+  cursor:pointer;transition:all .15s ease;
+}
+.period-filter button:hover{border-color:var(--primary);color:var(--primary)}
+.period-filter button.active{
+  background:linear-gradient(90deg,var(--primary),var(--primary-dark));
+  color:#fff;border-color:transparent;box-shadow:0 4px 12px rgba(59,130,246,.3);
+}
+
+/* Intervalo customizado (data inicial/final) */
+.period-filter-custom{
+  display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin-bottom:20px;
+  padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:10px;
+}
+.period-filter-custom label{font-size:13px;color:var(--muted)}
+.period-filter-custom input[type="date"]{
+  border:1px solid var(--border);border-radius:8px;padding:6px 8px;background:var(--bg);color:var(--text);
+}
+
+/* Cards do "pódio" do ranking inverso (alunos mais presentes) */
+.rank-inverse-card{
+  background:linear-gradient(135deg,#11998e,#38ef7d);color:#fff;
+  padding:18px;border-radius:12px;cursor:pointer;transition:transform .15s ease,box-shadow .15s ease;
+  box-shadow:0 4px 15px rgba(17,153,142,.25);
+}
+.rank-inverse-card:hover{transform:translateY(-3px);box-shadow:0 8px 22px rgba(17,153,142,.35)}
+
+/* Tabela auxiliar do ranking inverso (posições 4 em diante) */
+.rank-table{width:100%;border-collapse:collapse;background:var(--surface);border-radius:10px;overflow:hidden}
+.rank-table th{background:var(--bg);color:var(--muted);font-weight:600;border-bottom:2px solid var(--border)}
+.rank-table td{border-bottom:1px solid var(--border);color:var(--text)}
+.rank-row-clicavel{cursor:pointer;transition:background .15s ease}
+.rank-row-clicavel:hover{background:var(--bg)}
+
 /* Toasts (mensagens temporárias) */
 #toast-container{position:fixed;top:16px;right:16px;z-index:9999;display:flex;flex-direction:column;gap:8px}
 .toast{min-width:220px;padding:10px 12px;border-radius:8px;color:#fff;box-shadow:0 6px 20px rgba(2,6,23,.2);opacity:0;transform:translateY(-8px);animation:toast-in .25s forwards}

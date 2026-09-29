@@ -15,28 +15,95 @@ const API_RELATORIOS = typeof API_BASE !== 'undefined' ? API_BASE : 'http://127.
 // CARREGAR ESTATÍSTICAS GERAIS
 // ============================================================
 
-// Carrega estatísticas de todos os usuários
+// Guarda o filtro de período atualmente selecionado na tela de consultas.
+// Formato: { periodo, mes_atual, start_date, end_date, label }
+window.filtroConsultaAtual = window.filtroConsultaAtual || { periodo: 0, mes_atual: false, start_date: null, end_date: null, label: 'todos' };
+
+// Define os filtros fixos exibidos como chips (segmented control).
+const FILTROS_PERIODO = [
+    { label: 'todos', texto: '📋 Todo o período', periodo: 0, mes_atual: false },
+    { label: '7', texto: '📅 Últimos 7 dias', periodo: 7, mes_atual: false },
+    { label: '15', texto: '🗓️ Últimos 15 dias', periodo: 15, mes_atual: false },
+    { label: '30', texto: '📆 Últimos 30 dias', periodo: 30, mes_atual: false },
+    { label: 'mes', texto: '🈷️ Mês atual', periodo: 0, mes_atual: true },
+];
+
+// Aplica um filtro fixo (chamado pelos botões dos chips).
+function aplicarFiltroConsulta(label){
+    const filtro = FILTROS_PERIODO.find(f => f.label === label) || FILTROS_PERIODO[0];
+    window.filtroConsultaAtual = { periodo: filtro.periodo, mes_atual: filtro.mes_atual, start_date: null, end_date: null, label: filtro.label };
+    carregarEstatisticasGerais();
+}
+
+// Aplica um intervalo de datas customizado (inputs de data).
+function aplicarFiltroConsultaCustom(){
+    const s = document.getElementById('consultaStart').value;
+    const e = document.getElementById('consultaEnd').value;
+    if (!s){
+        if (typeof showToast === 'function') showToast('Informe ao menos a data inicial', 'error');
+        else alert('Informe ao menos a data inicial');
+        return;
+    }
+    window.filtroConsultaAtual = { periodo: 0, mes_atual: false, start_date: s, end_date: e || null, label: 'custom' };
+    carregarEstatisticasGerais();
+}
+
+// Monta a barra de chips de filtro por período, destacando o ativo.
+function renderFiltroPeriodoHTML(){
+    const atual = window.filtroConsultaAtual;
+    let chips = '<div class="period-filter">';
+    FILTROS_PERIODO.forEach(f => {
+        const ativo = atual.label === f.label ? ' active' : '';
+        chips += `<button type="button" class="${ativo.trim()}" onclick="aplicarFiltroConsulta('${f.label}')">${f.texto}</button>`;
+    });
+    chips += '</div>';
+
+    // Intervalo customizado (complementa os fixos, para quem precisa de algo específico).
+    chips += `
+        <div class="period-filter-custom">
+            <label for="consultaStart">De</label>
+            <input type="date" id="consultaStart" value="${atual.start_date || ''}">
+            <label for="consultaEnd">Até</label>
+            <input type="date" id="consultaEnd" value="${atual.end_date || ''}">
+            <button type="button" class="btn ghost" onclick="aplicarFiltroConsultaCustom()">Aplicar intervalo</button>
+        </div>
+    `;
+    return chips;
+}
+
+// Carrega estatísticas de todos os usuários, respeitando o filtro de período ativo.
 async function carregarEstatisticasGerais(){
 
     const container = document.getElementById('estatisticasContainer');
-    const tabela = document.getElementById('tabelaEstatisticas');
 
     if (container) {
         container.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">⏳ Carregando relatórios...</p>';
     }
 
     try{
+        // Monta a query string a partir do filtro de período selecionado.
+        const f = window.filtroConsultaAtual;
+        const params = new URLSearchParams();
+        if (f.periodo && f.periodo > 0) params.append('periodo', f.periodo);
+        if (f.mes_atual) params.append('mes_atual', 'true');
+        if (f.start_date) params.append('start_date', f.start_date);
+        if (f.end_date) params.append('end_date', f.end_date);
+
         // Busca estatísticas gerais da API.
         // Qualquer perfil logado pode ver o relatório geral (módulo Consulta).
-        const resp = await fetch(`${API_RELATORIOS}/relatorios/geral`);
+        const url = `${API_RELATORIOS}/relatorios/geral` + (Array.from(params).length ? ('?' + params.toString()) : '');
+        const resp = await fetch(url);
 
         if (!resp.ok) throw new Error('Falha ao carregar estatísticas');
 
         const dados = await resp.json();
 
+        // SEÇÃO 0: Filtro por período (chips + intervalo customizado)
+        let html = renderFiltroPeriodoHTML();
+
         // SEÇÃO 1: Cards com resumo geral
-        let html = `
-            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        html += `
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0 30px;">
 
                 <!-- Card 1: Total de Saídas -->
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
@@ -62,11 +129,18 @@ async function carregarEstatisticasGerais(){
             </div>
         `;
 
-        // SEÇÃO 2: Tabela de Ranking
+        // SEÇÃO 2: Tabela de Ranking (quem mais sai)
+        const comSaidas = dados.usuarios.filter(u => u.total_saidas > 0);
         html += `
             <h3 style="margin: 30px 0 20px 0; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px;">
                 🏆 Ranking de Alunos por Saídas
             </h3>
+        `;
+
+        if (comSaidas.length === 0){
+            html += `<p class="muted" style="padding: 16px 0;">Nenhuma saída registrada no período selecionado.</p>`;
+        } else {
+            html += `
             <table style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
                 <thead>
                     <tr style="background-color: #f5f5f5; border-bottom: 2px solid #ddd;">
@@ -78,39 +152,43 @@ async function carregarEstatisticasGerais(){
                     </tr>
                 </thead>
                 <tbody>
-        `;
+            `;
 
-        // Adiciona cada usuário na tabela (com ranking visual)
-        dados.usuarios.forEach((usuario, index) => {
-            const posicao = index + 1;
-            const medalha = posicao === 1 ? '🥇' : posicao === 2 ? '🥈' : posicao === 3 ? '🥉' : `#${posicao}`;
-            const corLinha = index % 2 === 0 ? '#fafafa' : 'white';
+            // Adiciona cada usuário na tabela (com ranking visual)
+            comSaidas.forEach((usuario, index) => {
+                const posicao = index + 1;
+                const medalha = posicao === 1 ? '🥇' : posicao === 2 ? '🥈' : posicao === 3 ? '🥉' : `#${posicao}`;
+                const corLinha = index % 2 === 0 ? '#fafafa' : 'white';
+
+                html += `
+                    <tr style="background-color: ${corLinha}; border-bottom: 1px solid #eee;" onclick="mostrarHistoricoUsuario(${usuario.id_usuario})" class="rank-row-clicavel">
+                        <td style="padding: 15px; font-weight: 600; font-size: 18px;">${medalha}</td>
+                        <td style="padding: 15px; color: #333;">${usuario.nome}</td>
+                        <td style="padding: 15px; text-align: center; color: #666; font-family: monospace;">${usuario.ra}</td>
+                        <td style="padding: 15px; text-align: center;">
+                            <span style="background: #e3f2fd; color: #1976d2; padding: 6px 12px; border-radius: 20px; font-weight: 600;">
+                                ${usuario.total_saidas}
+                            </span>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <span style="background: #ffebee; color: #d32f2f; padding: 6px 12px; border-radius: 20px; font-weight: 600;">
+                                ${usuario.tempo_formatado}
+                            </span>
+                        </td>
+                    </tr>
+                `;
+            });
 
             html += `
-                <tr style="background-color: ${corLinha}; border-bottom: 1px solid #eee; hover: {background-color: #f0f0f0;}">
-                    <td style="padding: 15px; font-weight: 600; font-size: 18px;">${medalha}</td>
-                    <td style="padding: 15px; color: #333;">${usuario.nome}</td>
-                    <td style="padding: 15px; text-align: center; color: #666; font-family: monospace;">${usuario.ra}</td>
-                    <td style="padding: 15px; text-align: center;">
-                        <span style="background: #e3f2fd; color: #1976d2; padding: 6px 12px; border-radius: 20px; font-weight: 600;">
-                            ${usuario.total_saidas}
-                        </span>
-                    </td>
-                    <td style="padding: 15px; text-align: center;">
-                        <span style="background: #ffebee; color: #d32f2f; padding: 6px 12px; border-radius: 20px; font-weight: 600;">
-                            ${usuario.tempo_formatado}
-                        </span>
-                    </td>
-                </tr>
-            `;
-        });
-
-        html += `
                 </tbody>
             </table>
-        `;
+            `;
+        }
 
-        // Seção 3: Botão para visualizar mais detalhes
+        // SEÇÃO 3: Ranking Inverso (quem menos sai / mais presentes)
+        html += renderRankingInversoHTML(dados.ranking_inverso || []);
+
+        // Seção 4: Dica de uso
         html += `
             <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; text-align: center;">
                 <p style="color: #666; margin: 0;">
@@ -131,11 +209,81 @@ async function carregarEstatisticasGerais(){
 }
 
 // ============================================================
+// RANKING INVERSO — ALUNOS QUE MENOS SAEM (MAIS PRESENTES)
+// ============================================================
+
+// Monta o HTML da seção de "ranking inverso": destaca os alunos com
+// menor número de saídas no período, valorizando a assiduidade.
+function renderRankingInversoHTML(rankingInverso){
+    if (!rankingInverso || rankingInverso.length === 0) return '';
+
+    // Mostra um "pódio" com os 3 alunos mais presentes + lista dos demais.
+    const top3 = rankingInverso.slice(0, 3);
+    const resto = rankingInverso.slice(3, 10); // limita a lista para não poluir a tela
+
+    const icones = ['🛡️', '🥈', '🥉'];
+    const rotulos = ['Mais presente', '2º mais presente', '3º mais presente'];
+
+    let html = `
+        <h3 style="margin: 30px 0 20px 0; color: #333; border-bottom: 2px solid #11998e; padding-bottom: 10px;">
+            🌟 Ranking Inverso — Quem Mais Marca Presença
+        </h3>
+        <p class="muted" style="margin-bottom: 16px;">Reconhecimento para os alunos com menos saídas no período selecionado.</p>
+
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; margin-bottom: 20px;">
+    `;
+
+    top3.forEach((u, i) => {
+        html += `
+            <div class="rank-inverse-card" onclick="mostrarHistoricoUsuario(${u.id_usuario})">
+                <div style="font-size: 28px;">${icones[i]}</div>
+                <div style="font-weight: 700; font-size: 17px; margin-top: 6px;">${u.nome}</div>
+                <div style="font-size: 12px; opacity: .9;">${rotulos[i]}</div>
+                <div style="margin-top: 10px; font-size: 13px;">RA: ${u.ra}</div>
+                <div style="margin-top: 4px; font-size: 22px; font-weight: 700;">${u.total_saidas} <span style="font-size:12px;font-weight:400;">saídas</span></div>
+            </div>
+        `;
+    });
+
+    html += `</div>`;
+
+    if (resto.length > 0){
+        html += `
+            <table class="rank-table" style="width: 100%; border-collapse: collapse; margin-bottom: 30px;">
+                <thead>
+                    <tr>
+                        <th style="padding: 10px; text-align: left;">Nome</th>
+                        <th style="padding: 10px; text-align: center;">RA</th>
+                        <th style="padding: 10px; text-align: center;">Saídas</th>
+                    </tr>
+                </thead>
+                <tbody>
+        `;
+        resto.forEach(u => {
+            html += `
+                <tr class="rank-row-clicavel" onclick="mostrarHistoricoUsuario(${u.id_usuario})">
+                    <td style="padding: 10px;">${u.nome}</td>
+                    <td style="padding: 10px; text-align: center; font-family: monospace;">${u.ra}</td>
+                    <td style="padding: 10px; text-align: center;">${u.total_saidas}</td>
+                </tr>
+            `;
+        });
+        html += `
+                </tbody>
+            </table>
+        `;
+    }
+
+    return html;
+}
+
+// ============================================================
 // CARREGAR HISTÓRICO DE UM USUÁRIO
 // ============================================================
 
 // Mostra histórico detalhado de um aluno específico
-async function mostrarHistoricoUsuario(id_usuario){
+// agora permite filtros de período: periodo (dias), mes_atual, ou intervalo start_date/end_date (YYYY-MM-DD)
+async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = null, end_date = null, mes_atual = false){
 
     const container = document.getElementById('historicoContainer');
 
@@ -145,18 +293,45 @@ async function mostrarHistoricoUsuario(id_usuario){
     }
 
     try{
-        // Qualquer perfil logado pode ver o histórico de qualquer aluno
-        // (módulo Consulta é de leitura livre para todos os perfis).
-        const resp = await fetch(`${API_RELATORIOS}/relatorios/historico/${id_usuario}`);
+        // Constrói query string conforme filtros
+        const params = new URLSearchParams();
+        if (periodo && periodo > 0) params.append('periodo', periodo);
+        if (mes_atual) params.append('mes_atual', 'true');
+        if (start_date) params.append('start_date', start_date);
+        if (end_date) params.append('end_date', end_date);
+
+        const url = `${API_RELATORIOS}/relatorios/historico/${id_usuario}` + (Array.from(params).length ? ('?' + params.toString()) : '');
+
+        const resp = await fetch(url);
 
         if (!resp.ok) throw new Error('Falha ao carregar histórico');
 
         const dados = await resp.json();
 
+        // Header com controles de filtro
         let html = `
-            <div style="margin-bottom: 30px;">
-                <h2 style="color: #333; margin: 0 0 10px 0;">📋 Histórico de ${dados.nome_usuario}</h2>
-                <p style="color: #666; margin: 0;">RA: <strong>${dados.ra_usuario}</strong> | Total: <strong>${dados.total_registros}</strong> saídas</p>
+            <div style="margin-bottom: 12px; display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <div>
+                        <h2 style="color: #333; margin: 0 0 6px 0;">📋 Histórico de ${dados.nome_usuario}</h2>
+                        <div style="color:#666;">RA: <strong>${dados.ra_usuario}</strong> | Total: <strong>${dados.total_registros}</strong> saídas</div>
+                    </div>
+                    <div style="display:flex;gap:8px;align-items:center;">
+                        <button class="btn" onclick="mostrarHistoricoUsuario(${id_usuario},7)">Últimos 7 dias</button>
+                        <button class="btn" onclick="mostrarHistoricoUsuario(${id_usuario},15)">Últimos 15 dias</button>
+                        <button class="btn" onclick="mostrarHistoricoUsuario(${id_usuario},30)">Últimos 30 dias</button>
+                        <button class="btn" onclick="mostrarHistoricoUsuario(${id_usuario},0,null,null,true)">Mês atual</button>
+                    </div>
+                </div>
+
+                <div style="display:flex;gap:8px;align-items:center;">
+                    <label style="font-size:13px;color:#666;">De</label>
+                    <input type="date" id="histStart" />
+                    <label style="font-size:13px;color:#666;">Até</label>
+                    <input type="date" id="histEnd" />
+                    <button class="btn" onclick="(function(){ const s=document.getElementById('histStart').value; const e=document.getElementById('histEnd').value; if(!s) return alert('Informe a data inicial'); mostrarHistoricoUsuario(${id_usuario},0,s,e,false); })()">Aplicar</button>
+                    <button class="btn ghost" onclick="voltarParaEstatisticas()">Fechar</button>
+                </div>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 15px;">
@@ -193,15 +368,15 @@ async function mostrarHistoricoUsuario(id_usuario){
 
         html += `
             </div>
-            <div style="margin-top: 20px; text-align: center;">
-                <button onclick="voltarParaEstatisticas()" style="background: #667eea; color: white; border: none; padding: 12px 30px; border-radius: 6px; cursor: pointer; font-size: 14px; font-weight: 600;">
-                    ← Voltar para Estatísticas
-                </button>
-            </div>
         `;
 
         if (container) {
             container.innerHTML = html;
+            // Se existirem inputs de data, preenche com valores do filtro atual
+            try{
+                if (start_date) document.getElementById('histStart').value = start_date;
+                if (end_date) document.getElementById('histEnd').value = end_date;
+            }catch(e){}
         }
 
     }catch(err){
