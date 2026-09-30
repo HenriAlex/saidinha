@@ -294,18 +294,73 @@
                     </div>
                 </section>
 
-                <!-- Tela: Consultas e Relatórios -->
+                <!-- Tela: Consultas e Relatórios (Dashboard Unificado) -->
                 <section class="card" id="telaConsultas" style="display:none;">
-                    <div style="margin-bottom: 20px;">
-                        <h2>📊 Relatórios e Estatísticas</h2>
-                        <p class="muted">Análise completa de saídas e permanência fora</p>
+                    <div style="margin-bottom: 24px;">
+                        <h2>📊 Dashboard de Consultas</h2>
+                        <p class="muted">Análise completa de desempenho e frequência dos alunos</p>
                     </div>
 
-                    <!-- Container de estatísticas gerais -->
-                    <div id="estatisticasContainer" aria-live="polite"></div>
+                    <!-- Abas de Navegação -->
+                    <div style="display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; border-bottom: 2px solid #e6e9f0; padding-bottom: 0;">
+                        <button class="tab-btn active" onclick="mudarAbaConsulta('saidas')" data-tab="saidas" style="padding: 12px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: #3b82f6; border-bottom: 3px solid #3b82f6; font-size: 15px;">
+                            📤 Saídas
+                        </button>
+                        <button class="tab-btn" onclick="mudarAbaConsulta('faltas')" data-tab="faltas" style="padding: 12px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: #6b7280; border-bottom: 3px solid transparent; font-size: 15px;">
+                            ❌ Faltas
+                        </button>
+                        <button class="tab-btn" onclick="mudarAbaConsulta('pontos')" data-tab="pontos" style="padding: 12px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: #6b7280; border-bottom: 3px solid transparent; font-size: 15px;">
+                            ⭐ Pontos
+                        </button>
+                        <button class="tab-btn" onclick="mudarAbaConsulta('geral')" data-tab="geral" style="padding: 12px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: #6b7280; border-bottom: 3px solid transparent; font-size: 15px;">
+                            🏆 Ranking Geral
+                        </button>
+                    </div>
 
-                    <!-- Container de histórico individual (inicialmente oculto) -->
-                    <div id="historicoContainer" style="display: none;" aria-live="polite"></div>
+                    <!-- Conteúdo das Abas -->
+                    <div id="abasSaidase" class="aba-consulta" style="display: block;">
+                        <div id="saidasContainer" aria-live="polite"></div>
+                    </div>
+
+                    <div id="abasFaltas" class="aba-consulta" style="display: none;">
+                        <div style="margin-bottom: 16px; background: #f8f9fa; padding: 12px; border-radius: 8px;">
+                            <label for="filtroDataFaltas" style="font-weight: 600; margin-right: 10px;">📅 Filtrar por período:</label>
+                            <select id="filtroDataFaltas" onchange="carregarFaltasComFiltro()" style="padding: 8px 12px; border: 1px solid #e6e9f0; border-radius: 6px; font-size: 14px;">
+                                <option value="">Todas as datas</option>
+                                <option value="7">Últimos 7 dias</option>
+                                <option value="15">Últimos 15 dias</option>
+                                <option value="30">Últimos 30 dias</option>
+                            </select>
+                        </div>
+                        <div id="faltasConsultaContainer" aria-live="polite"></div>
+                    </div>
+
+                    <div id="abasPontos" class="aba-consulta" style="display: none;">
+                        <div style="margin-bottom: 16px; background: #f8f9fa; padding: 12px; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
+                            <div>
+                                <label for="filtroBimestreConsultaMain" style="font-weight: 600; display: block; margin-bottom: 6px;">📊 Bimestre:</label>
+                                <select id="filtroBimestreConsultaMain" onchange="carregarPontosComFiltro()" style="padding: 8px 12px; border: 1px solid #e6e9f0; border-radius: 6px; font-size: 14px; width: 100%;">
+                                    <option value="">Todos os bimestres</option>
+                                    <option value="1">1º Bimestre</option>
+                                    <option value="2">2º Bimestre</option>
+                                    <option value="3">3º Bimestre</option>
+                                    <option value="4">4º Bimestre</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="filtroDisciplinaConsultaMain" style="font-weight: 600; display: block; margin-bottom: 6px;">📚 Disciplina:</label>
+                                <select id="filtroDisciplinaConsultaMain" onchange="carregarPontosComFiltro()" style="padding: 8px 12px; border: 1px solid #e6e9f0; border-radius: 6px; font-size: 14px; width: 100%;"></select>
+                            </div>
+                        </div>
+                        <div id="pontosConsultaContainer" aria-live="polite"></div>
+                    </div>
+
+                    <div id="abasGeral" class="aba-consulta" style="display: none;">
+                        <div style="margin-bottom: 16px; text-align: center;">
+                            <p class="muted" style="margin: 0; font-size: 14px;">🎯 Alunos com melhor desempenho: Menos faltas + Mais atividades + Menos saídas</p>
+                        </div>
+                        <div id="rankingGeralContainer" aria-live="polite"></div>
+                    </div>
 
                     <div class="list-footer">
                         <button class="btn ghost" onclick="showScreen('bemVindo')" style="width: 100%;">← Voltar ao início</button>
@@ -454,6 +509,7 @@
     <script src="js/disciplina.js"></script>
     <script src="js/atividade.js"></script>
     <script src="js/pontos.js"></script>
+    <script src="js/dashboard.js"></script>
 
     <!-- Tela: Login (modal de nível superior) -->
     <section class="card" id="telaLogin" style="display:none;">

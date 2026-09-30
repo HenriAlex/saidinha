@@ -114,10 +114,9 @@ function showScreen(screen) {
         if (typeof carregarFaltas === 'function') carregarFaltas();
         if (typeof popularSelectUsuariosFalta === 'function') popularSelectUsuariosFalta();
     }
-    // Ao exibir consultas, inicializa o filtro padrão de hoje e carrega os relatórios.
+    // Ao exibir consultas, carrega o dashboard
     if (screen === 'telaConsultas') {
-        if (typeof inicializarConsultaPadrao === 'function') inicializarConsultaPadrao();
-        if (typeof carregarEstatisticasGerais === 'function') carregarEstatisticasGerais();
+        if (typeof carregarSaidasDashboard === 'function') carregarSaidasDashboard();
     }
     // Ao exibir disciplinas, carrega as disciplinas.
     if (screen === 'telaDisciplinas') {
