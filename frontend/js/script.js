@@ -39,6 +39,8 @@ function init() {
     if (typeof carregarDisciplinas === 'function') carregarDisciplinas();
     // Carrega atividades em segundo plano
     if (typeof carregarAtividades === 'function') carregarAtividades();
+    // Carrega selects de atividades em segundo plano
+    if (typeof carregarSelectsAtividade === 'function') carregarSelectsAtividade();
 }
 
 // Vincula inicialização ao evento de carregamento.

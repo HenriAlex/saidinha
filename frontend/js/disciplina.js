@@ -92,15 +92,14 @@ async function registrarDisciplina() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
-                descricao: descricao,
-                id_usuario_logado: obterIdUsuarioLogado(),
-                id_perfil_logado: obterIdPerfilLogado()
+                descricao: descricao
             })
         });
 
+        const dados = await resposta.json();
+
         if (!resposta.ok) {
-            const erro = await resposta.json();
-            throw new Error(erro.detail || 'Erro ao registrar disciplina');
+            throw new Error(dados.detail || 'Erro ao registrar disciplina');
         }
 
         showToast('✓ Disciplina registrada com sucesso!', 'success');

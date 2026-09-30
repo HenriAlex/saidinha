@@ -98,36 +98,44 @@ async function carregarAtividades() {
 
 async function carregarSelectsAtividade() {
     try {
-        const [respUsers, respDiscipl] = await Promise.all([
-            fetch(`${API_BASE}/usuarios/`),
-            fetch(`${API_BASE}/disciplinas/`)
-        ]);
-
+        // Carregar usuários
+        const respUsers = await fetch(`${API_BASE}/usuarios/`);
         if (respUsers.ok) {
             const usuarios = await respUsers.json();
             const selectUser = document.getElementById('selectUsuarioAtividade');
-            selectUser.innerHTML = '<option value="">Selecione o aluno</option>';
-            usuarios.forEach(u => {
-                const opt = document.createElement('option');
-                opt.value = u.id_usuario;
-                opt.textContent = u.nome;
-                selectUser.appendChild(opt);
-            });
+            if (selectUser) {
+                selectUser.innerHTML = '<option value="">Selecione o aluno</option>';
+                usuarios.forEach(u => {
+                    const opt = document.createElement('option');
+                    opt.value = u.id_usuario;
+                    opt.textContent = u.nome;
+                    selectUser.appendChild(opt);
+                });
+            }
+        } else {
+            console.error('Erro ao carregar usuários:', respUsers.status);
         }
 
+        // Carregar disciplinas
+        const respDiscipl = await fetch(`${API_BASE}/disciplinas/`);
         if (respDiscipl.ok) {
             const disciplinas = await respDiscipl.json();
             const selectDisc = document.getElementById('selectDisciplinaAtividade');
-            selectDisc.innerHTML = '<option value="">Selecione a disciplina</option>';
-            disciplinas.forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d.id_disciplina;
-                opt.textContent = d.descricao;
-                selectDisc.appendChild(opt);
-            });
+            if (selectDisc) {
+                selectDisc.innerHTML = '<option value="">Selecione a disciplina</option>';
+                disciplinas.forEach(d => {
+                    const opt = document.createElement('option');
+                    opt.value = d.id_disciplina;
+                    opt.textContent = d.descricao;
+                    selectDisc.appendChild(opt);
+                });
+            }
+        } else {
+            console.error('Erro ao carregar disciplinas:', respDiscipl.status);
         }
     } catch (erro) {
         console.error('Erro ao carregar selects:', erro);
+        showToast('Erro ao carregar dados dos selects', 'error');
     }
 }
 
