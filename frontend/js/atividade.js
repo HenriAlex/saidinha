@@ -98,7 +98,6 @@ function preencherDataHojeEBimestre() {
     const dataInput = document.getElementById('inputDataAtividade');
     const bimestreSelect = document.getElementById('selectBimestreAtividade');
 
-    // Preencher data com hoje
     if (dataInput) {
         const hoje = new Date();
         const ano = hoje.getFullYear();
@@ -107,7 +106,6 @@ function preencherDataHojeEBimestre() {
         dataInput.value = `${ano}-${mes}-${dia}`;
     }
 
-    // Fixar bimestre em 4
     if (bimestreSelect) {
         bimestreSelect.value = '4';
     }
@@ -115,7 +113,6 @@ function preencherDataHojeEBimestre() {
 
 async function carregarSelectsAtividade() {
     try {
-        // Carregar usuários
         const respUsers = await fetch(`${API_BASE}/usuarios/`);
         if (respUsers.ok) {
             const usuarios = await respUsers.json();
@@ -133,7 +130,6 @@ async function carregarSelectsAtividade() {
             console.error('Erro ao carregar usuários:', respUsers.status);
         }
 
-        // Carregar disciplinas
         const respDiscipl = await fetch(`${API_BASE}/disciplinas/`);
         if (respDiscipl.ok) {
             const disciplinas = await respDiscipl.json();
@@ -151,7 +147,6 @@ async function carregarSelectsAtividade() {
             console.error('Erro ao carregar disciplinas:', respDiscipl.status);
         }
 
-        // Preencher data e bimestre após carregar
         preencherDataHojeEBimestre();
     } catch (erro) {
         console.error('Erro ao carregar selects:', erro);
@@ -182,9 +177,7 @@ async function registrarAtividade() {
                 data_atividade: dataAtividade,
                 bimestre: parseInt(bimestre),
                 pontos: parseFloat(pontos),
-                descricao: descricao,
-                id_usuario_logado: obterIdUsuarioLogado(),
-                id_perfil_logado: obterIdPerfilLogado()
+                descricao: descricao
             })
         });
 
@@ -195,6 +188,7 @@ async function registrarAtividade() {
 
         showToast('✓ Atividade registrada com sucesso!', 'success');
         document.getElementById('formAtividadeInline').reset();
+        preencherDataHojeEBimestre();
         carregarAtividades();
 
     } catch (erro) {
