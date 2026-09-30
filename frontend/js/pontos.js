@@ -37,7 +37,7 @@ async function carregarConsultaPontos() {
         const resposta = await fetch(url);
 
         if (!resposta.ok) throw new Error('Erro ao carregar atividades');
-        const atividades = await resposta.json();
+        let atividades = await resposta.json();
 
         if (idDisciplina) {
             atividades = atividades.filter(a => a.id_disciplina === parseInt(idDisciplina));
