@@ -138,6 +138,55 @@ class CriarBanco:
 
         """)
 
+        # Cria a tabela DISCIPLINA caso ela ainda não exista.
+        # Esta tabela armazena as disciplinas/matérias do curso.
+        cursor.execute("""
+
+        CREATE TABLE IF NOT EXISTS disciplina (
+
+            id_disciplina INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            descricao TEXT NOT NULL,
+
+            data_cadastro TEXT NOT NULL
+
+        )
+
+        """)
+
+        # Cria a tabela ATIVIDADE caso ela ainda não exista.
+        # Esta tabela armazena as atividades avaliativas com pontuação
+        # para cada aluno, disciplina e bimestre.
+        cursor.execute("""
+
+        CREATE TABLE IF NOT EXISTS atividade (
+
+            id_atividade INTEGER PRIMARY KEY AUTOINCREMENT,
+
+            id_usuario INTEGER NOT NULL,
+
+            id_disciplina INTEGER NOT NULL,
+
+            data_atividade TEXT NOT NULL,
+
+            bimestre INTEGER NOT NULL,
+
+            pontos REAL NOT NULL,
+
+            descricao TEXT,
+
+            data_cadastro TEXT NOT NULL,
+
+            FOREIGN KEY(id_usuario)
+                REFERENCES usuario(id_usuario),
+
+            FOREIGN KEY(id_disciplina)
+                REFERENCES disciplina(id_disciplina)
+
+        )
+
+        """)
+
         # ============================================================
         # INSERIR PERFIS PADRÕES
         # ============================================================

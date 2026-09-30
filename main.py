@@ -24,6 +24,12 @@ from controllers.falta_controller import router as falta_router
 # Importa o Controller de relatórios.
 from controllers.relatorio_controller import router as relatorio_router
 
+# Importa o Controller de disciplinas.
+from controllers.disciplina_controller import router as disciplina_router
+
+# Importa o Controller de atividades.
+from controllers.atividade_controller import router as atividade_router
+
 # Importa o middleware responsável pelo CORS.
 from fastapi.middleware.cors import CORSMiddleware
 
@@ -63,6 +69,16 @@ app.include_router(falta_router)
 # Adiciona as rotas de relatórios/estatísticas
 # à aplicação principal.
 app.include_router(relatorio_router)
+
+
+# Adiciona as rotas relacionadas às disciplinas
+# à aplicação principal.
+app.include_router(disciplina_router)
+
+
+# Adiciona as rotas relacionadas às atividades
+# à aplicação principal.
+app.include_router(atividade_router)
 
 
 # Cria uma rota simples para verificar

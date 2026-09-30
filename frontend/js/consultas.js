@@ -11,16 +11,34 @@
 
 const API_RELATORIOS = typeof API_BASE !== 'undefined' ? API_BASE : 'http://127.0.0.1:8000';
 
+function obterDataHojeLocal(){
+    const agora = new Date();
+    const ano = agora.getFullYear();
+    const mes = String(agora.getMonth() + 1).padStart(2, '0');
+    const dia = String(agora.getDate()).padStart(2, '0');
+    return `${ano}-${mes}-${dia}`;
+}
+
+function criarFiltroHoje(){
+    const hoje = obterDataHojeLocal();
+    return { periodo: 0, mes_atual: false, start_date: hoje, end_date: hoje, label: 'hoje' };
+}
+
+function inicializarConsultaPadrao(){
+    window.filtroConsultaAtual = criarFiltroHoje();
+}
+
 // ============================================================
 // CARREGAR ESTATÍSTICAS GERAIS
 // ============================================================
 
 // Guarda o filtro de período atualmente selecionado na tela de consultas.
 // Formato: { periodo, mes_atual, start_date, end_date, label }
-window.filtroConsultaAtual = window.filtroConsultaAtual || { periodo: 0, mes_atual: false, start_date: null, end_date: null, label: 'todos' };
+window.filtroConsultaAtual = window.filtroConsultaAtual || criarFiltroHoje();
 
 // Define os filtros fixos exibidos como chips (segmented control).
 const FILTROS_PERIODO = [
+    { label: 'hoje', texto: '📍 Hoje', periodo: 0, mes_atual: false },
     { label: 'todos', texto: '📋 Todo o período', periodo: 0, mes_atual: false },
     { label: '7', texto: '📅 Últimos 7 dias', periodo: 7, mes_atual: false },
     { label: '15', texto: '🗓️ Últimos 15 dias', periodo: 15, mes_atual: false },
@@ -30,8 +48,12 @@ const FILTROS_PERIODO = [
 
 // Aplica um filtro fixo (chamado pelos botões dos chips).
 function aplicarFiltroConsulta(label){
-    const filtro = FILTROS_PERIODO.find(f => f.label === label) || FILTROS_PERIODO[0];
-    window.filtroConsultaAtual = { periodo: filtro.periodo, mes_atual: filtro.mes_atual, start_date: null, end_date: null, label: filtro.label };
+    if (label === 'hoje') {
+        window.filtroConsultaAtual = criarFiltroHoje();
+    } else {
+        const filtro = FILTROS_PERIODO.find(f => f.label === label) || FILTROS_PERIODO[1];
+        window.filtroConsultaAtual = { periodo: filtro.periodo, mes_atual: filtro.mes_atual, start_date: null, end_date: null, label: filtro.label };
+    }
     carregarEstatisticasGerais();
 }
 
@@ -403,5 +425,4 @@ function voltarParaEstatisticas(){
 // Carrega estatísticas quando abre a página de consultas
 function abrirConsultas(){
     showScreen('telaConsultas');
-    carregarEstatisticasGerais();
 }

@@ -16,8 +16,6 @@ function parseDataLocal(dataString) {
     const [ano, mes, dia] = dataString.split('-').map(Number);
     return new Date(ano, mes - 1, dia);
 }
-   - Atualizar ou excluir faltas (apenas admin)
-*/
 
 // URL base da API (importada de script.js)
 const API_FALTAS = typeof API_BASE !== 'undefined' ? API_BASE : 'http://127.0.0.1:8000';
@@ -650,8 +648,15 @@ async function popularSelectUsuariosFalta(){
     try{
         // Busca a lista de usuários da API.
         const r = await fetch(`${API_FALTAS}/usuarios/`);
-        if (!r.ok) return;
+        if (!r.ok) throw new Error('Falha ao carregar a lista de alunos');
         let usuarios = await r.json();
+
+        if (!Array.isArray(usuarios)) {
+            throw new Error('Resposta inválida ao carregar a lista de alunos');
+        }
+
+        // Para faltas, só faz sentido exibir usuários que são alunos.
+        usuarios = usuarios.filter(u => u.id_perfil === 1 || (u.ds_perfil || '').toLowerCase() === 'aluno');
 
         // Se for aluno, filtra para mostrar apenas ele mesmo.
         if (ehAluno) {
@@ -673,8 +678,15 @@ async function popularSelectUsuariosFalta(){
         // Seleciona o primeiro usuário por padrão.
         if (usuarios && usuarios.length > 0)
             sel.value = usuarios[0].id_usuario;
+        else
+            sel.innerHTML = '<option value="">Nenhum aluno disponível</option>';
     }catch(e){
-        // Silenciosamente falha se a API não está disponível.
+        sel.innerHTML = '<option value="">Erro ao carregar alunos</option>';
+        sel.disabled = true;
+        if (typeof showToast==='function')
+            showToast(e.message || 'Erro ao carregar alunos','error');
+        else
+            alert(e.message || 'Erro ao carregar alunos');
     }
 }
 

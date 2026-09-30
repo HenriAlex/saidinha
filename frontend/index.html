@@ -59,6 +59,21 @@
                 <span>Consultas</span>
             </button>
 
+            <button class="nav-item" data-screen="telaDisciplinas" onclick="showScreen('telaDisciplinas')" title="Disciplinas">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
+                <span>Disciplinas</span>
+            </button>
+
+            <button class="nav-item" data-screen="telaAtividades" onclick="showScreen('telaAtividades')" title="Atividades">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M7 5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2H7zm0 12l4-5 3 4 3-4v5H7z"/></svg>
+                <span>Atividades</span>
+            </button>
+
+            <button class="nav-item" data-screen="telaConsultaPontos" onclick="showScreen('telaConsultaPontos')" title="Pontos">
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
+                <span>Pontos</span>
+            </button>
+
             <!-- Alternância de tema (claro/escuro), persistida no navegador -->
             <button class="nav-item nav-item--bottom" onclick="toggleTheme()" title="Alternar tema" id="theme-toggle">
                 <svg viewBox="0 0 24 24" width="20" height="20"><path fill="currentColor" d="M12 3a9 9 0 109 9c0-.46-.04-.92-.1-1.36a5.389 5.389 0 01-4.4 2.26 5.403 5.403 0 01-5.4-5.4c0-1.68.72-3.19 1.86-4.24C12.92 3.04 12.46 3 12 3z"/></svg>
@@ -296,6 +311,116 @@
                         <button class="btn ghost" onclick="showScreen('bemVindo')" style="width: 100%;">← Voltar ao início</button>
                     </div>
                 </section>
+
+                <!-- Tela: Disciplinas -->
+                <section class="card" id="telaDisciplinas" style="display:none;">
+                    <div class="profiles-toolbar">
+                        <h2>📚 Disciplinas cadastradas</h2>
+                        <div class="profiles-count muted" id="disciplinasCount">-- disciplinas</div>
+                    </div>
+
+                    <div style="margin-bottom:16px;">
+                        <h3 style="margin:0 0 8px 0;">Registrar Disciplina</h3>
+                        <form id="formDisciplinaInline" onsubmit="event.preventDefault(); registrarDisciplina(); return false;" style="background:#fff;padding:12px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                            <label for="inputDescricaoDisciplina">📖 Descrição da Disciplina</label>
+                            <input type="text" id="inputDescricaoDisciplina" placeholder="Ex: Matemática, Português, História" required style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;">
+
+                            <div class="form-actions" style="display:flex;gap:8px;">
+                                <button class="btn btn--primary" type="submit" style="flex:1;">✓ Registrar Disciplina</button>
+                                <button class="btn ghost" type="button" onclick="document.getElementById('formDisciplinaInline').reset();" style="flex:1;">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="disciplinasGrid" class="profiles-grid" aria-live="polite"></div>
+
+                    <div class="list-footer">
+                        <button class="btn ghost" onclick="showScreen('bemVindo')" style="width: 100%;">← Voltar ao início</button>
+                    </div>
+                </section>
+
+                <!-- Tela: Atividades -->
+                <section class="card" id="telaAtividades" style="display:none;">
+                    <div class="profiles-toolbar">
+                        <h2>📋 Cadastro de Atividades</h2>
+                        <div class="profiles-count muted" id="atividadesCount">-- atividades</div>
+                    </div>
+
+                    <div style="margin-bottom:16px;">
+                        <h3 style="margin:0 0 8px 0;">Registrar Atividade</h3>
+                        <form id="formAtividadeInline" onsubmit="event.preventDefault(); registrarAtividade(); return false;" style="background:#fff;padding:12px;border-radius:8px;box-shadow:0 1px 3px rgba(0,0,0,0.04);">
+                            <label for="selectUsuarioAtividade">👤 Selecione o Aluno</label>
+                            <select id="selectUsuarioAtividade" required style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;"></select>
+
+                            <label for="selectDisciplinaAtividade">📚 Selecione a Disciplina</label>
+                            <select id="selectDisciplinaAtividade" required style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;"></select>
+
+                            <label for="inputDataAtividade">📅 Data da Atividade</label>
+                            <input type="date" id="inputDataAtividade" required style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;">
+
+                            <label for="selectBimestreAtividade">📊 Bimestre</label>
+                            <select id="selectBimestreAtividade" required style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;">
+                                <option value="">Selecione o bimestre</option>
+                                <option value="1">1º Bimestre</option>
+                                <option value="2">2º Bimestre</option>
+                                <option value="3">3º Bimestre</option>
+                                <option value="4">4º Bimestre</option>
+                            </select>
+
+                            <label for="inputPontosAtividade">⭐ Pontos</label>
+                            <input type="number" id="inputPontosAtividade" placeholder="Ex: 10" step="0.5" min="0" required style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;">
+
+                            <label for="inputDescricaoAtividade">📝 Descrição (opcional)</label>
+                            <input type="text" id="inputDescricaoAtividade" placeholder="Ex: Prova, Trabalho, Apresentação" style="font-size: 16px; padding: 10px; width:100%; margin-bottom:8px;">
+
+                            <div class="form-actions" style="display:flex;gap:8px;">
+                                <button class="btn btn--primary" type="submit" style="flex:1;">✓ Registrar Atividade</button>
+                                <button class="btn ghost" type="button" onclick="document.getElementById('formAtividadeInline').reset();" style="flex:1;">Cancelar</button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div id="atividadesGrid" class="profiles-grid" aria-live="polite"></div>
+
+                    <div class="list-footer">
+                        <button class="btn ghost" onclick="showScreen('bemVindo')" style="width: 100%;">← Voltar ao início</button>
+                    </div>
+                </section>
+
+                <!-- Tela: Consulta de Pontos -->
+                <section class="card" id="telaConsultaPontos" style="display:none;">
+                    <div style="margin-bottom: 20px;">
+                        <h2>🎯 Consulta de Pontos por Disciplina</h2>
+                        <p class="muted">Visualize os pontos de cada aluno por disciplina e bimestre</p>
+                    </div>
+
+                    <div style="margin-bottom:20px;background:#f8f9fa;padding:16px;border-radius:8px;">
+                        <h3 style="margin:0 0 12px 0;">Filtros</h3>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+                            <div>
+                                <label for="selectBimestreConsulta">📊 Bimestre</label>
+                                <select id="selectBimestreConsulta" style="font-size: 16px; padding: 10px; width:100%;">
+                                    <option value="">Todos os bimestres</option>
+                                    <option value="1">1º Bimestre</option>
+                                    <option value="2">2º Bimestre</option>
+                                    <option value="3">3º Bimestre</option>
+                                    <option value="4">4º Bimestre</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="selectDisciplinaConsulta">📚 Disciplina (opcional)</label>
+                                <select id="selectDisciplinaConsulta" style="font-size: 16px; padding: 10px; width:100%;"></select>
+                            </div>
+                        </div>
+                        <button class="btn btn--primary" onclick="carregarConsultaPontos()" style="width:100%;margin-top:12px;">🔍 Consultar</button>
+                    </div>
+
+                    <div id="pontosContainer" aria-live="polite"></div>
+
+                    <div class="list-footer">
+                        <button class="btn ghost" onclick="showScreen('bemVindo')" style="width: 100%;">← Voltar ao início</button>
+                    </div>
+                </section>
             </main>
         </div>
     </div>
@@ -326,6 +451,9 @@
     <script src="js/retorno.js"></script>
     <script src="js/faltas.js"></script>
     <script src="js/consultas.js"></script>
+    <script src="js/disciplina.js"></script>
+    <script src="js/atividade.js"></script>
+    <script src="js/pontos.js"></script>
 
     <!-- Tela: Login (modal de nível superior) -->
     <section class="card" id="telaLogin" style="display:none;">

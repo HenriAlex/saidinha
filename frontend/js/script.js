@@ -15,7 +15,7 @@ function init() {
     // Se houver usuário autenticado mostra a app, caso contrário abre tela de login
     const usuario = localStorage.getItem('usuario_logado');
     const hash = (location.hash || '').replace('#','');
-    const valid = ['bemVindo','telaLista','telaCadastro','telaUsuarios','telaUsuarioCadastro','telaSaidas','telaSaidaCadastro','telaRetornos','telaFaltas','telaConsultas','telaLogin'];
+    const valid = ['bemVindo','telaLista','telaCadastro','telaUsuarios','telaUsuarioCadastro','telaSaidas','telaSaidaCadastro','telaRetornos','telaFaltas','telaConsultas','telaDisciplinas','telaAtividades','telaConsultaPontos','telaLogin'];
     if (usuario) {
         setLoggedUser(JSON.parse(usuario));
         if (hash && valid.includes(hash)) showScreen(hash);
@@ -35,6 +35,10 @@ function init() {
     if (typeof carregarSaidasPendentes === 'function') carregarSaidasPendentes();
     // Carrega faltas em segundo plano para agilizar a navegação
     if (typeof carregarFaltas === 'function') carregarFaltas();
+    // Carrega disciplinas em segundo plano
+    if (typeof carregarDisciplinas === 'function') carregarDisciplinas();
+    // Carrega atividades em segundo plano
+    if (typeof carregarAtividades === 'function') carregarAtividades();
 }
 
 // Vincula inicialização ao evento de carregamento.
@@ -43,7 +47,7 @@ window.addEventListener('load', init);
 // Função responsável por alternar entre telas.
 // Recebe o id lógico da tela e mostra/oculta os containers.
 function showScreen(screen) {
-    const telas = ['bemVindo', 'telaLista', 'telaCadastro', 'telaUsuarios', 'telaUsuarioCadastro', 'telaSaidas', 'telaSaidaCadastro', 'telaRetornos', 'telaFaltas', 'telaConsultas', 'telaLogin'];
+    const telas = ['bemVindo', 'telaLista', 'telaCadastro', 'telaUsuarios', 'telaUsuarioCadastro', 'telaSaidas', 'telaSaidaCadastro', 'telaRetornos', 'telaFaltas', 'telaConsultas', 'telaDisciplinas', 'telaAtividades', 'telaConsultaPontos', 'telaLogin'];
 
     // Bloqueio global: exige autenticação para acessar qualquer tela diferente de 'telaLogin'
     const usuario = localStorage.getItem('usuario_logado');
@@ -107,6 +111,24 @@ function showScreen(screen) {
     if (screen === 'telaFaltas') {
         if (typeof carregarFaltas === 'function') carregarFaltas();
         if (typeof popularSelectUsuariosFalta === 'function') popularSelectUsuariosFalta();
+    }
+    // Ao exibir consultas, inicializa o filtro padrão de hoje e carrega os relatórios.
+    if (screen === 'telaConsultas') {
+        if (typeof inicializarConsultaPadrao === 'function') inicializarConsultaPadrao();
+        if (typeof carregarEstatisticasGerais === 'function') carregarEstatisticasGerais();
+    }
+    // Ao exibir disciplinas, carrega as disciplinas.
+    if (screen === 'telaDisciplinas') {
+        if (typeof carregarDisciplinas === 'function') carregarDisciplinas();
+    }
+    // Ao exibir atividades, carrega as atividades e popula os selects.
+    if (screen === 'telaAtividades') {
+        if (typeof carregarAtividades === 'function') carregarAtividades();
+        if (typeof carregarSelectsAtividade === 'function') carregarSelectsAtividade();
+    }
+    // Ao exibir consulta de pontos, carrega os selects.
+    if (screen === 'telaConsultaPontos') {
+        if (typeof carregarSelectsPontos === 'function') carregarSelectsPontos();
     }
 }
 
@@ -242,4 +264,37 @@ function showModal(title, message){
         // Foco no botão confirmar para acessibilidade
         btnConfirm.focus();
     });
+}
+
+
+// Funções auxiliares para obter dados do usuário logado
+function obterIdUsuarioLogado() {
+    try {
+        const usuario = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+        return usuario.id_usuario || 0;
+    } catch(e) {
+        return 0;
+    }
+}
+
+function obterIdPerfilLogado() {
+    try {
+        const usuario = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+        return usuario.id_perfil || 0;
+    } catch(e) {
+        return 0;
+    }
+}
+
+// Função para gerar cores consistentes baseadas em texto
+function corPorTexto(texto) {
+    const cores = [
+        '#3b82f6', '#8b5cf6', '#ec4899', '#f59e0b',
+        '#10b981', '#06b6d4', '#6366f1', '#f97316'
+    ];
+    let hash = 0;
+    for (let i = 0; i < texto.length; i++) {
+        hash = texto.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    return cores[Math.abs(hash) % cores.length];
 }

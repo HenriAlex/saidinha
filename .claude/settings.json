@@ -17,7 +17,16 @@
       "Bash(curl -s http://127.0.0.1:8000/retornos/)",
       "Bash(git commit -m 'Fix: Corrigir data nas faltas e relatório de consulta *)",
       "PowerShell(netstat -ano)",
-      "PowerShell(Stop-Process -Id 8876 -Force -ErrorAction SilentlyContinue)"
+      "PowerShell(Stop-Process -Id 8876 -Force -ErrorAction SilentlyContinue)",
+      "Bash(Get-ChildItem -Name -Recurse -Exclude \".venv\" *.py)",
+      "Bash(Select-Object -First 20)",
+      "Bash(python -c \"from controllers.usuario_controller import router; print\\('✓ Controller importado com sucesso'\\)\")",
+      "Bash(dir \"g:\\\\Meu Drive\\\\Ensino Profissionalzante\\\\Desenvolvimento de Sistemas\\\\TCC\\\\MarqueMed\\\\MarqueMed\" -Exclude \".venv\")",
+      "PowerShell(Get-ChildItem \"g:\\\\Meu Drive\\\\Ensino Profissionalzante\\\\Desenvolvimento de Sistemas\\\\TCC\\\\MarqueMed\\\\MarqueMed\" -Exclude \".venv\" | Select-Object Name, @{Name=\"Type\";Expression={if\\($_.PSIsContainer\\){\"Pasta\"}else{\"Arquivo\"}}})",
+      "PowerShell(Head -20)",
+      "Bash(python -c \"import sqlite3; conn = sqlite3.connect\\('saidinha.db'\\); cursor = conn.cursor\\(\\); cursor.execute\\(\\\\\"SELECT name FROM sqlite_master WHERE type='table';\\\\\"\\); tables = cursor.fetchall\\(\\); print\\('\\\\n'.join\\([t[0] for t in tables]\\)\\); [print\\(f'\\\\n{t[0]}:'\\); [print\\(f'  {row}'\\) for row in cursor.execute\\(f'PRAGMA table_info\\({t[0]}\\)'\\)]] for t in cursor.execute\\(\\\\\"SELECT name FROM sqlite_master WHERE type='table';\\\\\"\\))",
+      "Bash(sqlite3 saidinha.db \".schema\")",
+      "Bash(git commit -m ' *)"
     ]
   }
 }
