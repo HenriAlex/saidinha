@@ -127,6 +127,9 @@ function showScreen(screen) {
     if (screen === 'telaAtividades') {
         if (typeof carregarAtividades === 'function') carregarAtividades();
         if (typeof carregarSelectsAtividade === 'function') carregarSelectsAtividade();
+        if (typeof preencherDataHojeEBimestre === 'function') {
+            setTimeout(() => preencherDataHojeEBimestre(), 100);
+        }
     }
     // Ao exibir consulta de pontos, carrega os selects.
     if (screen === 'telaConsultaPontos') {

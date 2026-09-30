@@ -96,6 +96,25 @@ async function carregarAtividades() {
     }
 }
 
+function preencherDataHojeEBimestre() {
+    const dataInput = document.getElementById('inputDataAtividade');
+    const bimestreSelect = document.getElementById('selectBimestreAtividade');
+
+    // Preencher data com hoje
+    if (dataInput) {
+        const hoje = new Date();
+        const ano = hoje.getFullYear();
+        const mes = String(hoje.getMonth() + 1).padStart(2, '0');
+        const dia = String(hoje.getDate()).padStart(2, '0');
+        dataInput.value = `${ano}-${mes}-${dia}`;
+    }
+
+    // Fixar bimestre em 4
+    if (bimestreSelect) {
+        bimestreSelect.value = '4';
+    }
+}
+
 async function carregarSelectsAtividade() {
     try {
         // Carregar usuários
@@ -133,6 +152,9 @@ async function carregarSelectsAtividade() {
         } else {
             console.error('Erro ao carregar disciplinas:', respDiscipl.status);
         }
+
+        // Preencher data e bimestre após carregar
+        preencherDataHojeEBimestre();
     } catch (erro) {
         console.error('Erro ao carregar selects:', erro);
         showToast('Erro ao carregar dados dos selects', 'error');

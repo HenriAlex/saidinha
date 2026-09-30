@@ -80,7 +80,8 @@ async function carregarDisciplinas() {
 }
 
 async function registrarDisciplina() {
-    const descricao = document.getElementById('inputDescricaoDisciplina').value.trim();
+    const inputEl = document.getElementById('inputDescricaoDisciplina');
+    const descricao = inputEl ? inputEl.value.trim() : '';
 
     if (!descricao) {
         showToast('Por favor, preencha a descrição da disciplina.', 'error');
@@ -88,27 +89,31 @@ async function registrarDisciplina() {
     }
 
     try {
+        console.log('Enviando disciplina:', { descricao });
+
         const resposta = await fetch(`${API_BASE}/disciplinas/`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                descricao: descricao
-            })
+            body: JSON.stringify({ descricao: descricao })
         });
 
+        console.log('Resposta status:', resposta.status);
+
         const dados = await resposta.json();
+        console.log('Dados da resposta:', dados);
 
         if (!resposta.ok) {
             throw new Error(dados.detail || 'Erro ao registrar disciplina');
         }
 
         showToast('✓ Disciplina registrada com sucesso!', 'success');
-        document.getElementById('formDisciplinaInline').reset();
-        carregarDisciplinas();
+        if (inputEl) inputEl.value = '';
+        setTimeout(() => carregarDisciplinas(), 500);
 
     } catch (erro) {
-        console.error('Erro:', erro);
-        showToast(`Erro ao registrar: ${erro.message}`, 'error');
+        console.error('Erro completo:', erro);
+        alert(`Erro ao registrar disciplina:\n${erro.message}`);
+        showToast(`Erro: ${erro.message}`, 'error');
     }
 }
 
