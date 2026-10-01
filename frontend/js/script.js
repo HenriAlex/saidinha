@@ -116,7 +116,7 @@ function showScreen(screen) {
     }
     // Ao exibir consultas, carrega o dashboard
     if (screen === 'telaConsultas') {
-        if (typeof carregarSaidasDashboard === 'function') carregarSaidasDashboard();
+        if (typeof inicializarDashboardConsultas === 'function') inicializarDashboardConsultas();
     }
     // Ao exibir disciplinas, carrega as disciplinas.
     if (screen === 'telaDisciplinas') {
@@ -301,4 +301,19 @@ function corPorTexto(texto) {
         hash = texto.charCodeAt(i) + ((hash << 5) - hash);
     }
     return cores[Math.abs(hash) % cores.length];
+}
+
+// Toggle para menu de grupos de navegação
+function toggleNavGroup(btn) {
+    const group = btn.closest('.nav-group');
+    const items = group.querySelector('.nav-group-items');
+    const icon = btn.querySelector('.nav-group-icon');
+
+    if (items.style.display === 'none') {
+        items.style.display = 'flex';
+        icon.style.transform = 'rotate(180deg)';
+    } else {
+        items.style.display = 'none';
+        icon.style.transform = 'rotate(0deg)';
+    }
 }

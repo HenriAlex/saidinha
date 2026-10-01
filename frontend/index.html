@@ -10,7 +10,7 @@
     <title>Saidinha</title>
     <!-- Importa o arquivo responsável pelo estilo da página. -->
     <!-- Estilos principais organizados em pasta `css/` -->
-    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/style.css?v=2">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
 </head>
 
@@ -29,20 +29,28 @@
                 <span>Início</span>
             </button>
 
-            <button class="nav-item" data-screen="telaLista" onclick="showScreen('telaLista')" title="Perfis">
-                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 5h16v2H4zM4 11h16v2H4zM4 17h16v2H4z"/></svg>
-                <span>Perfis</span>
-            </button>
+            <div class="nav-spacer"></div>
 
-            <button class="nav-item" data-screen="telaDisciplinas" onclick="showScreen('telaDisciplinas')" title="Disciplinas">
-                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M4 6h16v2H4zm0 5h16v2H4zm0 5h16v2H4z"/></svg>
-                <span>Disciplinas</span>
-            </button>
+            <div class="nav-group">
+                <button class="nav-group-toggle" onclick="toggleNavGroup(this)" title="Cadastros">
+                    <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14l4 4V4c0-1.1-.9-2-2-2zm0 16H5V4h14v14z"/></svg>
+                    <span>Cadastros</span>
+                    <svg class="nav-group-icon" viewBox="0 0 24 24" width="16" height="16"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                </button>
+                <div class="nav-group-items" style="display: none;">
+                    <button class="nav-item nav-subitem" data-screen="telaLista" onclick="showScreen('telaLista')" title="Perfis">
+                        <span>👥 Perfis</span>
+                    </button>
+                    <button class="nav-item nav-subitem" data-screen="telaDisciplinas" onclick="showScreen('telaDisciplinas')" title="Disciplinas">
+                        <span>📚 Disciplinas</span>
+                    </button>
+                    <button class="nav-item nav-subitem" data-screen="telaUsuarios" onclick="showScreen('telaUsuarios')" title="Usuários">
+                        <span>👤 Usuários</span>
+                    </button>
+                </div>
+            </div>
 
-            <button class="nav-item" data-screen="telaUsuarios" onclick="showScreen('telaUsuarios')" title="Usuários">
-                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 12c2.7 0 5-2.3 5-5s-2.3-5-5-5-5 2.3-5 5 2.3 5 5 5zm0 2c-4 0-8 2-8 5v1h16v-1c0-3-4-5-8-5z"/></svg>
-                <span>Usuários</span>
-            </button>
+            <div class="nav-spacer"></div>
 
             <button class="nav-item" data-screen="telaSaidas" onclick="showScreen('telaSaidas')" title="Saídas">
                 <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/></svg>
@@ -50,7 +58,7 @@
             </button>
 
             <button class="nav-item" data-screen="telaRetornos" onclick="showScreen('telaRetornos')" title="Retornos">
-                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M7 10l5 5 5-5z"/></svg>
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M20 11H7.83l5.59-5.59L12 3l-9 9 9 9 1.41-1.41L7.83 13H20v-2z"/></svg>
                 <span>Retornos</span>
             </button>
 
@@ -60,18 +68,15 @@
             </button>
 
             <button class="nav-item" data-screen="telaAtividades" onclick="showScreen('telaAtividades')" title="Atividades">
-                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M7 5c-1.1 0-2 .9-2 2v10c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2H7zm0 12l4-5 3 4 3-4v5H7z"/></svg>
+                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M17 12h-5v5h5v-5zM16 1v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2h-1V1h-2zm3 19H5V8h14v12z"/></svg>
                 <span>Atividades</span>
             </button>
 
-            <button class="nav-item" data-screen="telaConsultaPontos" onclick="showScreen('telaConsultaPontos')" title="Pontos">
-                <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-2h2v2zm0-4h-2V7h2v6z"/></svg>
-                <span>Pontos</span>
-            </button>
+            <div class="nav-spacer"></div>
 
-            <button class="nav-item" data-screen="telaConsultas" onclick="abrirConsultas()" title="Consultas">
+            <button class="nav-item nav-highlight" data-screen="telaConsultas" onclick="abrirConsultas()" title="Consulta">
                 <svg viewBox="0 0 24 24" width="22" height="22"><path fill="currentColor" d="M3 13h2v8H3zm4-8h2v16H7zm4-2h2v18h-2zm4-2h2v20h-2zm4 4h2v16h-2z"/></svg>
-                <span>Consultas</span>
+                <span>Consulta</span>
             </button>
 
             <!-- Alternância de tema (claro/escuro), persistida no navegador -->
@@ -295,61 +300,62 @@
                 </section>
 
                 <!-- Tela: Consultas e Relatórios (Dashboard Unificado) -->
-                <section class="card" id="telaConsultas" style="display:none;">
-                    <div style="margin-bottom: 24px;">
-                        <h2>📊 Dashboard de Consultas</h2>
-                        <p class="muted">Análise completa de desempenho e frequência dos alunos</p>
+                <section class="card dash" id="telaConsultas" style="display:none;">
+                    <div class="dash-header">
+                        <div class="dash-heading">
+                            <h2>📊 Dashboard de Consultas</h2>
+                            <p class="muted">Frequência e desempenho dos alunos em um só lugar</p>
+                        </div>
+                        <div class="dash-period">
+                            <div class="dash-chips" id="dashChips" role="group" aria-label="Período"></div>
+                            <div class="dash-period-range" id="dashPeriodoTexto"></div>
+                        </div>
                     </div>
 
-                    <!-- Abas de Navegação -->
-                    <div style="display: flex; gap: 8px; margin-bottom: 24px; flex-wrap: wrap; border-bottom: 2px solid #e6e9f0; padding-bottom: 0;">
-                        <button class="tab-btn active" onclick="mudarAbaConsulta('saidas')" data-tab="saidas" style="padding: 12px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: #3b82f6; border-bottom: 3px solid #3b82f6; font-size: 15px;">
-                            📤 Saídas
+                    <div class="dash-tabs" role="tablist">
+                        <button class="dash-tab active" role="tab" aria-selected="true" data-tab="saidas" onclick="mudarAbaConsulta('saidas', this)">
+                            <span class="dash-tab-icon">📤</span>Saídas
                         </button>
-                        <button class="tab-btn" onclick="mudarAbaConsulta('faltas')" data-tab="faltas" style="padding: 12px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: #6b7280; border-bottom: 3px solid transparent; font-size: 15px;">
-                            ❌ Faltas
+                        <button class="dash-tab" role="tab" aria-selected="false" data-tab="faltas" onclick="mudarAbaConsulta('faltas', this)">
+                            <span class="dash-tab-icon">❌</span>Faltas
                         </button>
-                        <button class="tab-btn" onclick="mudarAbaConsulta('pontos')" data-tab="pontos" style="padding: 12px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: #6b7280; border-bottom: 3px solid transparent; font-size: 15px;">
-                            ⭐ Pontos
+                        <button class="dash-tab" role="tab" aria-selected="false" data-tab="pontos" onclick="mudarAbaConsulta('pontos', this)">
+                            <span class="dash-tab-icon">⭐</span>Pontos
                         </button>
-                        <button class="tab-btn" onclick="mudarAbaConsulta('geral')" data-tab="geral" style="padding: 12px 20px; background: none; border: none; cursor: pointer; font-weight: 600; color: #6b7280; border-bottom: 3px solid transparent; font-size: 15px;">
-                            🏆 Ranking Geral
+                        <button class="dash-tab" role="tab" aria-selected="false" data-tab="geral" onclick="mudarAbaConsulta('geral', this)">
+                            <span class="dash-tab-icon">🏆</span>Ranking Geral
                         </button>
                     </div>
 
-                    <!-- Conteúdo das Abas -->
-                    <div id="abasSaidase" class="aba-consulta" style="display: block;">
+                    <div id="abasSaidase" class="aba-consulta" role="tabpanel">
                         <div id="saidasContainer" aria-live="polite"></div>
                     </div>
 
-                    <div id="abasFaltas" class="aba-consulta" style="display: none;">
+                    <div id="abasFaltas" class="aba-consulta" role="tabpanel" style="display: none;">
                         <div id="faltasConsultaContainer" aria-live="polite"></div>
                     </div>
 
-                    <div id="abasPontos" class="aba-consulta" style="display: none;">
-                        <div style="margin-bottom: 16px; background: #f8f9fa; padding: 12px; border-radius: 8px; display: grid; grid-template-columns: 1fr 1fr; gap: 12px;">
-                            <div>
-                                <label for="filtroBimestreConsultaMain" style="font-weight: 600; display: block; margin-bottom: 6px;">📊 Bimestre:</label>
-                                <select id="filtroBimestreConsultaMain" onchange="carregarPontosComFiltro()" style="padding: 8px 12px; border: 1px solid #e6e9f0; border-radius: 6px; font-size: 14px; width: 100%;">
+                    <div id="abasPontos" class="aba-consulta" role="tabpanel" style="display: none;">
+                        <div class="dash-toolbar">
+                            <label class="dash-field">
+                                <span>Bimestre</span>
+                                <select id="filtroBimestreConsultaMain" onchange="carregarPontosComFiltro()">
                                     <option value="">Todos os bimestres</option>
                                     <option value="1">1º Bimestre</option>
                                     <option value="2">2º Bimestre</option>
                                     <option value="3">3º Bimestre</option>
                                     <option value="4">4º Bimestre</option>
                                 </select>
-                            </div>
-                            <div>
-                                <label for="filtroDisciplinaConsultaMain" style="font-weight: 600; display: block; margin-bottom: 6px;">📚 Disciplina:</label>
-                                <select id="filtroDisciplinaConsultaMain" onchange="carregarPontosComFiltro()" style="padding: 8px 12px; border: 1px solid #e6e9f0; border-radius: 6px; font-size: 14px; width: 100%;"></select>
-                            </div>
+                            </label>
+                            <label class="dash-field">
+                                <span>Disciplina</span>
+                                <select id="filtroDisciplinaConsultaMain" onchange="carregarPontosComFiltro()"></select>
+                            </label>
                         </div>
                         <div id="pontosConsultaContainer" aria-live="polite"></div>
                     </div>
 
-                    <div id="abasGeral" class="aba-consulta" style="display: none;">
-                        <div style="margin-bottom: 16px; text-align: center;">
-                            <p class="muted" style="margin: 0; font-size: 14px;">🎯 Alunos com melhor desempenho: Menos faltas + Mais atividades + Menos saídas</p>
-                        </div>
+                    <div id="abasGeral" class="aba-consulta" role="tabpanel" style="display: none;">
                         <div id="rankingGeralContainer" aria-live="polite"></div>
                     </div>
 
@@ -490,7 +496,7 @@
     </div>
 
     <!-- Scripts organizados em `js/` -->
-    <script src="js/script.js"></script>
+    <script src="js/script.js?v=2"></script>
     <script src="js/perfil.js"></script>
     <script src="js/usuario.js"></script>
     <script src="js/saida.js"></script>
@@ -499,8 +505,8 @@
     <script src="js/consultas.js"></script>
     <script src="js/disciplina.js"></script>
     <script src="js/atividade.js"></script>
-    <script src="js/pontos.js"></script>
-    <script src="js/dashboard.js"></script>
+    <script src="js/pontos.js?v=2"></script>
+    <script src="js/dashboard.js?v=2"></script>
 
     <!-- Tela: Login (modal de nível superior) -->
     <section class="card" id="telaLogin" style="display:none;">

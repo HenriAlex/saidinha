@@ -1,3 +1,46 @@
+window.filtroPontosAtual = { label: 'todos', start_date: null, end_date: null };
+
+const FILTROS_PERIODO_CONSULTA = [
+    { label: 'hoje', texto: '📍 Hoje', isHoje: true },
+    { label: 'semana', texto: '📅 Esta Semana', isSemana: true },
+    { label: 'mes', texto: '🎯 Este mês', mes_atual: true },
+    { label: 'todos', texto: '📋 Todo o Período' }
+];
+
+function aplicarFiltroConsultaPontos(label) {
+    const filtro = FILTROS_PERIODO_CONSULTA.find(f => f.label === label) || FILTROS_PERIODO_CONSULTA[3];
+    const hoje = new Date();
+    let start_date = null, end_date = null;
+
+    if (filtro.isHoje) {
+        start_date = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+        end_date = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59);
+    } else if (filtro.isSemana) {
+        const dia = hoje.getDay();
+        const diff = hoje.getDate() - dia + (dia === 0 ? -6 : 1);
+        start_date = new Date(hoje.getFullYear(), hoje.getMonth(), diff);
+        end_date = hoje;
+    } else if (filtro.mes_atual) {
+        start_date = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+        end_date = hoje;
+    }
+
+    window.filtroPontosAtual = {
+        label: filtro.label,
+        start_date: start_date,
+        end_date: end_date || hoje
+    };
+
+    document.querySelectorAll('.filtro-chip-consulta').forEach(btn => {
+        btn.style.background = '#f3f4f6';
+        btn.style.color = '#6b7280';
+    });
+    event.target.style.background = '#dbeafe';
+    event.target.style.color = '#3b82f6';
+
+    carregarConsultaPontos();
+}
+
 async function carregarSelectsPontos() {
     try {
         const respDiscipl = await fetch(`${API_BASE}/disciplinas/`);
@@ -41,6 +84,13 @@ async function carregarConsultaPontos() {
             atividades = atividades.filter(a => a.id_disciplina === parseInt(idDisciplina));
         }
 
+        if (window.filtroPontosAtual.start_date && window.filtroPontosAtual.end_date) {
+            atividades = atividades.filter(a => {
+                const dataAtividade = new Date(a.data_atividade);
+                return dataAtividade >= window.filtroPontosAtual.start_date && dataAtividade <= window.filtroPontosAtual.end_date;
+            });
+        }
+
         const [respUsers, respDiscipl] = await Promise.all([
             fetch(`${API_BASE}/usuarios/`),
             fetch(`${API_BASE}/disciplinas/`)
@@ -52,8 +102,15 @@ async function carregarConsultaPontos() {
         const userMap = usuarios.reduce((m, u) => { m[u.id_usuario] = u; return m; }, {});
         const discMap = disciplinas.reduce((m, d) => { m[d.id_disciplina] = d.descricao; return m; }, {});
 
+        let html = '<div style="margin-bottom: 16px;">';
+        html += FILTROS_PERIODO_CONSULTA.map(f =>
+            `<button class="filtro-chip-consulta" onclick="aplicarFiltroConsultaPontos('${f.label}')" style="padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; margin-right: 8px; font-size: 13px; margin-bottom: 8px; background: ${window.filtroPontosAtual.label === f.label ? '#dbeafe' : '#f3f4f6'}; color: ${window.filtroPontosAtual.label === f.label ? '#3b82f6' : '#6b7280'}; font-weight: 600;">${f.texto}</button>`
+        ).join('');
+        html += '</div>';
+
         if (!atividades || atividades.length === 0) {
-            container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">Nenhuma atividade encontrada para este bimestre.</div>';
+            html += '<div style="text-align:center;padding:20px;color:#666;">Nenhuma atividade encontrada para este bimestre.</div>';
+            container.innerHTML = html;
             return;
         }
 
@@ -79,7 +136,10 @@ async function carregarConsultaPontos() {
             porAluno[d.usuario].push(d);
         });
 
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = html;
         container.innerHTML = '';
+        container.appendChild(wrapper);
 
         for (const [nomeAluno, disciplinas] of Object.entries(porAluno)) {
             const secao = document.createElement('div');
