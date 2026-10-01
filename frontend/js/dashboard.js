@@ -1,4 +1,13 @@
 let abaAtualConsulta = 'saidas';
+window.filtroConsultaAtualDash = { periodo: 0, mes_atual: false, start_date: null, end_date: null, label: 'todos' };
+
+const FILTROS_PERIODO_DASH = [
+    { label: 'todos', texto: '📋 Todo o período', periodo: 0, mes_atual: false },
+    { label: '7', texto: '📅 Últimos 7 dias', periodo: 7, mes_atual: false },
+    { label: '15', texto: '🗓️ Últimos 15 dias', periodo: 15, mes_atual: false },
+    { label: '30', texto: '📆 Últimos 30 dias', periodo: 30, mes_atual: false },
+    { label: 'mes', texto: '🎯 Este mês', periodo: 0, mes_atual: true }
+];
 
 function mudarAbaConsulta(aba) {
     abaAtualConsulta = aba;
@@ -26,6 +35,40 @@ function mudarAbaConsulta(aba) {
     else if (aba === 'geral') carregarRankingGeral();
 }
 
+function aplicarFiltroConsultaDash(label) {
+    const filtro = FILTROS_PERIODO_DASH.find(f => f.label === label) || FILTROS_PERIODO_DASH[0];
+    const hoje = new Date();
+    let start_date = null, end_date = null;
+
+    if (filtro.periodo > 0) {
+        start_date = new Date(hoje);
+        start_date.setDate(start_date.getDate() - filtro.periodo);
+    }
+
+    if (filtro.mes_atual) {
+        start_date = new Date(hoje.getFullYear(), hoje.getMonth(), 1);
+        end_date = hoje;
+    }
+
+    window.filtroConsultaAtualDash = {
+        periodo: filtro.periodo,
+        mes_atual: filtro.mes_atual,
+        start_date: start_date,
+        end_date: end_date || hoje,
+        label: filtro.label
+    };
+
+    document.querySelectorAll('.filtro-chip-dash').forEach(btn => {
+        btn.style.background = '#f3f4f6';
+        btn.style.color = '#6b7280';
+    });
+    event.target.style.background = '#dbeafe';
+    event.target.style.color = '#3b82f6';
+
+    if (abaAtualConsulta === 'saidas') carregarSaidasDashboard();
+    else if (abaAtualConsulta === 'faltas') carregarFaltasComFiltro();
+}
+
 async function carregarSaidasDashboard() {
     const container = document.getElementById('saidasContainer');
     container.innerHTML = '<div style="text-align:center;padding:20px;">⏳ Carregando...</div>';
@@ -33,16 +76,30 @@ async function carregarSaidasDashboard() {
     try {
         const resposta = await fetch(`${API_BASE}/saidas/`);
         if (!resposta.ok) throw new Error('Erro ao carregar saídas');
-        const saidas = await resposta.json();
+        let saidas = await resposta.json();
+
+        const filtro = window.filtroConsultaAtualDash;
+        if (filtro.periodo > 0 || filtro.mes_atual) {
+            saidas = saidas.filter(s => {
+                const dataSaida = new Date(s.data_saida);
+                return dataSaida >= filtro.start_date && dataSaida <= filtro.end_date;
+            });
+        }
 
         const respUsers = await fetch(`${API_BASE}/usuarios/`);
         const usuarios = respUsers.ok ? await respUsers.json() : [];
         const userMap = usuarios.reduce((m, u) => { m[u.id_usuario] = u.nome; return m; }, {});
 
         if (!saidas || saidas.length === 0) {
-            container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">Nenhuma saída registrada.</div>';
+            container.innerHTML = '<div style="text-align:center;padding:20px;color:#666;">Nenhuma saída registrada neste período.</div>';
             return;
         }
+
+        let html = '<div style="margin-bottom: 16px;">';
+        html += FILTROS_PERIODO_DASH.map(f =>
+            `<button class="filtro-chip-dash" onclick="aplicarFiltroConsultaDash('${f.label}')" style="padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; margin-right: 8px; font-size: 13px; margin-bottom: 8px; background: ${window.filtroConsultaAtualDash.label === f.label ? '#dbeafe' : '#f3f4f6'}; color: ${window.filtroConsultaAtualDash.label === f.label ? '#3b82f6' : '#6b7280'}; font-weight: 600;">${f.texto}</button>`
+        ).join('');
+        html += '</div>';
 
         const saidasAgrupadas = {};
         saidas.forEach(s => {
@@ -50,7 +107,7 @@ async function carregarSaidasDashboard() {
             saidasAgrupadas[chave] = s;
         });
 
-        let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">';
+        html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">';
 
         Object.values(saidasAgrupadas).forEach(s => {
             const nomePessoa = userMap[s.id_usuario] || 'Desconhecido';
@@ -76,7 +133,6 @@ async function carregarSaidasDashboard() {
 
 async function carregarFaltasComFiltro() {
     const container = document.getElementById('faltasConsultaContainer');
-    const filtro = document.getElementById('filtroDataFaltas').value;
     container.innerHTML = '<div style="text-align:center;padding:20px;">⏳ Carregando...</div>';
 
     try {
@@ -84,12 +140,12 @@ async function carregarFaltasComFiltro() {
         if (!resposta.ok) throw new Error('Erro ao carregar faltas');
         let faltas = await resposta.json();
 
-        if (filtro) {
-            const dias = parseInt(filtro);
-            const dataLimite = new Date();
-            dataLimite.setDate(dataLimite.getDate() - dias);
-
-            faltas = faltas.filter(f => new Date(f.data_falta) >= dataLimite);
+        const filtro = window.filtroConsultaAtualDash;
+        if (filtro.periodo > 0 || filtro.mes_atual) {
+            faltas = faltas.filter(f => {
+                const dataFalta = new Date(f.data_falta);
+                return dataFalta >= filtro.start_date && dataFalta <= filtro.end_date;
+            });
         }
 
         const respUsers = await fetch(`${API_BASE}/usuarios/`);
@@ -101,6 +157,12 @@ async function carregarFaltasComFiltro() {
             return;
         }
 
+        let html = '<div style="margin-bottom: 16px;">';
+        html += FILTROS_PERIODO_DASH.map(f =>
+            `<button class="filtro-chip-dash" onclick="aplicarFiltroConsultaDash('${f.label}')" style="padding: 8px 16px; border: none; border-radius: 20px; cursor: pointer; margin-right: 8px; font-size: 13px; margin-bottom: 8px; background: ${window.filtroConsultaAtualDash.label === f.label ? '#dbeafe' : '#f3f4f6'}; color: ${window.filtroConsultaAtualDash.label === f.label ? '#3b82f6' : '#6b7280'}; font-weight: 600;">${f.texto}</button>`
+        ).join('');
+        html += '</div>';
+
         const faltasAgrupadas = {};
         faltas.forEach(f => {
             if (!faltasAgrupadas[f.id_usuario]) {
@@ -109,29 +171,34 @@ async function carregarFaltasComFiltro() {
             faltasAgrupadas[f.id_usuario].push(f);
         });
 
-        let html = '';
+        html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">';
 
         Object.entries(faltasAgrupadas).forEach(([idUser, faltasList]) => {
             const nomePessoa = userMap[idUser] || 'Desconhecido';
             const totalFaltas = faltasList.length;
+            const mediaFaltas = (totalFaltas / (new Date().getDate())).toFixed(1);
 
             html += `
-                <div style="margin-bottom: 16px; background: #fff; border-radius: 8px; padding: 12px; border: 1px solid #e6e9f0;">
-                    <div style="font-weight: 600; margin-bottom: 10px; color: #161821;">
-                        👤 ${nomePessoa}
-                        <span style="float: right; background: #fee2e2; color: #dc2626; padding: 4px 8px; border-radius: 4px; font-size: 12px;">❌ ${totalFaltas} falta${totalFaltas > 1 ? 's' : ''}</span>
+                <div style="background: #fff; border-radius: 8px; padding: 12px; border: 2px solid #fee2e2;">
+                    <div style="font-weight: 600; margin-bottom: 8px; color: #161821;">👤 ${nomePessoa}</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                        <div style="background: #fee2e2; padding: 8px; border-radius: 6px; text-align: center;">
+                            <div style="font-weight: 700; color: #dc2626;">❌ ${totalFaltas}</div>
+                            <div style="font-size: 11px; color: #666;">Total</div>
+                        </div>
+                        <div style="background: #fef3c7; padding: 8px; border-radius: 6px; text-align: center;">
+                            <div style="font-weight: 700; color: #f59e0b;">📊 ${mediaFaltas}</div>
+                            <div style="font-size: 11px; color: #666;">Média</div>
+                        </div>
                     </div>
-                    <div style="display: grid; gap: 6px;">
-                        ${faltasList.map(f => `
-                            <div style="font-size: 12px; color: #666; padding: 6px; background: #f8f9fa; border-radius: 4px;">
-                                📅 ${new Date(f.data_falta).toLocaleDateString('pt-BR')} ${f.motivo ? `• ${f.motivo}` : ''}
-                            </div>
-                        `).join('')}
+                    <div style="font-size: 12px; color: #666; max-height: 80px; overflow-y: auto;">
+                        ${faltasList.slice(0, 3).map(f => `📅 ${new Date(f.data_falta).toLocaleDateString('pt-BR')}`).join(' • ')}
                     </div>
                 </div>
             `;
         });
 
+        html += '</div>';
         container.innerHTML = html;
 
     } catch (erro) {
@@ -168,8 +235,7 @@ async function carregarPontosComFiltro() {
     container.innerHTML = '<div style="text-align:center;padding:20px;">⏳ Carregando...</div>';
 
     try {
-        let url = `${API_BASE}/atividades/bimestre/${bimestre}`;
-        const resposta = await fetch(url);
+        const resposta = await fetch(`${API_BASE}/atividades/bimestre/${bimestre}`);
         if (!resposta.ok) throw new Error('Erro ao carregar atividades');
         let atividades = await resposta.json();
 
@@ -214,34 +280,33 @@ async function carregarPontosComFiltro() {
             porAluno[d.usuario].push(d);
         });
 
-        let html = '';
-        for (const [nomeAluno, disciplinasList] of Object.entries(porAluno)) {
+        let html = '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 12px;">';
+
+        Object.entries(porAluno).forEach(([nomeAluno, disciplinasList]) => {
             const totalPontos = disciplinasList.reduce((s, d) => s + d.pontos, 0);
+            const mediaPontos = (totalPontos / disciplinasList.length).toFixed(1);
 
             html += `
-                <div style="margin-bottom: 16px; background: #fff; border-radius: 8px; padding: 12px; border: 1px solid #e6e9f0;">
-                    <div style="font-weight: 600; margin-bottom: 10px; color: #161821;">
-                        👤 ${nomeAluno}
-                        <span style="float: right; background: #dbeafe; color: #3b82f6; padding: 4px 8px; border-radius: 4px; font-size: 12px;">⭐ ${totalPontos.toFixed(1)} pts</span>
+                <div style="background: #fff; border-radius: 8px; padding: 12px; border: 2px solid #dbeafe;">
+                    <div style="font-weight: 600; margin-bottom: 8px; color: #161821;">👤 ${nomeAluno}</div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 10px;">
+                        <div style="background: #dbeafe; padding: 8px; border-radius: 6px; text-align: center;">
+                            <div style="font-weight: 700; color: #3b82f6;">⭐ ${totalPontos.toFixed(1)}</div>
+                            <div style="font-size: 11px; color: #666;">Total</div>
+                        </div>
+                        <div style="background: #e0e7ff; padding: 8px; border-radius: 6px; text-align: center;">
+                            <div style="font-weight: 700; color: #6366f1;">📊 ${mediaPontos}</div>
+                            <div style="font-size: 11px; color: #666;">Média</div>
+                        </div>
                     </div>
-                    <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
-                        <tr style="border-bottom: 1px solid #f0f0f0;">
-                            <th style="text-align: left; padding: 6px; color: #666;">Disciplina</th>
-                            <th style="text-align: center; padding: 6px; color: #666;">Pontos</th>
-                            <th style="text-align: center; padding: 6px; color: #666;">Atividades</th>
-                        </tr>
-                        ${disciplinasList.map(d => `
-                            <tr style="border-bottom: 1px solid #f0f0f0;">
-                                <td style="padding: 6px;">📚 ${d.disciplina}</td>
-                                <td style="text-align: center; padding: 6px; font-weight: 600; color: #3b82f6;">${d.pontos.toFixed(1)}</td>
-                                <td style="text-align: center; padding: 6px;">${d.atividades}</td>
-                            </tr>
-                        `).join('')}
-                    </table>
+                    <div style="font-size: 12px; color: #666;">
+                        ${disciplinasList.map(d => `📚 ${d.disciplina} (${d.atividades})`).join(' • ')}
+                    </div>
                 </div>
             `;
-        }
+        });
 
+        html += '</div>';
         container.innerHTML = html;
 
     } catch (erro) {
@@ -286,13 +351,19 @@ async function carregarRankingGeral() {
         }).sort((a, b) => b.score - a.score);
 
         let html = '<div style="display: grid; gap: 12px;">';
+        let posicao = 1;
+        let scoreAnterior = null;
 
         ranking.forEach((aluno, idx) => {
-            const medalhas = ['🥇', '🥈', '🥉'];
-            const medalha = idx < 3 ? medalhas[idx] : '•';
+            if (scoreAnterior !== null && aluno.score !== scoreAnterior) {
+                posicao = idx + 1;
+            }
 
-            const corBg = idx === 0 ? '#fef3c7' : idx === 1 ? '#f3f4f6' : idx === 2 ? '#fed7aa' : '#fff';
-            const corBorda = idx === 0 ? '#f59e0b' : idx === 1 ? '#9ca3af' : idx === 2 ? '#f97316' : '#e5e7eb';
+            const medalhas = ['🥇', '🥈', '🥉'];
+            const medalha = posicao <= 3 ? medalhas[posicao - 1] : '•';
+
+            const corBg = posicao === 1 ? '#fef3c7' : posicao === 2 ? '#f3f4f6' : posicao === 3 ? '#fed7aa' : '#fff';
+            const corBorda = posicao === 1 ? '#f59e0b' : posicao === 2 ? '#9ca3af' : posicao === 3 ? '#f97316' : '#e5e7eb';
 
             const indicePorcentual = ((ranking.length - idx) / ranking.length * 100).toFixed(0);
 
@@ -305,7 +376,7 @@ async function carregarRankingGeral() {
 
                         <div>
                             <div style="font-weight: 700; font-size: 16px; color: #161821; margin-bottom: 6px;">
-                                ${idx + 1}º - ${aluno.nome}
+                                ${posicao}º - ${aluno.nome}
                             </div>
                             <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; font-size: 12px;">
                                 <div style="background: rgba(255,255,255,0.6); padding: 6px; border-radius: 4px; text-align: center;">
@@ -334,6 +405,8 @@ async function carregarRankingGeral() {
                     </div>
                 </div>
             `;
+
+            scoreAnterior = aluno.score;
         });
 
         html += '</div>';
