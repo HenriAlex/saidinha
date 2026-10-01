@@ -354,6 +354,9 @@ async function carregarRankingGeral() {
         let posicao = 1;
         let scoreAnterior = null;
 
+        const maxScore = Math.max(...ranking.map(r => r.score));
+        const minScore = Math.min(...ranking.map(r => r.score));
+
         ranking.forEach((aluno, idx) => {
             if (scoreAnterior !== null && aluno.score !== scoreAnterior) {
                 posicao = idx + 1;
@@ -365,7 +368,9 @@ async function carregarRankingGeral() {
             const corBg = posicao === 1 ? '#fef3c7' : posicao === 2 ? '#f3f4f6' : posicao === 3 ? '#fed7aa' : '#fff';
             const corBorda = posicao === 1 ? '#f59e0b' : posicao === 2 ? '#9ca3af' : posicao === 3 ? '#f97316' : '#e5e7eb';
 
-            const indicePorcentual = ((ranking.length - idx) / ranking.length * 100).toFixed(0);
+            const indicePorcentual = maxScore === minScore ?
+                Math.round((aluno.score / Math.max(1, maxScore)) * 100) :
+                Math.round(((aluno.score - minScore) / (maxScore - minScore)) * 100);
 
             html += `
                 <div style="background: ${corBg}; border: 2px solid ${corBorda}; border-radius: 8px; padding: 16px; position: relative; overflow: hidden;">
