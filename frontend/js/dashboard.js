@@ -2,6 +2,7 @@ let abaAtualConsulta = 'saidas';
 window.filtroConsultaAtualDash = { periodo: 0, mes_atual: false, start_date: null, end_date: null, label: 'todos' };
 
 const FILTROS_PERIODO_DASH = [
+    { label: 'hoje', texto: '📍 Hoje', periodo: 0, mes_atual: false, isHoje: true },
     { label: 'todos', texto: '📋 Todo o período', periodo: 0, mes_atual: false },
     { label: '7', texto: '📅 Últimos 7 dias', periodo: 7, mes_atual: false },
     { label: '15', texto: '🗓️ Últimos 15 dias', periodo: 15, mes_atual: false },
@@ -36,11 +37,14 @@ function mudarAbaConsulta(aba) {
 }
 
 function aplicarFiltroConsultaDash(label) {
-    const filtro = FILTROS_PERIODO_DASH.find(f => f.label === label) || FILTROS_PERIODO_DASH[0];
+    const filtro = FILTROS_PERIODO_DASH.find(f => f.label === label) || FILTROS_PERIODO_DASH[1];
     const hoje = new Date();
     let start_date = null, end_date = null;
 
-    if (filtro.periodo > 0) {
+    if (filtro.isHoje) {
+        start_date = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate());
+        end_date = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59);
+    } else if (filtro.periodo > 0) {
         start_date = new Date(hoje);
         start_date.setDate(start_date.getDate() - filtro.periodo);
     }
