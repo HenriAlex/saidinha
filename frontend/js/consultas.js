@@ -509,7 +509,7 @@ async function abrirDetalhesRetorno(id_saida, id_usuario, dataSaidaStr, dataReto
         modal.id = 'modalDetalhesRetorno';
         modal.style.cssText = `
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.95); display: flex; align-items: center;
+            background: rgba(255,255,255,0.95); display: flex; align-items: center;
             justify-content: center; z-index: 10000; overflow: hidden; padding: 20px;
         `;
 
