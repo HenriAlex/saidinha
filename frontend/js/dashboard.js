@@ -562,12 +562,22 @@ async function carregarRankingGeral() {
 
         const ranking = somenteAlunos(usuarios).map(u => {
             const tempo_minutos = (u.total_horas * 60) + u.total_minutos;
+            const tempo_horas = tempo_minutos / 60;
             const fl = faltas.filter(x => x.id_usuario === u.id_usuario).length;
             const p = atividades.filter(x => x.id_usuario === u.id_usuario).reduce((acc, a) => acc + a.pontos, 0);
 
-            // Score baseado em: faltas, TEMPO DE SAÍDAS (não quantidade), e pontos
-            // Penaliza mais quem fica mais tempo fora (tempo em horas)
-            const tempo_horas = tempo_minutos / 60;
+            // Score com pesos iguais (25% cada critério):
+            // 1. Quantidade de Saídas: quanto mais, pior (10 - quantidade)
+            // 2. Tempo Fora: quanto mais, pior (10 - horas)
+            // 3. Faltas: quanto mais, pior (10 - faltas)
+            // 4. Pontos: quanto mais, melhor (pontos ÷ 10)
+            const scoreQtdSaidas = Math.max(0, 10 - u.total_saidas);
+            const scoreTempo = Math.max(0, 10 - tempo_horas);
+            const scoreFaltas = Math.max(0, 10 - fl);
+            const scorePontos = p / 10;
+
+            const score = scoreQtdSaidas + scoreTempo + scoreFaltas + scorePontos;
+
             return {
                 nome: u.nome,
                 saidas: u.total_saidas,
@@ -575,7 +585,11 @@ async function carregarRankingGeral() {
                 tempo_formatado: u.tempo_formatado,
                 faltas: fl,
                 pontos: p,
-                score: (10 - fl) + (10 - tempo_horas) + (p / 10)
+                scoreQtdSaidas,
+                scoreTempo,
+                scoreFaltas,
+                scorePontos,
+                score
             };
         }).sort((a, b) => b.score - a.score || a.nome.localeCompare(b.nome));
 
@@ -623,7 +637,7 @@ async function carregarRankingGeral() {
                 <div><small>Alunos avaliados</small><strong>${ranking.length}</strong></div>
                 <div><small>Média de pontuação</small><strong>${fmtNum(mediaScore)}</strong></div>
                 <div><small>Melhor pontuação</small><strong>${fmtNum(maxScore)}</strong></div>
-                <div class="dash-strip-info"><small>Como é calculado</small><code>(10 − faltas) + (10 − tempo em horas) + pontos ÷ 10</code></div>
+                <div class="dash-strip-info"><small>Como é calculado</small><code>(10−qtd saídas) + (10−tempo) + (10−faltas) + (pontos÷10)</code></div>
             </div>`;
 
         html += tituloSecaoHTML('Classificação completa', 'empates compartilham a mesma posição');
