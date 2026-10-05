@@ -589,6 +589,13 @@ async function salvarEdicaoRetorno() {
     const novaDataRetorno = `${dataEdicao} ${horaEdicao}:00`;
 
     try {
+        // Obtém usuário logado do localStorage
+        const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+        const idUsuarioLogado = usuarioLogado.id_usuario || 0;
+        const idPerfilLogado = usuarioLogado.id_perfil || 0;
+
+        console.log('Usuário logado:', usuarioLogado);
+
         // Primeiro, busca o ID do retorno
         const respRetornos = await fetch(`${API_RELATORIOS}/retornos/saida/${dados.id_saida}`);
         const retornos = respRetornos.ok ? await respRetornos.json() : [];
@@ -609,8 +616,8 @@ async function salvarEdicaoRetorno() {
                 id_usuario: dados.id_usuario,
                 data_retorno_customizada: novaDataRetorno,
                 observacoes: observacoesEdicao,
-                id_usuario_logado: 1,
-                id_perfil_logado: 1
+                id_usuario_logado: idUsuarioLogado,
+                id_perfil_logado: idPerfilLogado
             })
         });
 
