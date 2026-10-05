@@ -348,10 +348,18 @@ def historico_usuario(id_usuario: int, periodo: int = 0, start_date: str = None,
     # Ordena por data (mais recente primeiro).
     eventos.sort(key=lambda x: x['data_saida'], reverse=True)
 
+    # Calcula total de horas e minutos do período
+    total_minutos = sum(e['duracao_minutos'] for e in eventos)
+    total_horas = total_minutos // 60
+    total_minutos_restantes = total_minutos % 60
+
     return {
         "id_usuario": id_usuario,
         "nome_usuario": usuario['nome'],
         "ra_usuario": usuario['ra'],
         "historico": eventos,
-        "total_registros": len(eventos)
+        "total_registros": len(eventos),
+        "total_horas": total_horas,
+        "total_minutos": total_minutos_restantes,
+        "tempo_formatado": f"{total_horas}h {total_minutos_restantes}min"
     }

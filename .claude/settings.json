@@ -36,7 +36,9 @@
       "PowerShell(Get-ChildItem -Path \"G:\\\\Meu Drive\\\\Ensino Profissionalzante\\\\Desenvolvimento de Sistemas\\\\TCC\\\\Saidinha\" -Recurse -File | Where-Object {$_.Extension -eq '.py' -or $_.Extension -eq '.html'} | Sort-Object FullName)",
       "PowerShell(Get-ChildItem -Path \"G:\\\\Meu Drive\\\\Ensino Profissionalzante\\\\Desenvolvimento de Sistemas\\\\TCC\\\\Saidinha\" -Recurse -File -Exclude '.venv' | Where-Object {$_.FullName -notmatch '\\\\.venv'} | Sort-Object FullName | Select-Object FullName)",
       "Bash(curl -s http://localhost:8000/)",
-      "Bash(curl -s http://localhost:8000/relatorios/geral)"
+      "Bash(curl -s http://localhost:8000/relatorios/geral)",
+      "Bash(grep -E \"\\\\.\\(py|js\\)$\")",
+      "Bash(git commit -m 'Fix: Adicionar total_horas e total_minutos no endpoint de histórico *)"
     ]
   }
 }
