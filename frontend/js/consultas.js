@@ -363,13 +363,17 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                     </div>
                 </div>
 
-                <div style="display:flex;gap:8px;align-items:center;">
-                    <label style="font-size:13px;color:#666;">De</label>
-                    <input type="date" id="histStart" />
-                    <label style="font-size:13px;color:#666;">Até</label>
-                    <input type="date" id="histEnd" />
-                    <button class="btn" onclick="(function(){ const s=document.getElementById('histStart').value; const e=document.getElementById('histEnd').value; if(!s) return alert('Informe a data inicial'); mostrarHistoricoUsuario(${id_usuario},0,s,e,false); })()">Aplicar</button>
-                    <button class="btn ghost" onclick="voltarParaEstatisticas()">Fechar</button>
+                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;">
+                    <div>
+                        <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">📅 De</label>
+                        <input type="date" id="histStart" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                    </div>
+                    <div>
+                        <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">📅 Até</label>
+                        <input type="date" id="histEnd" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                    </div>
+                    <button class="btn" style="grid-column:1;padding:8px;background:#0066cc;color:white;border:none;border-radius:4px;cursor:pointer;font-weight:600;" onclick="(function(){ const s=document.getElementById('histStart').value; const e=document.getElementById('histEnd').value; if(!s) return alert('Informe a data inicial'); mostrarHistoricoUsuario(${id_usuario},0,s,e,false); })()">🔍 Aplicar</button>
+                    <button class="btn ghost" style="grid-column:2;padding:8px;background:#999;color:white;border:none;border-radius:4px;cursor:pointer;font-weight:600;" onclick="voltarParaEstatisticas()">❌ Fechar</button>
                 </div>
             </div>
 
