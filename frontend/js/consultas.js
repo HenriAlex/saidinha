@@ -377,7 +377,7 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
             const dataSaidaFormatada = dataSaida.toLocaleDateString('pt-BR') + ' ' + dataSaida.toLocaleTimeString('pt-BR');
 
             html += `
-                <div class="card-saida" data-id-saida="${evento.id_saida}" data-id-usuario="${id_usuario}" data-data-saida="${evento.data_saida}" data-data-retorno="${evento.data_retorno || ''}" data-duracao="${evento.duracao}" data-observacoes="${(evento.observacoes || '').replace(/"/g, '&quot;')}" style="border-left: 4px solid ${statusCor}; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s;">
+                <div style="border-left: 4px solid ${statusCor}; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s;">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                         <div>
                             <span style="background: ${statusCor}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
@@ -393,7 +393,7 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                         <strong>Motivo:</strong> ${evento.motivo}
                     </div>
                     ${evento.observacoes ? `<div style="color: #666; font-size: 13px; margin-top: 8px;">📝 ${evento.observacoes}</div>` : ''}
-                    <div style="margin-top: 10px; font-size: 12px; color: #0066cc; font-weight: 500;">🔗 Clique para ver detalhes e editar</div>
+                    <button class="btn-editar-retorno" data-id-saida="${evento.id_saida}" data-id-usuario="${id_usuario}" data-data-saida="${evento.data_saida}" data-data-retorno="${evento.data_retorno || ''}" data-duracao="${evento.duracao}" data-observacoes="${(evento.observacoes || '').replace(/"/g, '&quot;')}" style="margin-top: 12px; padding: 8px 12px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 13px;">✏️ Editar Retorno</button>
                 </div>
             `;
         });
@@ -405,20 +405,16 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
         if (container) {
             container.innerHTML = html;
 
-            // Adiciona event listeners aos cards de saída
+            // Adiciona event listeners aos botões de edição de retorno
             setTimeout(() => {
-                const cards = document.querySelectorAll('.card-saida');
-                console.log('🔍 Cards encontrados:', cards.length);
+                const botoes = document.querySelectorAll('.btn-editar-retorno');
+                console.log('🔍 Botões de edição encontrados:', botoes.length);
 
-                cards.forEach((card, idx) => {
-                    card.addEventListener('mouseenter', function() {
-                        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
-                    });
-                    card.addEventListener('mouseleave', function() {
-                        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
-                    });
-                    card.addEventListener('click', function(e) {
-                        console.log('✅ Click detectado no card!');
+                botoes.forEach((btn) => {
+                    btn.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        console.log('✅ Clique detectado no botão de edição!');
                         abrirDetalhesRetorno(
                             this.dataset.idSaida,
                             this.dataset.idUsuario,
@@ -430,8 +426,8 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                     });
                 });
 
-                if (cards.length === 0) {
-                    console.warn('⚠️ Nenhum card .card-saida encontrado!');
+                if (botoes.length === 0) {
+                    console.warn('⚠️ Nenhum botão .btn-editar-retorno encontrado!');
                 }
             }, 100);
 
