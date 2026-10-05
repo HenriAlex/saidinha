@@ -327,13 +327,14 @@ async function carregarSaidasDashboard() {
             itens.forEach(s => {
                 const nome = userMap[s.id_usuario] || s.nome_usuario || 'Desconhecido';
                 html += `
-                    <div class="dash-event" data-tone="amber">
+                    <div class="dash-event" data-tone="amber" data-saida-id="${s.id_saida}" data-usuario-id="${s.id_usuario}" data-data-saida="${s.data_saida}" style="position: relative;">
                         <time>${fmtHora(s._d)}</time>
                         ${avatarHTML(nome, 32)}
                         <div class="dash-event-body">
                             <strong>${esc(nome)}</strong>
                             <span>${esc(s.motivo || 'Sem motivo informado')}</span>
                         </div>
+                        <button class="btn-editar-timeline" data-saida-id="${s.id_saida}" data-usuario-id="${s.id_usuario}" data-data-saida="${s.data_saida}" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #0066cc; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s;">✏️ Editar</button>
                     </div>`;
             });
             html += '</div>';
@@ -341,6 +342,23 @@ async function carregarSaidasDashboard() {
         html += '</div>';
 
         container.innerHTML = html;
+
+        // Adiciona event listeners aos botões de edição na timeline
+        setTimeout(() => {
+            document.querySelectorAll('.btn-editar-timeline').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const usuarioId = this.dataset.usuarioId;
+                    const saidaId = this.dataset.saidaId;
+                    console.log('✏️ Editar saída:', saidaId, 'de usuário:', usuarioId);
+                    // Abre o modal de histórico do usuário
+                    if (typeof mostrarHistoricoUsuario === 'function') {
+                        mostrarHistoricoUsuario(usuarioId);
+                    }
+                });
+            });
+        }, 200);
     } catch (erro) {
         console.error('Erro:', erro);
         container.innerHTML = erroHTML(erro.message || 'Erro ao carregar saídas.');
