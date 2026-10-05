@@ -533,14 +533,27 @@ async function carregarRankingGeral() {
     container.innerHTML = skeletonHTML(5);
 
     try {
-        const [respUsers, respSaidas, respFaltas, respAtv] = await Promise.all([
-            fetch(`${API_BASE}/usuarios/`), fetch(`${API_BASE}/saidas/`), fetch(`${API_BASE}/faltas/`), fetch(`${API_BASE}/atividades/`)
-        ]);
-        const usuarios = respUsers.ok ? await respUsers.json() : [];
         const f = window.filtroConsultaAtualDash;
-        const saidas = filtrarPorPeriodo(respSaidas.ok ? await respSaidas.json() : [], 'data_saida', f.start_date, f.end_date);
+
+        // Constrói query string para os filtros
+        const params = new URLSearchParams();
+        if (f.periodo && f.periodo > 0) params.append('periodo', f.periodo);
+        if (f.mes_atual) params.append('mes_atual', 'true');
+        if (f.start_date) params.append('start_date', f.start_date);
+        if (f.end_date) params.append('end_date', f.end_date);
+
+        // Busca dados do relatório (que já calcula tempo de saídas)
+        const [respRelatorios, respFaltas, respAtv] = await Promise.all([
+            fetch(`${API_BASE}/relatorios/geral${params.size ? ('?' + params) : ''}`),
+            fetch(`${API_BASE}/faltas/`),
+            fetch(`${API_BASE}/atividades/`)
+        ]);
+
+        const relatorios = respRelatorios.ok ? await respRelatorios.json() : { usuarios: [] };
         const faltas = filtrarPorPeriodo(respFaltas.ok ? await respFaltas.json() : [], 'data_falta', f.start_date, f.end_date);
         const atividades = filtrarPorPeriodo(respAtv.ok ? await respAtv.json() : [], 'data_atividade', f.start_date, f.end_date);
+
+        const usuarios = relatorios.usuarios || [];
 
         if (usuarios.length === 0) {
             container.innerHTML = estadoVazioHTML('👥', 'Nenhum aluno cadastrado', 'Cadastre alunos para gerar o ranking.');
@@ -548,10 +561,22 @@ async function carregarRankingGeral() {
         }
 
         const ranking = somenteAlunos(usuarios).map(u => {
-            const s = saidas.filter(x => x.id_usuario === u.id_usuario).length;
+            const tempo_minutos = (u.total_horas * 60) + u.total_minutos;
             const fl = faltas.filter(x => x.id_usuario === u.id_usuario).length;
             const p = atividades.filter(x => x.id_usuario === u.id_usuario).reduce((acc, a) => acc + a.pontos, 0);
-            return { nome: u.nome, saidas: s, faltas: fl, pontos: p, score: (10 - fl) + (10 - s) + (p / 10) };
+
+            // Score baseado em: faltas, TEMPO DE SAÍDAS (não quantidade), e pontos
+            // Penaliza mais quem fica mais tempo fora (tempo em horas)
+            const tempo_horas = tempo_minutos / 60;
+            return {
+                nome: u.nome,
+                saidas: u.total_saidas,
+                tempo_horas: tempo_horas,
+                tempo_formatado: u.tempo_formatado,
+                faltas: fl,
+                pontos: p,
+                score: (10 - fl) + (10 - tempo_horas) + (p / 10)
+            };
         }).sort((a, b) => b.score - a.score || a.nome.localeCompare(b.nome));
 
         let posicao = 1;
@@ -598,7 +623,7 @@ async function carregarRankingGeral() {
                 <div><small>Alunos avaliados</small><strong>${ranking.length}</strong></div>
                 <div><small>Média de pontuação</small><strong>${fmtNum(mediaScore)}</strong></div>
                 <div><small>Melhor pontuação</small><strong>${fmtNum(maxScore)}</strong></div>
-                <div class="dash-strip-info"><small>Como é calculado</small><code>(10 − faltas) + (10 − saídas) + pontos ÷ 10</code></div>
+                <div class="dash-strip-info"><small>Como é calculado</small><code>(10 − faltas) + (10 − tempo em horas) + pontos ÷ 10</code></div>
             </div>`;
 
         html += tituloSecaoHTML('Classificação completa', 'empates compartilham a mesma posição');
@@ -618,7 +643,7 @@ async function carregarRankingGeral() {
                         <div class="rank-stats">
                             <span title="Pontos em atividades">⭐ ${fmtNum(al.pontos, 0)}</span>
                             <span title="Faltas">❌ ${al.faltas}</span>
-                            <span title="Saídas">📤 ${al.saidas}</span>
+                            <span title="Tempo fora da sala">⏱️ ${al.tempo_formatado}</span>
                             <span class="rank-pct">${p}%</span>
                         </div>
                     </div>
