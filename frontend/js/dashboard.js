@@ -40,6 +40,17 @@ function fmtDataLonga(d){ return capitalizar(d.toLocaleDateString('pt-BR', { wee
 function fmtHora(d)     { return d.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }); }
 function fmtNum(n, casas = 1) { return Number(n).toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: casas }); }
 
+function calcularDuracao(dataSaidaStr, dataRetornoStr) {
+    try {
+        const dataSaida = new Date(dataSaidaStr.replace(' ', 'T'));
+        const dataRetorno = new Date(dataRetornoStr.replace(' ', 'T'));
+        const minutos = Math.floor((dataRetorno - dataSaida) / (1000 * 60));
+        return Math.max(0, minutos);
+    } catch (e) {
+        return 0;
+    }
+}
+
 function filtrarPorPeriodo(lista, campo, inicio, fim) {
     if (!inicio || !fim) return lista;
     return lista.filter(item => {
@@ -200,9 +211,14 @@ async function carregarSaidasDashboard() {
     container.innerHTML = skeletonHTML();
 
     try {
-        const [respSaidas, respUsers] = await Promise.all([fetch(`${API_BASE}/saidas/`), fetch(`${API_BASE}/usuarios/`)]);
+        const [respSaidas, respRetornos, respUsers] = await Promise.all([
+            fetch(`${API_BASE}/saidas/`),
+            fetch(`${API_BASE}/retornos/`),
+            fetch(`${API_BASE}/usuarios/`)
+        ]);
         if (!respSaidas.ok) throw new Error('Não foi possível carregar as saídas.');
         const todas = await respSaidas.json();
+        const todosRetornos = respRetornos.ok ? await respRetornos.json() : [];
         const usuarios = respUsers.ok ? await respUsers.json() : [];
         const userMap = Object.fromEntries(usuarios.map(u => [u.id_usuario, u.nome]));
         const f = window.filtroConsultaAtualDash;
@@ -215,37 +231,61 @@ async function carregarSaidasDashboard() {
             return;
         }
 
+        // Cria mapa de retornos por id_saida
+        const retornoMap = Object.fromEntries(todosRetornos.map(r => [r.id_saida, r]));
+
+        // Calcula tempo fora por aluno
         const porAluno = {};
         const porMotivo = {};
+        let totalMinutosGeral = 0;
+
         saidas.forEach(s => {
-            porAluno[s.id_usuario] = (porAluno[s.id_usuario] || 0) + 1;
+            const retorno = retornoMap[s.id_saida];
+            const duracao = retorno ? calcularDuracao(s.data_saida, retorno.data_retorno) : 0;
+
+            if (!porAluno[s.id_usuario]) {
+                porAluno[s.id_usuario] = { quantidade: 0, minutos: 0 };
+            }
+            porAluno[s.id_usuario].quantidade += 1;
+            porAluno[s.id_usuario].minutos += duracao;
+            totalMinutosGeral += duracao;
+
             const m = (s.motivo || 'Não informado').trim();
             porMotivo[m] = (porMotivo[m] || 0) + 1;
         });
 
+        // Ordena por tempo fora (decrescente), depois por quantidade
+        const rankAlunos = Object.entries(porAluno)
+            .map(([id, dados]) => [id, dados.quantidade, dados.minutos])
+            .sort((a, b) => b[2] - a[2] || b[1] - a[1]);
+
         const totalAlunos = Math.max(1, somenteAlunos(usuarios).length);
-        const rankAlunos = Object.entries(porAluno).sort((a, b) => b[1] - a[1]);
-        const [topId, topQtd] = rankAlunos[0];
+        const [topId, topQtd, topMinutos] = rankAlunos[0];
         const [motivoTop, motivoQtd] = Object.entries(porMotivo).sort((a, b) => b[1] - a[1])[0];
-        const maxAluno = topQtd;
+        const maxMinutos = topMinutos || 1;
+        const horasGerais = Math.floor(totalMinutosGeral / 60);
+        const minutosGerais = totalMinutosGeral % 60;
 
         let html = kpisHTML([
             { icone: '📤', rotulo: 'Total de saídas', valor: saidas.length, delta: deltaHTML(saidas.length, anteriores?.length, true), tom: 'amber' },
-            { icone: '👥', rotulo: 'Alunos com saída', valor: rankAlunos.length, sub: `de ${totalAlunos} alunos · ${fmtNum(saidas.length / totalAlunos)} por aluno`, tom: 'cyan' },
-            { icone: '🔝', rotulo: 'Mais saídas', valor: esc(userMap[topId] || 'Desconhecido'), sub: `${topQtd} ${topQtd === 1 ? 'saída' : 'saídas'}`, tom: 'rose', texto: true },
+            { icone: '⏱️', rotulo: 'Tempo total fora', valor: `${horasGerais}h ${minutosGerais}min`, sub: `${totalMinutosGeral} minutos`, tom: 'rose' },
+            { icone: '👥', rotulo: 'Alunos com saída', valor: rankAlunos.length, sub: `de ${totalAlunos} alunos`, tom: 'cyan' },
             { icone: '💬', rotulo: 'Motivo mais comum', valor: esc(motivoTop), sub: `${motivoQtd}× · ${fmtNum(motivoQtd / saidas.length * 100, 0)}% do total`, tom: 'violet', texto: true }
         ]);
 
-        html += tituloSecaoHTML('Distribuição por aluno', `${rankAlunos.length} ${rankAlunos.length === 1 ? 'aluno' : 'alunos'}`);
+        html += tituloSecaoHTML('Tempo fora por aluno', `${rankAlunos.length} ${rankAlunos.length === 1 ? 'aluno' : 'alunos'}`);
         html += '<div class="dash-ranklist">';
-        rankAlunos.slice(0, 8).forEach(([id, qtd]) => {
+        rankAlunos.slice(0, 8).forEach(([id, qtd, minutos]) => {
             const nome = userMap[id] || 'Desconhecido';
+            const horas = Math.floor(minutos / 60);
+            const mins = minutos % 60;
+            const tempoTexto = horas > 0 ? `${horas}h ${mins}min` : `${mins}min`;
             html += `
                 <div class="dash-rankrow">
                     ${avatarHTML(nome, 30)}
                     <div class="dash-rankrow-body">
-                        <div class="dash-rankrow-head"><span>${esc(nome)}</span><strong>${qtd}</strong></div>
-                        ${barraHTML(qtd / maxAluno * 100, 'amber')}
+                        <div class="dash-rankrow-head"><span>${esc(nome)}</span><strong>${tempoTexto}</strong><small>${qtd} saída${qtd === 1 ? '' : 's'}</small></div>
+                        ${barraHTML(minutos / maxMinutos * 100, 'rose')}
                     </div>
                 </div>`;
         });

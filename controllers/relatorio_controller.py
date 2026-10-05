@@ -231,8 +231,12 @@ def estatisticas_geral(periodo: int = 0, mes_atual: bool = False, start_date: st
             # Se houver erro, continua com próximo usuário.
             continue
 
-    # Ordena por total de saídas (decrescente) — ranking "tradicional".
-    estatisticas.sort(key=lambda x: x['total_saidas'], reverse=True)
+    # Ordena por tempo total fora (em minutos, decrescente) — ranking por tempo
+    # Quando há empate no tempo, usa total de saídas como desempate
+    estatisticas.sort(key=lambda x: (
+        x['total_horas'] * 60 + x['total_minutos'],
+        x['total_saidas']
+    ), reverse=True)
 
     # Calcula totalizadores considerando apenas quem teve ao menos
     # uma saída no período (para não distorcer as médias com zeros).

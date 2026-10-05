@@ -123,40 +123,49 @@ async function carregarEstatisticasGerais(){
         // SEÇÃO 0: Filtro por período (chips + intervalo customizado)
         let html = renderFiltroPeriodoHTML();
 
-        // SEÇÃO 1: Cards com resumo geral
+        // SEÇÃO 1: Cards com resumo geral de saídas
         html += `
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; margin: 20px 0 30px;">
 
-                <!-- Card 1: Total de Saídas -->
+                <!-- Card 1: Quantidade Total de Saídas -->
                 <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                    <div style="font-size: 14px; opacity: 0.9;">Total de Saídas</div>
+                    <div style="font-size: 14px; opacity: 0.9;">Quantidade de Saídas</div>
                     <div style="font-size: 42px; font-weight: bold; margin: 10px 0;">📤 ${dados.resumo_geral.total_saidas_geral}</div>
                     <div style="font-size: 12px; opacity: 0.8;">${dados.resumo_geral.total_usuarios_com_saidas} alunos com saídas</div>
                 </div>
 
-                <!-- Card 2: Total de Horas -->
+                <!-- Card 2: Tempo Total Fora (Horas) -->
                 <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                    <div style="font-size: 14px; opacity: 0.9;">Tempo Total Fora</div>
-                    <div style="font-size: 42px; font-weight: bold; margin: 10px 0;">⏱️ ${dados.resumo_geral.total_horas_geral}h</div>
-                    <div style="font-size: 12px; opacity: 0.8;">${dados.resumo_geral.total_minutos_geral} minutos</div>
+                    <div style="font-size: 14px; opacity: 0.9;">Tempo Total Fora da Sala</div>
+                    <div style="font-size: 42px; font-weight: bold; margin: 10px 0;">⏱️ ${dados.resumo_geral.total_horas_geral}h ${dados.resumo_geral.total_minutos_geral}min</div>
+                    <div style="font-size: 12px; opacity: 0.8;">${Math.round(dados.resumo_geral.total_horas_geral + dados.resumo_geral.total_minutos_geral/60)} horas totais</div>
                 </div>
 
-                <!-- Card 3: Média por Aluno -->
+                <!-- Card 3: Tempo Médio por Aluno -->
                 <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; padding: 25px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
-                    <div style="font-size: 14px; opacity: 0.9;">Média por Aluno</div>
-                    <div style="font-size: 42px; font-weight: bold; margin: 10px 0;">📊 ${Math.round(dados.resumo_geral.total_saidas_geral / (dados.resumo_geral.total_usuarios_com_saidas || 1))}</div>
-                    <div style="font-size: 12px; opacity: 0.8;">saídas por aluno</div>
+                    <div style="font-size: 14px; opacity: 0.9;">Tempo Médio por Aluno</div>
+                    <div style="font-size: 42px; font-weight: bold; margin: 10px 0;">📊 ${(() => {
+                        const totalMin = dados.resumo_geral.total_horas_geral * 60 + dados.resumo_geral.total_minutos_geral;
+                        const mediaMin = Math.round(totalMin / (dados.resumo_geral.total_usuarios_com_saidas || 1));
+                        const h = Math.floor(mediaMin / 60);
+                        const m = mediaMin % 60;
+                        return h > 0 ? (h + 'h ' + m + 'min') : (m + 'min');
+                    })()}</div>
+                    <div style="font-size: 12px; opacity: 0.8;">por aluno com saídas</div>
                 </div>
 
             </div>
         `;
 
-        // SEÇÃO 2: Tabela de Ranking (quem mais sai)
+        // SEÇÃO 2: Tabela de Ranking (quem fica mais tempo fora)
         const comSaidas = dados.usuarios.filter(u => u.total_saidas > 0);
         html += `
             <h3 style="margin: 30px 0 20px 0; color: #333; border-bottom: 2px solid #667eea; padding-bottom: 10px;">
-                🏆 Ranking de Alunos por Saídas
+                🏆 Ranking de Alunos por Tempo Fora da Sala
             </h3>
+            <p style="color: #666; margin: 0 0 15px 0; font-size: 13px;">
+                🔍 Classificação baseada no tempo total que cada aluno ficou fora. Quem fica mais tempo fora aparece primeiro.
+            </p>
         `;
 
         if (comSaidas.length === 0){
