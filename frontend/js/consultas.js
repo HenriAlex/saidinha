@@ -377,7 +377,7 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
             const dataSaidaFormatada = dataSaida.toLocaleDateString('pt-BR') + ' ' + dataSaida.toLocaleTimeString('pt-BR');
 
             html += `
-                <div style="border-left: 4px solid ${statusCor}; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+                <div style="border-left: 4px solid ${statusCor}; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" onmouseout="this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)'" onclick="abrirDetalhesRetorno(${evento.id_saida}, ${id_usuario}, '${evento.data_saida}', '${evento.data_retorno || ''}', '${evento.duracao}', '${evento.observacoes || ''}')">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                         <div>
                             <span style="background: ${statusCor}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
@@ -393,6 +393,7 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                         <strong>Motivo:</strong> ${evento.motivo}
                     </div>
                     ${evento.observacoes ? `<div style="color: #666; font-size: 13px; margin-top: 8px;">📝 ${evento.observacoes}</div>` : ''}
+                    <div style="margin-top: 10px; font-size: 12px; color: #0066cc; font-weight: 500;">🔗 Clique para ver detalhes e editar</div>
                 </div>
             `;
         });
@@ -425,6 +426,178 @@ function voltarParaEstatisticas(){
         container.innerHTML = '';
     }
     carregarEstatisticasGerais();
+}
+
+// ============================================================
+// POPUP DE DETALHES E EDIÇÃO DE RETORNO
+// ============================================================
+
+// Armazena dados do retorno atual sendo editado
+window.dadosRetornoEmEdicao = null;
+
+async function abrirDetalhesRetorno(id_saida, id_usuario, dataSaidaStr, dataRetornoStr, duracao, observacoes) {
+    // Busca os detalhes da saída
+    try {
+        const respSaida = await fetch(`${API_RELATORIOS}/saidas/${id_saida}`);
+        const saida = respSaida.ok ? await respSaida.json() : null;
+
+        if (!saida) {
+            alert('Erro ao carregar detalhes da saída');
+            return;
+        }
+
+        // Formata datas para exibição
+        const dataSaida = new Date(dataSaidaStr.replace(' ', 'T'));
+        const dataSaidaFormatada = dataSaida.toLocaleDateString('pt-BR') + ' às ' + dataSaida.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+
+        let dataRetornoFormatada = 'Pendente';
+        let horaRetornoEditar = '';
+        let dataRetornoEditar = '';
+
+        if (dataRetornoStr) {
+            const dataRetorno = new Date(dataRetornoStr.replace(' ', 'T'));
+            dataRetornoFormatada = dataRetorno.toLocaleDateString('pt-BR') + ' às ' + dataRetorno.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit'});
+            dataRetornoEditar = dataRetorno.toISOString().split('T')[0];
+            horaRetornoEditar = dataRetorno.toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit', hour12: false});
+        }
+
+        // Armazena dados para possível edição
+        window.dadosRetornoEmEdicao = {
+            id_saida: id_saida,
+            id_usuario: id_usuario,
+            data_saida: dataSaidaStr,
+            data_retorno: dataRetornoStr || null
+        };
+
+        // Cria o modal HTML
+        const modal = document.createElement('div');
+        modal.id = 'modalDetalhesRetorno';
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: flex; align-items: center;
+            justify-content: center; z-index: 10000;
+        `;
+
+        modal.innerHTML = `
+            <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                    <h2 style="margin: 0; color: #333;">📋 Detalhes da Saída</h2>
+                    <button onclick="document.getElementById('modalDetalhesRetorno').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">✕</button>
+                </div>
+
+                <div style="background: #f9f9f9; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 12px; color: #666; font-weight: 600; margin-bottom: 4px;">📤 Data e Hora de Saída</label>
+                        <div style="font-size: 16px; color: #333; font-weight: 500;">${dataSaidaFormatada}</div>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; color: #666; font-weight: 600; margin-bottom: 4px;">Motivo</label>
+                        <div style="font-size: 14px; color: #555;">${saida.motivo || 'Não informado'}</div>
+                    </div>
+                </div>
+
+                <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="margin-bottom: 12px;">
+                        <label style="display: block; font-size: 12px; color: #666; font-weight: 600; margin-bottom: 4px;">🔄 Data e Hora de Retorno</label>
+                        <div style="font-size: 16px; color: #333; font-weight: 500;" id="dataRetornoDisplay">${dataRetornoFormatada}</div>
+                    </div>
+                    <div>
+                        <label style="display: block; font-size: 12px; color: #666; font-weight: 600; margin-bottom: 4px;">⏱️ Duração</label>
+                        <div style="font-size: 14px; color: #555;" id="duracaoDisplay">${duracao}</div>
+                    </div>
+                </div>
+
+                <div style="border-top: 1px solid #ddd; padding-top: 20px; margin-bottom: 20px;">
+                    <h3 style="margin: 0 0 15px 0; color: #333; font-size: 14px;">✏️ Editar Retorno</h3>
+
+                    <div style="margin-bottom: 12px;">
+                        <label for="dataRetornoEdicao" style="display: block; font-size: 12px; color: #666; font-weight: 600; margin-bottom: 4px;">Data</label>
+                        <input type="date" id="dataRetornoEdicao" value="${dataRetornoEditar}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+
+                    <div style="margin-bottom: 12px;">
+                        <label for="horaRetornoEdicao" style="display: block; font-size: 12px; color: #666; font-weight: 600; margin-bottom: 4px;">Hora (HH:MM)</label>
+                        <input type="time" id="horaRetornoEdicao" value="${horaRetornoEditar}" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    </div>
+
+                    <div style="margin-bottom: 15px;">
+                        <label for="observacoesRetorno" style="display: block; font-size: 12px; color: #666; font-weight: 600; margin-bottom: 4px;">Observações (opcional)</label>
+                        <textarea id="observacoesRetorno" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; min-height: 80px; resize: vertical;" placeholder="Adicione observações sobre o retorno...">${observacoes || ''}</textarea>
+                    </div>
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="salvarEdicaoRetorno()" style="flex: 1; padding: 12px; background: #4caf50; color: white; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">💾 Salvar Alterações</button>
+                    <button onclick="document.getElementById('modalDetalhesRetorno').remove()" style="flex: 1; padding: 12px; background: #ccc; color: #333; border: none; border-radius: 6px; font-weight: 600; cursor: pointer; font-size: 14px;">❌ Cancelar</button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+    } catch (err) {
+        console.error('Erro:', err);
+        alert('Erro ao carregar detalhes: ' + err.message);
+    }
+}
+
+async function salvarEdicaoRetorno() {
+    const dados = window.dadosRetornoEmEdicao;
+    if (!dados) return;
+
+    const dataEdicao = document.getElementById('dataRetornoEdicao').value;
+    const horaEdicao = document.getElementById('horaRetornoEdicao').value;
+    const observacoesEdicao = document.getElementById('observacoesRetorno').value;
+
+    // Validação básica
+    if (!dataEdicao || !horaEdicao) {
+        alert('Por favor, preencha a data e hora do retorno');
+        return;
+    }
+
+    const novaDataRetorno = `${dataEdicao} ${horaEdicao}:00`;
+
+    try {
+        // Primeiro, busca o ID do retorno
+        const respRetornos = await fetch(`${API_RELATORIOS}/retornos/saida/${dados.id_saida}`);
+        const retornos = respRetornos.ok ? await respRetornos.json() : [];
+
+        if (retornos.length === 0) {
+            alert('Nenhum retorno encontrado para esta saída. Registre um retorno primeiro.');
+            return;
+        }
+
+        const idRetorno = retornos[0].id_retorno;
+
+        // Atualiza o retorno
+        const respAtualizar = await fetch(`${API_RELATORIOS}/retornos/${idRetorno}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                id_saida: dados.id_saida,
+                id_usuario: dados.id_usuario,
+                data_retorno_customizada: novaDataRetorno,
+                observacoes: observacoesEdicao,
+                id_usuario_logado: 1,
+                id_perfil_logado: 1
+            })
+        });
+
+        if (!respAtualizar.ok) {
+            const erro = await respAtualizar.json();
+            alert('Erro ao salvar: ' + (erro.detail || 'Erro desconhecido'));
+            return;
+        }
+
+        // Fecha modal e recarrega histórico
+        document.getElementById('modalDetalhesRetorno').remove();
+        alert('Retorno atualizado com sucesso!');
+
+        // Recarrega o histórico
+        mostrarHistoricoUsuario(dados.id_usuario);
+    } catch (err) {
+        console.error('Erro:', err);
+        alert('Erro ao salvar: ' + err.message);
+    }
 }
 
 // ============================================================

@@ -34,7 +34,9 @@
       "Bash(python -m http.server 5500 --bind 127.0.0.1)",
       "Read(//c/Users/alex.henrique/AppData/Local/Temp/dash/**)",
       "PowerShell(Get-ChildItem -Path \"G:\\\\Meu Drive\\\\Ensino Profissionalzante\\\\Desenvolvimento de Sistemas\\\\TCC\\\\Saidinha\" -Recurse -File | Where-Object {$_.Extension -eq '.py' -or $_.Extension -eq '.html'} | Sort-Object FullName)",
-      "PowerShell(Get-ChildItem -Path \"G:\\\\Meu Drive\\\\Ensino Profissionalzante\\\\Desenvolvimento de Sistemas\\\\TCC\\\\Saidinha\" -Recurse -File -Exclude '.venv' | Where-Object {$_.FullName -notmatch '\\\\.venv'} | Sort-Object FullName | Select-Object FullName)"
+      "PowerShell(Get-ChildItem -Path \"G:\\\\Meu Drive\\\\Ensino Profissionalzante\\\\Desenvolvimento de Sistemas\\\\TCC\\\\Saidinha\" -Recurse -File -Exclude '.venv' | Where-Object {$_.FullName -notmatch '\\\\.venv'} | Sort-Object FullName | Select-Object FullName)",
+      "Bash(curl -s http://localhost:8000/)",
+      "Bash(curl -s http://localhost:8000/relatorios/geral)"
     ]
   }
 }
