@@ -452,12 +452,11 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
 
 // Volta para exibição de estatísticas gerais
 function voltarParaEstatisticas(){
-    const container = document.getElementById('historicoContainer');
-    if (container) {
-        container.style.display = 'none';
-        container.innerHTML = '';
+    // Fecha o modal de histórico
+    const modal = document.getElementById('modalHistorico');
+    if (modal) {
+        modal.remove();
     }
-    carregarEstatisticasGerais();
 }
 
 // ============================================================
