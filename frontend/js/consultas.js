@@ -442,25 +442,25 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                     ${evento.observacoes ? `<div style="color: #4b5563; font-size: 13px; margin-top: 12px; background: #f3f4f6; padding: 12px; border-radius: 8px; border-left: 4px solid #667eea;">📝 <strong style="color: #1f2937;">Observações:</strong> ${evento.observacoes}</div>` : ''}
 
                     <!-- Formulário de Edição (inicialmente oculto) -->
-                    <div class="form-edicao-retorno-${evento.id_saida}" style="display: none; margin-top: 16px; padding: 16px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                    <div class="form-edicao-inline" data-id-saida="${evento.id_saida}" style="display: none; margin-top: 16px; padding: 16px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
                         <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 14px;">✏️ Editar Retorno</h4>
                         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
                             <div>
                                 <label style="font-size: 12px; color: #374151; display: block; margin-bottom: 4px; font-weight: 600;">📅 Data</label>
-                                <input type="date" class="input-data-retorno-${evento.id_saida}" value="${dataRetornoEditar}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;" />
+                                <input type="date" data-input-data="${evento.id_saida}" value="${dataRetornoEditar}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;" />
                             </div>
                             <div>
                                 <label style="font-size: 12px; color: #374151; display: block; margin-bottom: 4px; font-weight: 600;">🕐 Hora</label>
-                                <input type="time" class="input-hora-retorno-${evento.id_saida}" value="${horaRetornoEditar}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;" />
+                                <input type="time" data-input-hora="${evento.id_saida}" value="${horaRetornoEditar}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;" />
                             </div>
                         </div>
                         <div>
                             <label style="font-size: 12px; color: #374151; display: block; margin-bottom: 4px; font-weight: 600;">📝 Observações</label>
-                            <input type="text" class="input-obs-retorno-${evento.id_saida}" value="${evento.observacoes || ''}" placeholder="Adicione uma observação..." style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;" />
+                            <input type="text" data-input-obs="${evento.id_saida}" value="${evento.observacoes || ''}" placeholder="Adicione uma observação..." style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;" />
                         </div>
                         <div style="display: flex; gap: 8px; margin-top: 12px;">
-                            <button class="btn-salvar-retorno-inline" data-id-saida="${evento.id_saida}" data-id-usuario="${id_usuario}" style="flex: 1; padding: 8px 12px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s;">💾 Salvar</button>
-                            <button class="btn-cancelar-edicao" data-id-saida="${evento.id_saida}" style="flex: 1; padding: 8px 12px; background: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s;">❌ Cancelar</button>
+                            <button class="btn-salvar-inline" data-id-saida="${evento.id_saida}" data-id-usuario="${id_usuario}" style="flex: 1; padding: 8px 12px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s;">💾 Salvar</button>
+                            <button class="btn-cancelar-inline" data-id-saida="${evento.id_saida}" style="flex: 1; padding: 8px 12px; background: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s;">❌ Cancelar</button>
                         </div>
                     </div>
 
@@ -481,30 +481,40 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
 
         // Adiciona event listeners aos botões de edição inline
         setTimeout(() => {
+            console.log('🔍 Procurando botões de edição...');
+            const botoes = document.querySelectorAll('.btn-editar-retorno');
+            console.log('✅ Botões encontrados:', botoes.length);
+
             // Botões para abrir/fechar formulário inline
-            document.querySelectorAll('.btn-editar-retorno').forEach(btn => {
+            botoes.forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
+                    console.log('🖱️ Botão clicado, ID:', this.dataset.idSaida);
                     const idSaida = this.dataset.idSaida;
-                    const formulario = document.querySelector(`.form-edicao-retorno-${idSaida}`);
+                    const formulario = document.querySelector(`.form-edicao-inline[data-id-saida="${idSaida}"]`);
+                    console.log('📝 Formulário encontrado:', !!formulario);
                     if (formulario) {
                         formulario.style.display = formulario.style.display === 'none' ? 'block' : 'none';
                         if (formulario.style.display === 'block') {
                             this.textContent = '▲ Fechar Edição';
+                            console.log('✅ Formulário aberto');
                         } else {
                             this.textContent = '✏️ Editar Retorno';
+                            console.log('✅ Formulário fechado');
                         }
+                    } else {
+                        console.warn('⚠️ Formulário não encontrado para ID:', idSaida);
                     }
                 });
             });
 
             // Botões para cancelar edição
-            document.querySelectorAll('.btn-cancelar-edicao').forEach(btn => {
+            document.querySelectorAll('.btn-cancelar-inline').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     const idSaida = this.dataset.idSaida;
-                    const formulario = document.querySelector(`.form-edicao-retorno-${idSaida}`);
+                    const formulario = document.querySelector(`.form-edicao-inline[data-id-saida="${idSaida}"]`);
                     const botaoEditar = document.querySelector(`[data-id-saida="${idSaida}"].btn-editar-retorno`);
                     if (formulario) {
                         formulario.style.display = 'none';
@@ -514,14 +524,14 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
             });
 
             // Botões para salvar edição inline
-            document.querySelectorAll('.btn-salvar-retorno-inline').forEach(btn => {
+            document.querySelectorAll('.btn-salvar-inline').forEach(btn => {
                 btn.addEventListener('click', async function(e) {
                     e.preventDefault();
                     const idSaida = this.dataset.idSaida;
                     const idUsuario = this.dataset.idUsuario;
-                    const dataRetorno = document.querySelector(`.input-data-retorno-${idSaida}`).value;
-                    const horaRetorno = document.querySelector(`.input-hora-retorno-${idSaida}`).value;
-                    const observacoes = document.querySelector(`.input-obs-retorno-${idSaida}`).value;
+                    const dataRetorno = document.querySelector(`input[data-input-data="${idSaida}"]`).value;
+                    const horaRetorno = document.querySelector(`input[data-input-hora="${idSaida}"]`).value;
+                    const observacoes = document.querySelector(`input[data-input-obs="${idSaida}"]`).value;
 
                     if (!dataRetorno || !horaRetorno) {
                         alert('Informe data e hora do retorno');
@@ -557,7 +567,7 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                     }
                 });
             });
-        }, 100);
+        }, 300);
 
         // Se existirem inputs de data, preenche com valores do filtro atual
         try{
