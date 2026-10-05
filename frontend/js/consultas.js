@@ -407,7 +407,10 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
 
             // Adiciona event listeners aos cards de saída
             setTimeout(() => {
-                document.querySelectorAll('.card-saida').forEach(card => {
+                const cards = document.querySelectorAll('.card-saida');
+                console.log('🔍 Cards encontrados:', cards.length);
+
+                cards.forEach((card, idx) => {
                     card.addEventListener('mouseenter', function() {
                         this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
                     });
@@ -415,18 +418,22 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                         this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
                     });
                     card.addEventListener('click', function(e) {
-                        e.preventDefault();
+                        console.log('✅ Click detectado no card!');
                         abrirDetalhesRetorno(
                             this.dataset.idSaida,
                             this.dataset.idUsuario,
                             this.dataset.dataSaida,
                             this.dataset.dataRetorno,
                             this.dataset.duracao,
-                            this.dataset.observacoes.replace(/&quot;/g, '"')
+                            (this.dataset.observacoes || '').replace(/&quot;/g, '"')
                         );
                     });
                 });
-            }, 50);
+
+                if (cards.length === 0) {
+                    console.warn('⚠️ Nenhum card .card-saida encontrado!');
+                }
+            }, 100);
 
             // Se existirem inputs de data, preenche com valores do filtro atual
             try{
