@@ -377,7 +377,7 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
             const dataSaidaFormatada = dataSaida.toLocaleDateString('pt-BR') + ' ' + dataSaida.toLocaleTimeString('pt-BR');
 
             html += `
-                <div style="border-left: 4px solid ${statusCor}; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s;" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.15)'" onmouseout="this.style.boxShadow='0 2px 4px rgba(0,0,0,0.05)'" onclick="abrirDetalhesRetorno(${evento.id_saida}, ${id_usuario}, '${evento.data_saida}', '${evento.data_retorno || ''}', '${evento.duracao}', '${evento.observacoes || ''}')">
+                <div class="card-saida" data-id-saida="${evento.id_saida}" data-id-usuario="${id_usuario}" data-data-saida="${evento.data_saida}" data-data-retorno="${evento.data_retorno || ''}" data-duracao="${evento.duracao}" data-observacoes="${(evento.observacoes || '').replace(/"/g, '&quot;')}" style="border-left: 4px solid ${statusCor}; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); cursor: pointer; transition: all 0.3s;">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
                         <div>
                             <span style="background: ${statusCor}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
@@ -404,6 +404,30 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
 
         if (container) {
             container.innerHTML = html;
+
+            // Adiciona event listeners aos cards de saída
+            setTimeout(() => {
+                document.querySelectorAll('.card-saida').forEach(card => {
+                    card.addEventListener('mouseenter', function() {
+                        this.style.boxShadow = '0 4px 12px rgba(0,0,0,0.15)';
+                    });
+                    card.addEventListener('mouseleave', function() {
+                        this.style.boxShadow = '0 2px 4px rgba(0,0,0,0.05)';
+                    });
+                    card.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        abrirDetalhesRetorno(
+                            this.dataset.idSaida,
+                            this.dataset.idUsuario,
+                            this.dataset.dataSaida,
+                            this.dataset.dataRetorno,
+                            this.dataset.duracao,
+                            this.dataset.observacoes.replace(/&quot;/g, '"')
+                        );
+                    });
+                });
+            }, 50);
+
             // Se existirem inputs de data, preenche com valores do filtro atual
             try{
                 if (start_date) document.getElementById('histStart').value = start_date;
