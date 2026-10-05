@@ -325,10 +325,11 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
     modal.id = 'modalHistorico';
     modal.style.cssText = `
         position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.5); display: flex; align-items: center;
-        justify-content: center; z-index: 9999;
+        background: rgba(0,0,0,0.4); display: flex; align-items: center;
+        justify-content: center; z-index: 9999; padding: 20px;
+        backdrop-filter: blur(2px);
     `;
-    modal.innerHTML = '<div style="background: white; padding: 40px; border-radius: 8px;">⏳ Carregando histórico...</div>';
+    modal.innerHTML = '<div style="background: white; padding: 40px; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.2);">⏳ Carregando histórico...</div>';
     document.body.appendChild(modal);
 
     try{
@@ -347,70 +348,98 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
 
         const dados = await resp.json();
 
-        // Header com controles de filtro
+        // Modal wrapper com container interno
         let html = `
-            <div style="margin-bottom: 12px; display:flex;flex-direction:column;gap:8px;">
-                <div style="display:flex;justify-content:space-between;align-items:center;">
-                    <div>
-                        <h2 style="color: #333; margin: 0 0 6px 0;">📋 Histórico de ${dados.nome_usuario}</h2>
-                        <div style="color:#666;">RA: <strong>${dados.ra_usuario}</strong> | Total: <strong>${dados.total_registros}</strong> saídas</div>
-                    </div>
-                    <div style="display:flex;gap:8px;align-items:center;">
-                        <button class="btn" onclick="mostrarHistoricoUsuario(${id_usuario},7)">Últimos 7 dias</button>
-                        <button class="btn" onclick="mostrarHistoricoUsuario(${id_usuario},15)">Últimos 15 dias</button>
-                        <button class="btn" onclick="mostrarHistoricoUsuario(${id_usuario},30)">Últimos 30 dias</button>
-                        <button class="btn" onclick="mostrarHistoricoUsuario(${id_usuario},0,null,null,true)">Mês atual</button>
-                    </div>
-                </div>
+            <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; backdrop-filter: blur(2px);">
+                <div style="background: white; border-radius: 16px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); max-width: 900px; width: 100%; max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column;">
 
-                <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;align-items:end;">
-                    <div>
-                        <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">📅 De</label>
-                        <input type="date" id="histStart" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
+                    <!-- Header do Modal -->
+                    <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 16px 16px 0 0; display: flex; justify-content: space-between; align-items: center; flex-shrink: 0;">
+                        <div>
+                            <h2 style="margin: 0 0 8px 0; font-size: 24px;">📋 Histórico de Saídas</h2>
+                            <p style="margin: 0; opacity: 0.9; font-size: 14px;">${dados.nome_usuario} | RA: <strong>${dados.ra_usuario}</strong></p>
+                        </div>
+                        <button onclick="voltarParaEstatisticas()" style="background: rgba(255,255,255,0.2); border: none; color: white; font-size: 28px; cursor: pointer; padding: 4px 8px; border-radius: 6px;">✕</button>
                     </div>
-                    <div>
-                        <label style="font-size:13px;color:#666;display:block;margin-bottom:4px;">📅 Até</label>
-                        <input type="date" id="histEnd" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:4px;" />
-                    </div>
-                    <button class="btn" style="grid-column:1;padding:8px;background:#0066cc;color:white;border:none;border-radius:4px;cursor:pointer;font-weight:600;" onclick="(function(){ const s=document.getElementById('histStart').value; const e=document.getElementById('histEnd').value; if(!s) return alert('Informe a data inicial'); mostrarHistoricoUsuario(${id_usuario},0,s,e,false); })()">🔍 Aplicar</button>
-                    <button class="btn ghost" style="grid-column:2;padding:8px;background:#999;color:white;border:none;border-radius:4px;cursor:pointer;font-weight:600;" onclick="voltarParaEstatisticas()">❌ Fechar</button>
-                </div>
-            </div>
 
-            <div style="display: flex; flex-direction: column; gap: 15px;">
+                    <!-- Conteúdo do Modal -->
+                    <div style="padding: 25px; overflow-y: auto; flex: 1;">
+
+                        <!-- Cards de Resumo -->
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 25px;">
+                            <div style="background: #f0f4ff; padding: 15px; border-radius: 10px; border-left: 4px solid #667eea;">
+                                <div style="font-size: 12px; color: #666; font-weight: 600; margin-bottom: 4px;">📊 Total de Saídas</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #333;">${dados.total_registros}</div>
+                            </div>
+                            <div style="background: #fff0f4; padding: 15px; border-radius: 10px; border-left: 4px solid #f5576c;">
+                                <div style="font-size: 12px; color: #666; font-weight: 600; margin-bottom: 4px;">⏱️ Tempo Total Fora</div>
+                                <div style="font-size: 24px; font-weight: 700; color: #333;">${dados.total_horas || 0}h ${dados.total_minutos || 0}min</div>
+                            </div>
+                        </div>
+
+                        <!-- Filtros -->
+                        <div style="background: #f9f9f9; padding: 20px; border-radius: 10px; margin-bottom: 25px; border: 1px solid #e0e0e0;">
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                                <button style="padding: 8px 12px; background: #667eea; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 12px;" onclick="mostrarHistoricoUsuario(${id_usuario},7)">📅 Últimos 7 dias</button>
+                                <button style="padding: 8px 12px; background: #764ba2; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 12px;" onclick="mostrarHistoricoUsuario(${id_usuario},15)">📅 Últimos 15 dias</button>
+                                <button style="padding: 8px 12px; background: #f5576c; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 12px;" onclick="mostrarHistoricoUsuario(${id_usuario},30)">📅 Últimos 30 dias</button>
+                                <button style="padding: 8px 12px; background: #4facfe; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500; font-size: 12px;" onclick="mostrarHistoricoUsuario(${id_usuario},0,null,null,true)">🈷️ Mês Atual</button>
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;">
+                                <div>
+                                    <label style="font-size: 11px; color: #666; display: block; margin-bottom: 4px; font-weight: 600;">📅 De</label>
+                                    <input type="date" id="histStart" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px;" />
+                                </div>
+                                <div>
+                                    <label style="font-size: 11px; color: #666; display: block; margin-bottom: 4px; font-weight: 600;">📅 Até</label>
+                                    <input type="date" id="histEnd" style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 6px; font-size: 13px;" />
+                                </div>
+                                <div style="display: flex; gap: 8px; align-items: flex-end;">
+                                    <button style="flex: 1; padding: 8px 12px; background: #0066cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px;" onclick="(function(){ const s=document.getElementById('histStart').value; const e=document.getElementById('histEnd').value; if(!s) return alert('Informe a data inicial'); mostrarHistoricoUsuario(${id_usuario},0,s,e,false); })()">🔍 Aplicar</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Lista de Saídas -->
+                        <div style="display: flex; flex-direction: column; gap: 12px;">
         `;
 
-        // Mostra cada saída como um card de timeline
+        // Mostra cada saída como um card profissional
         dados.historico.forEach((evento, index) => {
             const statusCor = evento.status === 'Retornou' ? '#4caf50' : '#ff9800';
             const statusIcon = evento.status === 'Retornou' ? '✓' : '⏳';
+            const bgCard = evento.status === 'Retornou' ? '#f0fdf4' : '#fffbf0';
 
             const dataSaida = new Date(evento.data_saida);
             const dataSaidaFormatada = dataSaida.toLocaleDateString('pt-BR') + ' ' + dataSaida.toLocaleTimeString('pt-BR');
 
             html += `
-                <div style="border-left: 4px solid ${statusCor}; padding: 15px; background: white; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transition: all 0.3s;">
-                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
-                        <div>
-                            <span style="background: ${statusCor}; color: white; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: 600;">
+                <div style="border-left: 5px solid ${statusCor}; padding: 16px; background: ${bgCard}; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); transition: all 0.3s; border: 1px solid ${statusCor}20;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                        <div style="flex: 1;">
+                            <span style="background: ${statusCor}; color: white; padding: 5px 14px; border-radius: 20px; font-size: 11px; font-weight: 700; display: inline-block;">
                                 ${statusIcon} ${evento.status}
                             </span>
                         </div>
-                        <div style="text-align: right; color: #666; font-size: 14px;">
-                            <div>${dataSaidaFormatada}</div>
-                            <div style="font-weight: 600; color: #333; margin-top: 5px; font-size: 16px;">⏱️ ${evento.duracao}</div>
+                        <div style="text-align: right;">
+                            <div style="color: #666; font-size: 12px; margin-bottom: 4px;">📅 ${dataSaidaFormatada}</div>
+                            <div style="font-weight: 700; color: #333; font-size: 18px;">⏱️ ${evento.duracao}</div>
                         </div>
                     </div>
-                    <div style="color: #333; margin: 10px 0;">
-                        <strong>Motivo:</strong> ${evento.motivo}
+                    <div style="color: #333; margin: 10px 0; font-size: 14px;">
+                        <strong>📌 Motivo:</strong> ${evento.motivo}
                     </div>
-                    ${evento.observacoes ? `<div style="color: #666; font-size: 13px; margin-top: 8px;">📝 ${evento.observacoes}</div>` : ''}
-                    <button class="btn-editar-retorno" data-id-saida="${evento.id_saida}" data-id-usuario="${id_usuario}" data-data-saida="${evento.data_saida}" data-data-retorno="${evento.data_retorno || ''}" data-duracao="${evento.duracao}" data-observacoes="${(evento.observacoes || '').replace(/"/g, '&quot;')}" style="margin-top: 12px; padding: 8px 12px; background: #0066cc; color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 13px;">✏️ Editar Retorno</button>
+                    ${evento.observacoes ? `<div style="color: #666; font-size: 12px; margin-top: 8px; background: white; padding: 8px; border-radius: 6px; border-left: 3px solid #667eea;">📝 <strong>Observações:</strong> ${evento.observacoes}</div>` : ''}
+                    <button class="btn-editar-retorno" data-id-saida="${evento.id_saida}" data-id-usuario="${id_usuario}" data-data-saida="${evento.data_saida}" data-data-retorno="${evento.data_retorno || ''}" data-duracao="${evento.duracao}" data-observacoes="${(evento.observacoes || '').replace(/"/g, '&quot;')}" style="margin-top: 12px; padding: 10px 16px; background: #0066cc; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 13px; transition: all 0.3s;">✏️ Editar Retorno</button>
                 </div>
             `;
         });
 
         html += `
+                        </div>
+                    </div>
+                </div>
             </div>
         `;
 
