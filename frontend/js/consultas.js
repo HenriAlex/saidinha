@@ -505,12 +505,12 @@ async function abrirDetalhesRetorno(id_saida, id_usuario, dataSaidaStr, dataReto
         modal.id = 'modalDetalhesRetorno';
         modal.style.cssText = `
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5); display: flex; align-items: center;
-            justify-content: center; z-index: 10000;
+            background: rgba(0,0,0,0.75); display: flex; align-items: center;
+            justify-content: center; z-index: 10000; overflow-y: auto;
         `;
 
         modal.innerHTML = `
-            <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto;">
+            <div style="background: white; border-radius: 12px; padding: 30px; max-width: 500px; width: 90%; box-shadow: 0 10px 40px rgba(0,0,0,0.3); max-height: 90vh; overflow-y: auto; margin: 20px 0;">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                     <h2 style="margin: 0; color: #333;">📋 Detalhes da Saída</h2>
                     <button onclick="document.getElementById('modalDetalhesRetorno').remove()" style="background: none; border: none; font-size: 24px; cursor: pointer; color: #999;">✕</button>
