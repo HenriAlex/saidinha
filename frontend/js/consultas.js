@@ -420,8 +420,11 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
             const dataSaida = new Date(evento.data_saida);
             const dataSaidaFormatada = dataSaida.toLocaleDateString('pt-BR') + ' ' + dataSaida.toLocaleTimeString('pt-BR');
 
+            const dataRetornoEditar = evento.data_retorno ? new Date(evento.data_retorno.replace(' ', 'T')).toISOString().split('T')[0] : '';
+            const horaRetornoEditar = evento.data_retorno ? new Date(evento.data_retorno.replace(' ', 'T')).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit', hour12: false}) : '';
+
             html += `
-                <div style="border-left: 5px solid ${statusCor}; padding: 18px; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.3s; border: 1px solid ${statusCor}30; hover: box-shadow 0 4px 20px rgba(0,0,0,0.1);">
+                <div style="border-left: 5px solid ${statusCor}; padding: 18px; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.3s; border: 1px solid ${statusCor}30; hover: box-shadow 0 4px 20px rgba(0,0,0,0.1);" data-card-saida="${evento.id_saida}">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 14px;">
                         <div style="flex: 1;">
                             <span style="background: linear-gradient(135deg, ${statusCor}, ${statusCor}dd); color: white; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block; box-shadow: 0 2px 8px ${statusCor}40;">
@@ -437,6 +440,30 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                         <strong style="color: #1f2937;">📌 Motivo:</strong> ${evento.motivo}
                     </div>
                     ${evento.observacoes ? `<div style="color: #4b5563; font-size: 13px; margin-top: 12px; background: #f3f4f6; padding: 12px; border-radius: 8px; border-left: 4px solid #667eea;">📝 <strong style="color: #1f2937;">Observações:</strong> ${evento.observacoes}</div>` : ''}
+
+                    <!-- Formulário de Edição (inicialmente oculto) -->
+                    <div class="form-edicao-retorno-${evento.id_saida}" style="display: none; margin-top: 16px; padding: 16px; background: #f9fafb; border-radius: 10px; border: 1px solid #e5e7eb;">
+                        <h4 style="margin: 0 0 12px 0; color: #1f2937; font-size: 14px;">✏️ Editar Retorno</h4>
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 12px;">
+                            <div>
+                                <label style="font-size: 12px; color: #374151; display: block; margin-bottom: 4px; font-weight: 600;">📅 Data</label>
+                                <input type="date" class="input-data-retorno-${evento.id_saida}" value="${dataRetornoEditar}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;" />
+                            </div>
+                            <div>
+                                <label style="font-size: 12px; color: #374151; display: block; margin-bottom: 4px; font-weight: 600;">🕐 Hora</label>
+                                <input type="time" class="input-hora-retorno-${evento.id_saida}" value="${horaRetornoEditar}" style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;" />
+                            </div>
+                        </div>
+                        <div>
+                            <label style="font-size: 12px; color: #374151; display: block; margin-bottom: 4px; font-weight: 600;">📝 Observações</label>
+                            <input type="text" class="input-obs-retorno-${evento.id_saida}" value="${evento.observacoes || ''}" placeholder="Adicione uma observação..." style="width: 100%; padding: 8px; border: 1px solid #d1d5db; border-radius: 6px; font-size: 13px;" />
+                        </div>
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button class="btn-salvar-retorno-inline" data-id-saida="${evento.id_saida}" data-id-usuario="${id_usuario}" style="flex: 1; padding: 8px 12px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s;">💾 Salvar</button>
+                            <button class="btn-cancelar-edicao" data-id-saida="${evento.id_saida}" style="flex: 1; padding: 8px 12px; background: #6b7280; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s;">❌ Cancelar</button>
+                        </div>
+                    </div>
+
                     <button class="btn-editar-retorno" data-id-saida="${evento.id_saida}" data-id-usuario="${id_usuario}" data-data-saida="${evento.data_saida}" data-data-retorno="${evento.data_retorno || ''}" data-duracao="${evento.duracao}" data-observacoes="${(evento.observacoes || '').replace(/"/g, '&quot;')}" style="margin-top: 14px; padding: 10px 18px; background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(0, 102, 204, 0.3)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0, 102, 204, 0.2)'">✏️ Editar Retorno</button>
                 </div>
             `;
@@ -452,30 +479,84 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
         // Atualiza o modal com o histórico
         modal.innerHTML = html;
 
-        // Adiciona event listeners aos botões de edição de retorno
+        // Adiciona event listeners aos botões de edição inline
         setTimeout(() => {
-            const botoes = document.querySelectorAll('.btn-editar-retorno');
-            console.log('🔍 Botões de edição encontrados:', botoes.length);
-
-            botoes.forEach((btn) => {
+            // Botões para abrir/fechar formulário inline
+            document.querySelectorAll('.btn-editar-retorno').forEach(btn => {
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('✅ Clique detectado no botão de edição!');
-                    abrirDetalhesRetorno(
-                        this.dataset.idSaida,
-                        this.dataset.idUsuario,
-                        this.dataset.dataSaida,
-                        this.dataset.dataRetorno,
-                        this.dataset.duracao,
-                        (this.dataset.observacoes || '').replace(/&quot;/g, '"')
-                    );
+                    const idSaida = this.dataset.idSaida;
+                    const formulario = document.querySelector(`.form-edicao-retorno-${idSaida}`);
+                    if (formulario) {
+                        formulario.style.display = formulario.style.display === 'none' ? 'block' : 'none';
+                        if (formulario.style.display === 'block') {
+                            this.textContent = '▲ Fechar Edição';
+                        } else {
+                            this.textContent = '✏️ Editar Retorno';
+                        }
+                    }
                 });
             });
 
-            if (botoes.length === 0) {
-                console.warn('⚠️ Nenhum botão .btn-editar-retorno encontrado!');
-            }
+            // Botões para cancelar edição
+            document.querySelectorAll('.btn-cancelar-edicao').forEach(btn => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    const idSaida = this.dataset.idSaida;
+                    const formulario = document.querySelector(`.form-edicao-retorno-${idSaida}`);
+                    const botaoEditar = document.querySelector(`[data-id-saida="${idSaida}"].btn-editar-retorno`);
+                    if (formulario) {
+                        formulario.style.display = 'none';
+                        if (botaoEditar) botaoEditar.textContent = '✏️ Editar Retorno';
+                    }
+                });
+            });
+
+            // Botões para salvar edição inline
+            document.querySelectorAll('.btn-salvar-retorno-inline').forEach(btn => {
+                btn.addEventListener('click', async function(e) {
+                    e.preventDefault();
+                    const idSaida = this.dataset.idSaida;
+                    const idUsuario = this.dataset.idUsuario;
+                    const dataRetorno = document.querySelector(`.input-data-retorno-${idSaida}`).value;
+                    const horaRetorno = document.querySelector(`.input-hora-retorno-${idSaida}`).value;
+                    const observacoes = document.querySelector(`.input-obs-retorno-${idSaida}`).value;
+
+                    if (!dataRetorno || !horaRetorno) {
+                        alert('Informe data e hora do retorno');
+                        return;
+                    }
+
+                    const dataRetornoFormatada = `${dataRetorno} ${horaRetorno}:00`;
+
+                    try {
+                        const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
+                        const idUsuarioLogado = usuarioLogado.id_usuario || 0;
+
+                        const resposta = await fetch(`${API_RELATORIOS}/retornos/${idSaida}`, {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                id_usuario: parseInt(idUsuarioLogado),
+                                data_retorno: dataRetornoFormatada,
+                                observacoes: observacoes
+                            })
+                        });
+
+                        if (!resposta.ok) {
+                            const erro = await resposta.json();
+                            alert('Erro: ' + (erro.detail || 'Falha ao salvar'));
+                            return;
+                        }
+
+                        alert('✅ Retorno atualizado com sucesso!');
+                        mostrarHistoricoUsuario(parseInt(idUsuario));
+                    } catch (erro) {
+                        alert('Erro: ' + erro.message);
+                    }
+                });
+            });
         }, 100);
 
         // Se existirem inputs de data, preenche com valores do filtro atual
