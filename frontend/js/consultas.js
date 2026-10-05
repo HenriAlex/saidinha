@@ -316,12 +316,20 @@ function renderRankingInversoHTML(rankingInverso){
 // agora permite filtros de período: periodo (dias), mes_atual, ou intervalo start_date/end_date (YYYY-MM-DD)
 async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = null, end_date = null, mes_atual = false){
 
-    const container = document.getElementById('historicoContainer');
+    // Remove modal anterior se existir
+    const modalAnterior = document.getElementById('modalHistorico');
+    if (modalAnterior) modalAnterior.remove();
 
-    if (container) {
-        container.innerHTML = '<p style="text-align: center; padding: 40px;">⏳ Carregando histórico...</p>';
-        container.style.display = 'block';
-    }
+    // Cria modal de carregamento
+    const modal = document.createElement('div');
+    modal.id = 'modalHistorico';
+    modal.style.cssText = `
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.5); display: flex; align-items: center;
+        justify-content: center; z-index: 9999;
+    `;
+    modal.innerHTML = '<div style="background: white; padding: 40px; border-radius: 8px;">⏳ Carregando histórico...</div>';
+    document.body.appendChild(modal);
 
     try{
         // Constrói query string conforme filtros
@@ -402,46 +410,43 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
             </div>
         `;
 
-        if (container) {
-            container.innerHTML = html;
+        // Atualiza o modal com o histórico
+        modal.innerHTML = html;
 
-            // Adiciona event listeners aos botões de edição de retorno
-            setTimeout(() => {
-                const botoes = document.querySelectorAll('.btn-editar-retorno');
-                console.log('🔍 Botões de edição encontrados:', botoes.length);
+        // Adiciona event listeners aos botões de edição de retorno
+        setTimeout(() => {
+            const botoes = document.querySelectorAll('.btn-editar-retorno');
+            console.log('🔍 Botões de edição encontrados:', botoes.length);
 
-                botoes.forEach((btn) => {
-                    btn.addEventListener('click', function(e) {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        console.log('✅ Clique detectado no botão de edição!');
-                        abrirDetalhesRetorno(
-                            this.dataset.idSaida,
-                            this.dataset.idUsuario,
-                            this.dataset.dataSaida,
-                            this.dataset.dataRetorno,
-                            this.dataset.duracao,
-                            (this.dataset.observacoes || '').replace(/&quot;/g, '"')
-                        );
-                    });
+            botoes.forEach((btn) => {
+                btn.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    console.log('✅ Clique detectado no botão de edição!');
+                    abrirDetalhesRetorno(
+                        this.dataset.idSaida,
+                        this.dataset.idUsuario,
+                        this.dataset.dataSaida,
+                        this.dataset.dataRetorno,
+                        this.dataset.duracao,
+                        (this.dataset.observacoes || '').replace(/&quot;/g, '"')
+                    );
                 });
+            });
 
-                if (botoes.length === 0) {
-                    console.warn('⚠️ Nenhum botão .btn-editar-retorno encontrado!');
-                }
-            }, 100);
+            if (botoes.length === 0) {
+                console.warn('⚠️ Nenhum botão .btn-editar-retorno encontrado!');
+            }
+        }, 100);
 
-            // Se existirem inputs de data, preenche com valores do filtro atual
-            try{
-                if (start_date) document.getElementById('histStart').value = start_date;
-                if (end_date) document.getElementById('histEnd').value = end_date;
-            }catch(e){}
-        }
+        // Se existirem inputs de data, preenche com valores do filtro atual
+        try{
+            if (start_date) document.getElementById('histStart').value = start_date;
+            if (end_date) document.getElementById('histEnd').value = end_date;
+        }catch(e){}
 
     }catch(err){
-        if (container) {
-            container.innerHTML = `<p style="color: red; padding: 20px;">❌ Erro: ${err.message}</p>`;
-        }
+        modal.innerHTML = `<div style="background: white; padding: 40px; border-radius: 8px; max-width: 600px;"><p style="color: red;">❌ Erro: ${err.message}</p><button class="btn" onclick="document.getElementById('modalHistorico').remove()">Fechar</button></div>`;
     }
 }
 
