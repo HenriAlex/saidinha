@@ -544,6 +544,8 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                         const usuarioLogado = JSON.parse(localStorage.getItem('usuario_logado') || '{}');
                         const idUsuarioLogado = usuarioLogado.id_usuario || 0;
 
+                        console.log('📤 Enviando dados:', { idSaida, idUsuarioLogado, dataRetornoFormatada, observacoes });
+
                         const resposta = await fetch(`${API_RELATORIOS}/retornos/${idSaida}`, {
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
@@ -554,16 +556,26 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                             })
                         });
 
+                        console.log('📥 Status da resposta:', resposta.status);
+
                         if (!resposta.ok) {
-                            const erro = await resposta.json();
-                            alert('Erro: ' + (erro.detail || 'Falha ao salvar'));
+                            try {
+                                const erroJson = await resposta.json();
+                                console.error('❌ Erro do servidor:', erroJson);
+                                const mensagem = erroJson.detail || erroJson.message || JSON.stringify(erroJson);
+                                alert('❌ Erro: ' + mensagem);
+                            } catch (e) {
+                                alert('❌ Erro ao salvar: Status ' + resposta.status);
+                            }
                             return;
                         }
 
                         alert('✅ Retorno atualizado com sucesso!');
+                        console.log('✅ Sucesso ao atualizar');
                         mostrarHistoricoUsuario(parseInt(idUsuario));
                     } catch (erro) {
-                        alert('Erro: ' + erro.message);
+                        console.error('❌ Erro na requisição:', erro);
+                        alert('❌ Erro: ' + (erro.message || String(erro)));
                     }
                 });
             });
