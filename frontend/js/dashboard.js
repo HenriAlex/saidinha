@@ -281,7 +281,7 @@ async function carregarSaidasDashboard() {
             const mins = minutos % 60;
             const tempoTexto = horas > 0 ? `${horas}h ${mins}min` : `${mins}min`;
             html += `
-                <div class="dash-rankrow">
+                <div class="dash-rankrow" data-aluno-id="${id}" style="cursor: pointer;">
                     ${avatarHTML(nome, 30)}
                     <div class="dash-rankrow-body">
                         <div class="dash-rankrow-head"><span>${esc(nome)}</span><strong>${tempoTexto}</strong><small>${qtd} saída${qtd === 1 ? '' : 's'}</small></div>
@@ -290,6 +290,27 @@ async function carregarSaidasDashboard() {
                 </div>`;
         });
         html += '</div>';
+
+        // Adiciona event listeners para clique nos alunos
+        setTimeout(() => {
+            document.querySelectorAll('.dash-ranklist .dash-rankrow').forEach(row => {
+                row.addEventListener('click', function() {
+                    const alunoId = this.dataset.alunoId;
+                    console.log('Clicou no aluno:', alunoId);
+                    if (typeof mostrarHistoricoUsuario === 'function') {
+                        mostrarHistoricoUsuario(alunoId);
+                    } else {
+                        alert('Função mostrarHistoricoUsuario não disponível');
+                    }
+                });
+                row.addEventListener('mouseenter', function() {
+                    this.style.backgroundColor = '#f0f0f0';
+                });
+                row.addEventListener('mouseleave', function() {
+                    this.style.backgroundColor = 'transparent';
+                });
+            });
+        }, 100);
 
         const porDia = {};
         saidas.forEach(s => {
