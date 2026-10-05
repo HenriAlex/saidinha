@@ -96,7 +96,7 @@ function renderFiltroPeriodoHTML(){
 // Carrega estatísticas de todos os usuários, respeitando o filtro de período ativo.
 async function carregarEstatisticasGerais(){
 
-    const container = document.getElementById('estatisticasContainer');
+    const container = document.getElementById('saidasContainer');
 
     if (container) {
         container.innerHTML = '<p style="text-align: center; padding: 40px; color: #999;">⏳ Carregando relatórios...</p>';
