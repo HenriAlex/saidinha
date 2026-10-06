@@ -424,7 +424,7 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
             const horaRetornoEditar = evento.data_retorno ? new Date(evento.data_retorno.replace(' ', 'T')).toLocaleTimeString('pt-BR', {hour: '2-digit', minute: '2-digit', hour12: false}) : '';
 
             html += `
-                <div style="border-left: 5px solid ${statusCor}; padding: 18px; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.3s; border: 1px solid ${statusCor}30; hover: box-shadow 0 4px 20px rgba(0,0,0,0.1);" data-card-saida="${evento.id_saida}">
+                <div style="border-left: 5px solid ${statusCor}; padding: 18px; background: white; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.06); transition: all 0.3s; border: 1px solid ${statusCor}30; hover: box-shadow 0 4px 20px rgba(0,0,0,0.1);" data-card-retorno="${evento.id_retorno}">
                     <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 14px;">
                         <div style="flex: 1;">
                             <span style="background: linear-gradient(135deg, ${statusCor}, ${statusCor}dd); color: white; padding: 6px 16px; border-radius: 20px; font-size: 12px; font-weight: 700; display: inline-block; box-shadow: 0 2px 8px ${statusCor}40;">
