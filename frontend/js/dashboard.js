@@ -2,10 +2,10 @@
 window.filtroConsultaAtualDash = { label: 'todos', start_date: null, end_date: null, prev_start: null, prev_end: null };
 
 const FILTROS_PERIODO_DASH = [
-    { label: 'hoje',   texto: 'Hoje',           icone: 'ðŸ“' },
-    { label: 'semana', texto: 'Esta Semana',    icone: 'ðŸ“…' },
-    { label: 'mes',    texto: 'Este mÃªs',       icone: 'ðŸŽ¯' },
-    { label: 'todos',  texto: 'Todo o PerÃ­odo', icone: 'ðŸ“‹' }
+    { label: 'hoje',   texto: 'Hoje',           icone: '📍' },
+    { label: 'semana', texto: 'Esta Semana',    icone: '📅' },
+    { label: 'mes',    texto: 'Este mês',       icone: '🗓️' },
+    { label: 'todos',  texto: 'Todo o Período', icone: '📋' }
 ];
 
 const CARREGADORES_ABA = {
@@ -78,13 +78,13 @@ function avatarHTML(nome, tamanho = 36) {
 function deltaHTML(atual, anterior, inverso = false) {
     const f = window.filtroConsultaAtualDash;
     if (!f.prev_start || anterior === null || anterior === undefined) return '';
-    if (anterior === 0 && atual === 0) return '<span class="kpi-delta neutro">= perÃ­odo anterior</span>';
-    if (anterior === 0) return '<span class="kpi-delta neutro">novo no perÃ­odo</span>';
+    if (anterior === 0 && atual === 0) return '<span class="kpi-delta neutro">= período anterior</span>';
+    if (anterior === 0) return '<span class="kpi-delta neutro">novo no período</span>';
     const variacao = ((atual - anterior) / anterior) * 100;
-    if (Math.abs(variacao) < 0.5) return '<span class="kpi-delta neutro">= perÃ­odo anterior</span>';
+    if (Math.abs(variacao) < 0.5) return '<span class="kpi-delta neutro">= período anterior</span>';
     const subiu = variacao > 0;
     const bom = inverso ? !subiu : subiu;
-    return `<span class="kpi-delta ${bom ? 'bom' : 'ruim'}">${subiu ? 'â–²' : 'â–¼'} ${fmtNum(Math.abs(variacao), 0)}% vs anterior</span>`;
+    return `<span class="kpi-delta ${bom ? 'bom' : 'ruim'}">${subiu ? '▲' : '▼'} ${fmtNum(Math.abs(variacao), 0)}% vs anterior</span>`;
 }
 
 function kpiHTML({ icone, rotulo, valor, sub = '', delta = '', tom = 'blue', texto = false }) {
@@ -128,7 +128,7 @@ function skeletonHTML(linhas = 3) {
 }
 
 function erroHTML(msg) {
-    return `<div class="dash-error">âš ï¸ ${esc(msg)}</div>`;
+    return `<div class="dash-error">❗ ${esc(msg)}</div>`;
 }
 
 /* ---------- perÃ­odo ---------- */
@@ -216,7 +216,7 @@ async function carregarSaidasDashboard() {
             fetch(`${API_BASE}/retornos/`),
             fetch(`${API_BASE}/usuarios/`)
         ]);
-        if (!respSaidas.ok) throw new Error('NÃ£o foi possÃ­vel carregar as saÃ­das.');
+        if (!respSaidas.ok) throw new Error('Não foi possível carregar as saídas.');
         const todas = await respSaidas.json();
         const todosRetornos = respRetornos.ok ? await respRetornos.json() : [];
         const usuarios = respUsers.ok ? await respUsers.json() : [];
@@ -227,7 +227,7 @@ async function carregarSaidasDashboard() {
         const anteriores = f.prev_start ? filtrarPorPeriodo(todas, 'data_saida', f.prev_start, f.prev_end) : null;
 
         if (saidas.length === 0) {
-            container.innerHTML = estadoVazioHTML('ðŸ–ï¸', 'Nenhuma saÃ­da no perÃ­odo', 'Experimente ampliar o perÃ­odo no filtro acima.');
+            container.innerHTML = estadoVazioHTML('📍', 'Nenhuma saída no período', 'Experimente ampliar o período no filtro acima.');
             return;
         }
 
@@ -250,7 +250,7 @@ async function carregarSaidasDashboard() {
             porAluno[s.id_usuario].minutos += duracao;
             totalMinutosGeral += duracao;
 
-            const m = (s.motivo || 'NÃ£o informado').trim();
+            const m = (s.motivo || 'Não informado').trim();
             porMotivo[m] = (porMotivo[m] || 0) + 1;
         });
 
@@ -267,10 +267,10 @@ async function carregarSaidasDashboard() {
         const minutosGerais = totalMinutosGeral % 60;
 
         let html = kpisHTML([
-            { icone: 'ðŸ“¤', rotulo: 'Total de saÃ­das', valor: saidas.length, delta: deltaHTML(saidas.length, anteriores?.length, true), tom: 'amber' },
-            { icone: 'â±ï¸', rotulo: 'Tempo total fora', valor: `${horasGerais}h ${minutosGerais}min`, sub: `${totalMinutosGeral} minutos`, tom: 'rose' },
-            { icone: 'ðŸ‘¥', rotulo: 'Alunos com saÃ­da', valor: rankAlunos.length, sub: `de ${totalAlunos} alunos`, tom: 'cyan' },
-            { icone: 'ðŸ’¬', rotulo: 'Motivo mais comum', valor: esc(motivoTop), sub: `${motivoQtd}Ã— Â· ${fmtNum(motivoQtd / saidas.length * 100, 0)}% do total`, tom: 'violet', texto: true }
+            { icone: '📊', rotulo: 'Total de saídas', valor: saidas.length, delta: deltaHTML(saidas.length, anteriores?.length, true), tom: 'amber' },
+            { icone: '⏱️', rotulo: 'Tempo total fora', valor: `${horasGerais}h ${minutosGerais}min`, sub: `${totalMinutosGeral} minutos`, tom: 'rose' },
+            { icone: '👥', rotulo: 'Alunos com saída', valor: rankAlunos.length, sub: `de ${totalAlunos} alunos`, tom: 'cyan' },
+            { icone: '📌', rotulo: 'Motivo mais comum', valor: esc(motivoTop), sub: `${motivoQtd}× · ${fmtNum(motivoQtd / saidas.length * 100, 0)}% do total`, tom: 'violet', texto: true }
         ]);
 
         html += tituloSecaoHTML('Tempo fora por aluno', `${rankAlunos.length} ${rankAlunos.length === 1 ? 'aluno' : 'alunos'}`);
@@ -284,7 +284,7 @@ async function carregarSaidasDashboard() {
                 <div class="dash-rankrow" data-aluno-id="${id}" style="cursor: pointer;">
                     ${avatarHTML(nome, 30)}
                     <div class="dash-rankrow-body">
-                        <div class="dash-rankrow-head"><span>${esc(nome)}</span><strong>${tempoTexto}</strong><small>${qtd} saÃ­da${qtd === 1 ? '' : 's'}</small></div>
+                        <div class="dash-rankrow-head"><span>${esc(nome)}</span><strong>${tempoTexto}</strong><small>${qtd} saída${qtd === 1 ? '' : 's'}</small></div>
                         ${barraHTML(minutos / maxMinutos * 100, 'rose')}
                     </div>
                 </div>`;
@@ -334,7 +334,7 @@ async function carregarSaidasDashboard() {
                             <strong>${esc(nome)}</strong>
                             <span>${esc(s.motivo || 'Sem motivo informado')}</span>
                         </div>
-                        <button class="btn-editar-timeline" data-saida-id="${s.id_saida}" data-usuario-id="${s.id_usuario}" data-data-saida="${s.data_saida}" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #0066cc; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s;">âœï¸ Editar</button>
+                        <button class="btn-editar-timeline" data-saida-id="${s.id_saida}" data-usuario-id="${s.id_usuario}" data-data-saida="${s.data_saida}" style="position: absolute; right: 12px; top: 50%; transform: translateY(-50%); background: #0066cc; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 12px; font-weight: 600; transition: all 0.3s;">✔️ Editar</button>
                     </div>`;
             });
             html += '</div>';
@@ -351,7 +351,7 @@ async function carregarSaidasDashboard() {
                     e.stopPropagation();
                     const usuarioId = this.dataset.usuarioId;
                     const saidaId = this.dataset.saidaId;
-                    console.log('âœï¸ Editar saÃ­da:', saidaId, 'de usuÃ¡rio:', usuarioId);
+                    console.log('✔️ Editar saída:', saidaId, 'de usuário:', usuarioId);
                     // Abre o modal de histÃ³rico do usuÃ¡rio
                     if (typeof mostrarHistoricoUsuario === 'function') {
                         mostrarHistoricoUsuario(usuarioId);
@@ -361,7 +361,7 @@ async function carregarSaidasDashboard() {
         }, 200);
     } catch (erro) {
         console.error('Erro:', erro);
-        container.innerHTML = erroHTML(erro.message || 'Erro ao carregar saÃ­das.');
+        container.innerHTML = erroHTML(erro.message || 'Erro ao carregar saídas.');
     }
 }
 
@@ -373,7 +373,7 @@ async function carregarFaltasComFiltro() {
 
     try {
         const [respFaltas, respUsers] = await Promise.all([fetch(`${API_BASE}/faltas/`), fetch(`${API_BASE}/usuarios/`)]);
-        if (!respFaltas.ok) throw new Error('NÃ£o foi possÃ­vel carregar as faltas.');
+        if (!respFaltas.ok) throw new Error('Não foi possível carregar as faltas.');
         const todas = await respFaltas.json();
         const usuarios = respUsers.ok ? await respUsers.json() : [];
         const userMap = Object.fromEntries(usuarios.map(u => [u.id_usuario, u.nome]));
@@ -383,7 +383,7 @@ async function carregarFaltasComFiltro() {
         const anteriores = f.prev_start ? filtrarPorPeriodo(todas, 'data_falta', f.prev_start, f.prev_end) : null;
 
         if (faltas.length === 0) {
-            container.innerHTML = estadoVazioHTML('ðŸŽ‰', 'Nenhuma falta no perÃ­odo', 'PresenÃ§a total! Amplie o perÃ­odo para ver o histÃ³rico.');
+            container.innerHTML = estadoVazioHTML('🎗️', 'Nenhuma falta no período', 'Presença total! Amplie o período para ver o histórico.');
             return;
         }
 
@@ -398,10 +398,10 @@ async function carregarFaltasComFiltro() {
         const maxFaltas = rank[0][1].length;
 
         let html = kpisHTML([
-            { icone: 'âŒ', rotulo: 'Total de faltas', valor: faltas.length, delta: deltaHTML(faltas.length, anteriores?.length, true), tom: 'red' },
-            { icone: 'âœ…', rotulo: 'Alunos sem falta', valor: `${fmtNum(semFalta / totalAlunos * 100, 0)}%`, sub: `${semFalta} de ${totalAlunos} alunos`, tom: 'emerald' },
-            { icone: 'ðŸ“', rotulo: 'Justificadas', valor: `${fmtNum(justificadas / faltas.length * 100, 0)}%`, sub: `${justificadas} com motivo Â· ${faltas.length - justificadas} sem`, tom: 'blue' },
-            { icone: 'ðŸ”', rotulo: 'Mais faltas', valor: esc(userMap[rank[0][0]] || 'Desconhecido'), sub: `${maxFaltas} ${maxFaltas === 1 ? 'falta' : 'faltas'}`, tom: 'rose', texto: true }
+            { icone: '📊', rotulo: 'Total de faltas', valor: faltas.length, delta: deltaHTML(faltas.length, anteriores?.length, true), tom: 'red' },
+            { icone: '✔️', rotulo: 'Alunos sem falta', valor: `${fmtNum(semFalta / totalAlunos * 100, 0)}%`, sub: `${semFalta} de ${totalAlunos} alunos`, tom: 'emerald' },
+            { icone: '📝', rotulo: 'Justificadas', valor: `${fmtNum(justificadas / faltas.length * 100, 0)}%`, sub: `${justificadas} com motivo · ${faltas.length - justificadas} sem`, tom: 'blue' },
+            { icone: '🔝', rotulo: 'Mais faltas', valor: esc(userMap[rank[0][0]] || 'Desconhecido'), sub: `${maxFaltas} ${maxFaltas === 1 ? 'falta' : 'faltas'}`, tom: 'rose', texto: true }
         ]);
 
         html += tituloSecaoHTML('Faltas por aluno', `${alunosComFalta} ${alunosComFalta === 1 ? 'aluno' : 'alunos'}`);
@@ -465,7 +465,7 @@ async function carregarPontosComFiltro() {
 
         const url = bimestre ? `${API_BASE}/atividades/bimestre/${bimestre}` : `${API_BASE}/atividades/`;
         const [respAtv, respUsers, respDisc] = await Promise.all([fetch(url), fetch(`${API_BASE}/usuarios/`), fetch(`${API_BASE}/disciplinas/`)]);
-        if (!respAtv.ok) throw new Error('NÃ£o foi possÃ­vel carregar as atividades.');
+        if (!respAtv.ok) throw new Error('Não foi possível carregar as atividades.');
         let atividades = await respAtv.json();
         const usuarios = respUsers.ok ? await respUsers.json() : [];
         const disciplinas = respDisc.ok ? await respDisc.json() : [];
@@ -478,7 +478,7 @@ async function carregarPontosComFiltro() {
         atividades = filtrarPorPeriodo(atividades, 'data_atividade', f.start_date, f.end_date);
 
         if (atividades.length === 0) {
-            container.innerHTML = estadoVazioHTML('ðŸ“­', 'Nenhuma atividade encontrada', 'Ajuste o perÃ­odo, o bimestre ou a disciplina para ver os pontos.');
+            container.innerHTML = estadoVazioHTML('📝', 'Nenhuma atividade encontrada', 'Ajuste o período, o bimestre ou a disciplina para ver os pontos.');
             return;
         }
 
@@ -502,13 +502,13 @@ async function carregarPontosComFiltro() {
         const pontosAnteriores = anteriores ? anteriores.reduce((s, a) => s + a.pontos, 0) : null;
 
         let html = kpisHTML([
-            { icone: 'â­', rotulo: 'Total de pontos', valor: fmtNum(totalPontos), sub: `${atividades.length} atividade${atividades.length === 1 ? '' : 's'}`, delta: deltaHTML(totalPontos, pontosAnteriores), tom: 'blue' },
+            { icone: '📌', rotulo: 'Total de pontos', valor: fmtNum(totalPontos), sub: `${atividades.length} atividade${atividades.length === 1 ? '' : 's'}`, delta: deltaHTML(totalPontos, pontosAnteriores), tom: 'blue' },
             { icone: 'ðŸ“Š', rotulo: 'MÃ©dia por aluno', valor: fmtNum(totalPontos / rank.length), sub: `${rank.length} aluno${rank.length === 1 ? '' : 's'} com pontos`, tom: 'violet' },
             { icone: 'ðŸ†', rotulo: 'Maior pontuaÃ§Ã£o', valor: esc(userMap[rank[0][0]] || 'Desconhecido'), sub: `${fmtNum(rank[0][1].total)} pontos`, tom: 'emerald', texto: true },
-            { icone: 'ðŸ“š', rotulo: 'Disciplina destaque', valor: esc(discMap[discDestaque[0]] || 'Desconhecida'), sub: `mÃ©dia ${fmtNum(discDestaque[1].pontos / discDestaque[1].qtd)} por atividade`, tom: 'amber', texto: true }
+            { icone: '🏆', rotulo: 'Disciplina destaque', valor: esc(discMap[discDestaque[0]] || 'Desconhecida'), sub: `média ${fmtNum(discDestaque[1].pontos / discDestaque[1].qtd)} por atividade`, tom: 'amber', texto: true }
         ]);
 
-        html += tituloSecaoHTML('PontuaÃ§Ã£o por aluno', `${rank.length} ${rank.length === 1 ? 'aluno' : 'alunos'}`);
+        html += tituloSecaoHTML('Pontuação por aluno', `${rank.length} ${rank.length === 1 ? 'aluno' : 'alunos'}`);
         html += '<div class="dash-cards">';
         rank.forEach(([id, dados]) => {
             const nome = userMap[id] || 'Desconhecido';
@@ -520,7 +520,7 @@ async function carregarPontosComFiltro() {
                         ${avatarHTML(nome)}
                         <div class="dash-card-title">
                             <strong>${esc(nome)}</strong>
-                            <span>${dados.qtd} atividade${dados.qtd === 1 ? '' : 's'} Â· mÃ©dia ${fmtNum(dados.total / dados.qtd)}</span>
+                            <span>${dados.qtd} atividade${dados.qtd === 1 ? '' : 's'} · média ${fmtNum(dados.total / dados.qtd)}</span>
                         </div>
                         <div class="dash-card-number">${fmtNum(dados.total)}</div>
                     </div>
@@ -578,7 +578,23 @@ async function carregarRankingGeral() {
             return;
         }
 
-        // PrÃ©-calcula mapas de pontos (atividades) e faltas por aluno para normalizaÃ§Ã£o        const pontosPorAluno = {};        atividades.forEach(a => { pontosPorAluno[a.id_usuario] = (pontosPorAluno[a.id_usuario] || 0) + a.pontos; });        const faltasPorAluno = {};        faltas.forEach(fa => { faltasPorAluno[fa.id_usuario] = (faltasPorAluno[fa.id_usuario] || 0) + 1; });        // Calcula mÃ¡ximos para normalizar (evita divisÃ£o por zero)        const maxPontos = Math.max(1, ...Object.values(pontosPorAluno));        const maxSaidas = Math.max(1, ...somenteAlunos(usuarios).map(u => u.total_saidas || 0));        const maxTempoMin = Math.max(1, ...somenteAlunos(usuarios).map(u => ((u.total_horas || 0) * 60) + (u.total_minutos || 0)));        const maxFaltas = Math.max(1, ...Object.values(faltasPorAluno));        // Pesos definidos pelo requisito        const PESOS = { pontos: 5, qtdSaidas: 1, tempo: 3, faltas: 1 };        const PESO_TOTAL = PESOS.pontos + PESOS.qtdSaidas + PESOS.tempo + PESOS.faltas; // =10                const ranking = somenteAlunos(usuarios).map(u => {
+        // PrÃ©-calcula mapas de pontos (atividades) e faltas por aluno para normalizaÃ§Ã£o
+        const pontosPorAluno = {};
+        atividades.forEach(a => { pontosPorAluno[a.id_usuario] = (pontosPorAluno[a.id_usuario] || 0) + a.pontos; });
+        const faltasPorAluno = {};
+        faltas.forEach(fa => { faltasPorAluno[fa.id_usuario] = (faltasPorAluno[fa.id_usuario] || 0) + 1; });
+
+        // Calcula mÃ¡ximos para normalizar (evita divisÃ£o por zero)
+        const maxPontos = Math.max(1, ...Object.values(pontosPorAluno));
+        const maxSaidas = Math.max(1, ...somenteAlunos(usuarios).map(u => u.total_saidas || 0));
+        const maxTempoMin = Math.max(1, ...somenteAlunos(usuarios).map(u => ((u.total_horas || 0) * 60) + (u.total_minutos || 0)));
+        const maxFaltas = Math.max(1, ...Object.values(faltasPorAluno));
+
+        // Pesos definidos pelo requisito
+        const PESOS = { pontos: 5, qtdSaidas: 1, tempo: 3, faltas: 1 };
+        const PESO_TOTAL = PESOS.pontos + PESOS.qtdSaidas + PESOS.tempo + PESOS.faltas; // =10
+
+                const ranking = somenteAlunos(usuarios).map(u => {
             const tempo_minutos = ((u.total_horas || 0) * 60) + (u.total_minutos || 0);
             const fl = faltasPorAluno[u.id_usuario] || 0;
             const p = pontosPorAluno[u.id_usuario] || 0;
@@ -633,9 +649,9 @@ async function carregarRankingGeral() {
         const pct = s => maxScore === minScore ? 100 : Math.round(((s - minScore) / (maxScore - minScore)) * 100);
 
         const classePodio = p => p === 1 ? 'ouro' : p === 2 ? 'prata' : 'bronze';
-        const medalha = p => p === 1 ? 'ðŸ¥‡' : p === 2 ? 'ðŸ¥ˆ' : p === 3 ? 'ðŸ¥‰' : '';
+        const medalha = p => p === 1 ? '🥇' : p === 2 ? '🥈' : p === 3 ? '🥉' : '';
 
-        // Empatados dividem o mesmo degrau; com 4 empatados em 1Âº, por exemplo, sÃ³ existe o degrau "1Âº".
+        // Empatados dividem o mesmo degrau; com 4 empatados em 1º, por exemplo, só existe o degrau "1º".
         const degraus = {};
         ranking.filter(al => al.posicao <= 3).forEach(al => (degraus[al.posicao] ||= []).push(al));
         const slots = Object.keys(degraus).map(Number).sort((a, b) => a - b);
@@ -655,7 +671,7 @@ async function carregarRankingGeral() {
                     <div class="podium-avatars">${avatares}</div>
                     ${nome}
                     <span class="podium-score">${fmtNum(grupo[0].score)} pts</span>
-                    <div class="podium-base">${pos}Âº</div>
+                    <div class="podium-base">${pos}º</div>
                 </div>`;
         };
 
@@ -663,15 +679,15 @@ async function carregarRankingGeral() {
             <div class="dash-podium" data-slots="${slots.length}">${ordemPodio.map(slotHTML).join('')}</div>
             <div class="dash-strip">
                 <div><small>Alunos avaliados</small><strong>${ranking.length}</strong></div>
-                <div><small>MÃ©dia de pontuaÃ§Ã£o</small><strong>${fmtNum(mediaScore)}</strong></div>
-                <div><small>Melhor pontuaÃ§Ã£o</small><strong>${fmtNum(maxScore)}</strong></div>
+                <div><small>Média de pontuação</small><strong>${fmtNum(mediaScore)}</strong></div>
+                <div><small>Melhor pontuação</small><strong>${fmtNum(maxScore)}</strong></div>
                 <div class="dash-strip-info">
                                         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
                                             <small>ComposiÃ§Ã£o da nota final</small>
                                             <!-- Accordion toggle -->
                                             <div>
-                                                <button class="btn ghost" id="rankingRuleToggle" onclick="(function(){ window.rankingRuleCollapsed = !window.rankingRuleCollapsed; const el = document.getElementById('rankingRuleContent'); const ico = document.getElementById('rankingRuleIcon'); if(el) el.style.display = window.rankingRuleCollapsed ? 'none' : 'block'; if(ico) ico.textContent = window.rankingRuleCollapsed ? 'â–¸' : 'â–¾'; localStorage.setItem('rankingRuleCollapsed', window.rankingRuleCollapsed ? '1' : '0'); })();" style="display:flex;align-items:center;gap:8px;">
-                                                    <span id="rankingRuleIcon">â–¸</span>
+                                                <button class="btn ghost" id="rankingRuleToggle" onclick="(function(){ window.rankingRuleCollapsed = !window.rankingRuleCollapsed; const el = document.getElementById('rankingRuleContent'); const ico = document.getElementById('rankingRuleIcon'); if(el) el.style.display = window.rankingRuleCollapsed ? 'none' : 'block'; if(ico) ico.textContent = window.rankingRuleCollapsed ? '▸' : '▾'; localStorage.setItem('rankingRuleCollapsed', window.rankingRuleCollapsed ? '1' : '0'); })();" style="display:flex;align-items:center;gap:8px;">
+                                                    <span id="rankingRuleIcon">▸</span>
                                                     <span>Mostrar</span>
                                                 </button>
                                             </div>
@@ -682,17 +698,13 @@ async function carregarRankingGeral() {
     <div>• Saídas por tempo: cada 5 minutos => <strong>-1</strong> (equivalente a - (tempo_minutos / 5))</div>
     <div>• Faltas: cada 1 falta => <strong>-0.5</strong></div>
     <div style="margin-top:6px;"><code>Score = 2×Pontos_Atividade - 0.5×QtdSaidas - (Tempo_minutos / 5) - 0.5×Faltas</code></div>
-    <div style="color:#666;margin-top:6px;">Composição linear — valores positivos somam; itens negativos subtraem. Quanto maior o Score, melhor a posição no ranking.</div>
+    <div style="color:#666;margin-top:6px;">Composição linear, valores positivos somam; itens negativos subtraem. Quanto maior o Score, melhor a posição no ranking.</div>
 </div>
-                                            <div>â€¢ Quantidade de saÃ­das (mais Ã© pior) â€” peso <strong>1</strong></div>
-                                            <div>â€¢ Tempo fora da aula (mais Ã© pior) â€” peso <strong>3</strong></div>
-                                            <div>â€¢ Faltas (mais Ã© pior) â€” peso <strong>1</strong></div>
-                                            <div class="mt-2"><code>Score = (5Â·Pontos_norm + 1Â·SaÃ­das_norm + 3Â·Tempo_norm + 1Â·Faltas_norm) / 10</code></div>
-                                            <div class="muted">Onde cada *_norm Ã© normalizado entre 0 e 10. (Pontos_norm = pontos / max_pontos Â· 10; mÃ©tricas "pior" sÃ£o invertidas)</div>
-                                        </div>                    </div></div>
+                                        </div>
+                    </div></div>
             </div>`;
 
-        html += tituloSecaoHTML('ClassificaÃ§Ã£o completa', 'empates compartilham a mesma posiÃ§Ã£o');
+        html += tituloSecaoHTML('Classificação completa', 'empates compartilham a mesma posição');
         html += '<div class="dash-ranking">';
         ranking.forEach(al => {
             const p = pct(al.score);
@@ -716,9 +728,9 @@ async function carregarRankingGeral() {
                         </div>
                         ${barraHTML(p, 'blue') }
                         <div class="rank-stats">
-                            <span title="Pontos em atividades">â­ ${fmtNum(al.pontos, 0)}</span>
-                            <span title="Faltas">âŒ ${al.faltas}</span>
-                            <span title="Tempo fora da sala">â±ï¸ ${al.tempo_formatado}</span>
+                            <span title="Pontos em atividades">📌 ${fmtNum(al.pontos, 0)}</span>
+                            <span title="Faltas">✖️ ${al.faltas}</span>
+                            <span title="Tempo fora da sala">⏱️ ${al.tempo_formatado}</span>
                             <span class="rank-pct">${p}%</span>
                         </div>
                     </div>
@@ -728,14 +740,14 @@ async function carregarRankingGeral() {
 
         container.innerHTML = html;
 
-        // Inicializa estado do accordion (colapsado por preferÃªncia do usuÃ¡rio salvo em localStorage)
+        // Inicializa estado do accordion (colapsado por preferência do usuário salvo em localStorage)
         try {
             const saved = localStorage.getItem('rankingRuleCollapsed');
             window.rankingRuleCollapsed = saved === '1';
             const el = document.getElementById('rankingRuleContent');
             const ico = document.getElementById('rankingRuleIcon');
             if (el) el.style.display = window.rankingRuleCollapsed ? 'none' : 'block';
-            if (ico) ico.textContent = window.rankingRuleCollapsed ? 'â–¸' : 'â–¾';
+            if (ico) ico.textContent = window.rankingRuleCollapsed ? '▸' : '▾';
         } catch (e) { /* localStorage pode falhar em contextos restritos */ }
 
     } catch (erro) {
