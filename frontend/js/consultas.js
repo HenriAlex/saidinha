@@ -464,7 +464,7 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                         </div>
                     </div>
 
-                    <button class="btn-editar-retorno" data-id-saida="${evento.id_saida}" data-id-usuario="${id_usuario}" data-data-saida="${evento.data_saida}" data-data-retorno="${evento.data_retorno || ''}" data-duracao="${evento.duracao}" data-observacoes="${(evento.observacoes || '').replace(/"/g, '&quot;')}" style="margin-top: 14px; padding: 10px 18px; background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(0, 102, 204, 0.3)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0, 102, 204, 0.2)'">✏️ Editar Retorno</button>
+                    <button class="btn-editar-retorno" data-id-retorno="${evento.id_retorno}" data-id-saida="${evento.id_saida}" data-id-usuario="${id_usuario}" data-data-saida="${evento.data_saida}" data-data-retorno="${evento.data_retorno || ''}" data-duracao="${evento.duracao}" data-observacoes="${(evento.observacoes || '').replace(/"/g, '&quot;')}" style="margin-top: 14px; padding: 10px 18px; background: linear-gradient(135deg, #0066cc 0%, #0052a3 100%); color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 700; font-size: 13px; transition: all 0.3s; box-shadow: 0 2px 8px rgba(0, 102, 204, 0.2);" onmouseover="this.style.transform='translateY(-2px)';this.style.boxShadow='0 4px 16px rgba(0, 102, 204, 0.3)'" onmouseout="this.style.transform='translateY(0)';this.style.boxShadow='0 2px 8px rgba(0, 102, 204, 0.2)'">✏️ Editar Retorno</button>
                 </div>
             `;
         });
@@ -490,21 +490,22 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                 btn.addEventListener('click', function(e) {
                     e.preventDefault();
                     e.stopPropagation();
-                    console.log('🖱️ Botão clicado, ID:', this.dataset.idSaida);
-                    const idRetorno = this.dataset.idSaida;
+                    const idRetorno = this.dataset.idRetorno;
+                    console.log('🖱️ Botão clicado, ID Retorno:', idRetorno);
                     const formulario = document.querySelector(`.form-edicao-inline[data-id-retorno="${idRetorno}"]`);
                     console.log('📝 Formulário encontrado:', !!formulario);
                     if (formulario) {
                         formulario.style.display = formulario.style.display === 'none' ? 'block' : 'none';
                         if (formulario.style.display === 'block') {
                             this.textContent = '▲ Fechar Edição';
-                            console.log('✅ Formulário aberto');
+                            console.log('✅ Formulário aberto para ID:', idRetorno);
                         } else {
                             this.textContent = '✏️ Editar Retorno';
                             console.log('✅ Formulário fechado');
                         }
                     } else {
-                        console.warn('⚠️ Formulário não encontrado para ID:', idRetorno);
+                        console.warn('⚠️ Formulário não encontrado para ID Retorno:', idRetorno);
+                        console.log('📋 Seletor usado:', `.form-edicao-inline[data-id-retorno="${idRetorno}"]`);
                     }
                 });
             });
