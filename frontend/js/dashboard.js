@@ -711,7 +711,10 @@ async function carregarRankingGeral() {
                             <span title="Contribuição Tempo">Tempo: ${fmtNum(al.contribTempo)}</span>
                             <span title="Contribuição Faltas">Faltas: ${fmtNum(al.contribFaltas)}</span>
                         </div>
-                        ${barraHTML(p, 'blue')}
+                        <div class="rank-example" style="font-size:0.9em;color:#333;margin-top:6px;">
+                            Total = ${fmtNum(al.contribAtividade)} + (${fmtNum(al.contribQtdSaidas)}) + (${fmtNum(al.contribTempo)}) + (${fmtNum(al.contribFaltas)}) = <strong>${fmtNum(al.score)}</strong>
+                        </div>
+                        ${barraHTML(p, 'blue') }
                         <div class="rank-stats">
                             <span title="Pontos em atividades">â­ ${fmtNum(al.pontos, 0)}</span>
                             <span title="Faltas">âŒ ${al.faltas}</span>
