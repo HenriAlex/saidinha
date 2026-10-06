@@ -550,9 +550,11 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
                             method: 'PUT',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
-                                id_usuario: parseInt(idUsuarioLogado),
-                                data_retorno: dataRetornoFormatada,
-                                observacoes: observacoes
+                                id_saida: parseInt(idSaida),
+                                id_usuario: parseInt(idUsuario),
+                                data_retorno_customizada: dataRetornoFormatada,
+                                observacoes: observacoes,
+                                id_usuario_logado: parseInt(idUsuarioLogado)
                             })
                         });
 

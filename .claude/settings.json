@@ -41,7 +41,8 @@
       "Bash(git commit -m 'Fix: Adicionar total_horas e total_minutos no endpoint de histórico *)",
       "Bash(git commit -m 'Feat: Implementar fórmula balanceada de scoring no Ranking Geral *)",
       "Bash(git commit -m 'Feat: Adicionar edição de retorno inline nos cards da linha do tempo *)",
-      "Bash(git commit -m 'Fix: Melhorar tratamento de erros ao salvar edição de retorno *)"
+      "Bash(git commit -m 'Fix: Melhorar tratamento de erros ao salvar edição de retorno *)",
+      "Bash(git commit -m 'Fix: Corrigir campo de data ao salvar edição de retorno *)"
     ]
   }
 }
