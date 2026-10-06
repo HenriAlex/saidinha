@@ -705,6 +705,12 @@ async function carregarRankingGeral() {
                             <strong>${esc(al.nome)}</strong>
                             <span class="rank-score">${fmtNum(al.score)} pts</span>
                         </div>
+                        <div class="rank-breakdown" style="font-size:0.9em;color:#444;margin-top:6px;display:flex;gap:12px;flex-wrap:wrap;">
+                            <span title="Contribuição Atividade">Ativ: ${fmtNum(al.contribAtividade)}</span>
+                            <span title="Contribuição Qtd Saídas">Qtd Saídas: ${fmtNum(al.contribQtdSaidas)}</span>
+                            <span title="Contribuição Tempo">Tempo: ${fmtNum(al.contribTempo)}</span>
+                            <span title="Contribuição Faltas">Faltas: ${fmtNum(al.contribFaltas)}</span>
+                        </div>
                         ${barraHTML(p, 'blue')}
                         <div class="rank-stats">
                             <span title="Pontos em atividades">â­ ${fmtNum(al.pontos, 0)}</span>
@@ -734,5 +740,6 @@ async function carregarRankingGeral() {
         container.innerHTML = erroHTML(erro.message || 'Erro ao carregar ranking geral.');
     }
 }
+
 
 
