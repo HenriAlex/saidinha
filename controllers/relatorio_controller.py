@@ -330,15 +330,19 @@ def historico_usuario(id_usuario: int, periodo: int = 0, start_date: str = None,
         # Cria evento.
         evento = {
             "id_saida": saida['id_saida'],
-            "id_retorno": retorno_saida['id_retorno'] if retorno_saida else None,
+            "id_retorno": retorno_saida.get('id_retorno') if retorno_saida else None,
             "data_saida": saida['data_saida'],
             "motivo": saida['motivo'],
-            "data_retorno": retorno_saida['data_retorno'] if retorno_saida else None,
-            "observacoes": retorno_saida['observacoes'] if retorno_saida else None,
+            "data_retorno": retorno_saida.get('data_retorno') if retorno_saida else None,
+            "observacoes": retorno_saida.get('observacoes') if retorno_saida else None,
             "duracao": duracao,
             "duracao_minutos": duracao_minutos,
             "status": "Retornou" if retorno_saida else "Fora (pendente)"
         }
+
+        # Debug: verificar se id_retorno é None
+        if evento["data_retorno"] and not evento["id_retorno"]:
+            print(f"⚠️ Retorno sem ID: saída={saida['id_saida']}, retorno_saida={retorno_saida}")
 
         eventos.append(evento)
 
