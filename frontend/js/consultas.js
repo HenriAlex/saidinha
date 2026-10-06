@@ -348,6 +348,10 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
 
         const dados = await resp.json();
 
+        // Debug: verificar se id_retorno está vindo da API
+        console.log('📊 Dados do histórico:', dados);
+        console.log('📝 Primeiro evento:', dados.historico[0] || 'nenhum');
+
         // Modal wrapper com container interno
         let html = `
             <div style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: linear-gradient(135deg, rgba(102, 126, 234, 0.15) 0%, rgba(245, 87, 108, 0.15) 100%); display: flex; align-items: center; justify-content: center; z-index: 9999; padding: 20px; backdrop-filter: blur(8px);">
