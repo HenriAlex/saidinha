@@ -19,6 +19,19 @@ function obterDataHojeLocal(){
     return `${ano}-${mes}-${dia}`;
 }
 
+// Formata uma Date local ou string como YYYY-MM-DD. Se já for YYYY-MM-DD, retorna como está.
+function fmtDateYMDLocal_consultas(d) {
+    if (!d) return '';
+    if (d instanceof Date) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(d))) return String(d);
+    try { return new Date(String(d)).toISOString().split('T')[0]; } catch(e) { return String(d); }
+}
+
 function criarFiltroHoje(){
     const hoje = obterDataHojeLocal();
     return { periodo: 0, mes_atual: false, start_date: hoje, end_date: hoje, label: 'hoje' };
@@ -108,8 +121,8 @@ async function carregarEstatisticasGerais(){
         const params = new URLSearchParams();
         if (f.periodo && f.periodo > 0) params.append('periodo', f.periodo);
         if (f.mes_atual) params.append('mes_atual', 'true');
-        if (f.start_date) params.append('start_date', f.start_date);
-        if (f.end_date) params.append('end_date', f.end_date);
+        if (f.start_date) params.append('start_date', fmtDateYMDLocal_consultas(f.start_date));
+        if (f.end_date) params.append('end_date', fmtDateYMDLocal_consultas(f.end_date));
 
         // Busca estatísticas gerais da API.
         // Qualquer perfil logado pode ver o relatório geral (módulo Consulta).
@@ -337,8 +350,8 @@ async function mostrarHistoricoUsuario(id_usuario, periodo = 0, start_date = nul
         const params = new URLSearchParams();
         if (periodo && periodo > 0) params.append('periodo', periodo);
         if (mes_atual) params.append('mes_atual', 'true');
-        if (start_date) params.append('start_date', start_date);
-        if (end_date) params.append('end_date', end_date);
+        if (start_date) params.append('start_date', fmtDateYMDLocal_consultas(start_date));
+        if (end_date) params.append('end_date', fmtDateYMDLocal_consultas(end_date));
 
         const url = `${API_RELATORIOS}/relatorios/historico/${id_usuario}` + (Array.from(params).length ? ('?' + params.toString()) : '');
 

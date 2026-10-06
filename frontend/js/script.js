@@ -104,10 +104,12 @@ function showScreen(screen) {
     if (screen === 'telaSaidas' || screen === 'telaSaidaCadastro') {
         if (typeof carregarSaidas === 'function') carregarSaidas();
         if (typeof popularSelectUsuariosSaida === 'function') popularSelectUsuariosSaida();
+        if (typeof carregarSaidasHistorico === 'function') carregarSaidasHistorico();
     }
-    // Ao exibir os retornos, carrega as saídas pendentes.
+    // Ao exibir os retornos, carrega as saídas pendentes e os retornos registrados (hoje por padrão).
     if (screen === 'telaRetornos') {
         if (typeof carregarSaidasPendentes === 'function') carregarSaidasPendentes();
+        if (typeof carregarRetornos === 'function') carregarRetornos();
     }
     // Ao exibir as faltas, carrega as faltas e popula o select de usuários.
     if (screen === 'telaFaltas') {
@@ -129,6 +131,8 @@ function showScreen(screen) {
         if (typeof preencherDataHojeEBimestre === 'function') {
             setTimeout(() => preencherDataHojeEBimestre(), 100);
         }
+        // Carrega histórico das atividades (padrão: hoje) para permitir edição/consultas rápidas
+        if (typeof carregarAtividadesHistorico === 'function') carregarAtividadesHistorico();
     }
     // Ao exibir consulta de pontos, carrega os selects.
     if (screen === 'telaConsultaPontos') {

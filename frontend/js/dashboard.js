@@ -34,6 +34,20 @@ function parseData(str) {
 function inicioDoDia(d) { return new Date(d.getFullYear(), d.getMonth(), d.getDate()); }
 function fimDoDia(d)    { return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 23, 59, 59, 999); }
 
+// Formata uma Date local como "YYYY-MM-DD" (para query params). Avoid toISOString because it uses UTC and may shift the day.
+function fmtDateYMDLocal(d) {
+    if (!d) return '';
+    if (d instanceof Date) {
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const day = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${day}`;
+    }
+    // If already a string in YYYY-MM-DD, return as-is; otherwise try to parse and fall back to ISO date part.
+    if (/^\d{4}-\d{2}-\d{2}$/.test(String(d))) return String(d);
+    try { return new Date(String(d)).toISOString().split('T')[0]; } catch (e) { return String(d); }
+}
+
 function capitalizar(s) { return s ? s.charAt(0).toUpperCase() + s.slice(1) : s; }
 function fmtData(d)     { return d.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }); }
 function fmtDataLonga(d){ return capitalizar(d.toLocaleDateString('pt-BR', { weekday: 'long', day: '2-digit', month: 'long' })); }
@@ -422,8 +436,8 @@ async function carregarFaltasComFiltro() {
                     </div>
                     ${barraHTML(lista.length / maxFaltas * 100, 'red')}
                     <div class="dash-card-meta">
-                        <span>ðŸ“ ${just} justificada${just === 1 ? '' : 's'}</span>
-                        <span>âš ï¸ ${lista.length - just} sem motivo</span>
+                        <span>📊 ${just} justificada${just === 1 ? '' : 's'}</span>
+                        <span>⚠️ ${lista.length - just} sem motivo</span>
                     </div>
                     <div class="dash-tags">
                         ${datas.slice(0, 4).map(d => `<span class="dash-tag">${fmtData(d)}</span>`).join('')}
@@ -503,8 +517,8 @@ async function carregarPontosComFiltro() {
 
         let html = kpisHTML([
             { icone: '📌', rotulo: 'Total de pontos', valor: fmtNum(totalPontos), sub: `${atividades.length} atividade${atividades.length === 1 ? '' : 's'}`, delta: deltaHTML(totalPontos, pontosAnteriores), tom: 'blue' },
-            { icone: 'ðŸ“Š', rotulo: 'MÃ©dia por aluno', valor: fmtNum(totalPontos / rank.length), sub: `${rank.length} aluno${rank.length === 1 ? '' : 's'} com pontos`, tom: 'violet' },
-            { icone: 'ðŸ†', rotulo: 'Maior pontuaÃ§Ã£o', valor: esc(userMap[rank[0][0]] || 'Desconhecido'), sub: `${fmtNum(rank[0][1].total)} pontos`, tom: 'emerald', texto: true },
+            { icone: '📌', rotulo: 'Média por aluno', valor: fmtNum(totalPontos / rank.length), sub: `${rank.length} aluno${rank.length === 1 ? '' : 's'} com pontos`, tom: 'violet' },
+            { icone: '📌', rotulo: 'Maior pontuação', valor: esc(userMap[rank[0][0]] || 'Desconhecido'), sub: `${fmtNum(rank[0][1].total)} pontos`, tom: 'emerald', texto: true },
             { icone: '🏆', rotulo: 'Disciplina destaque', valor: esc(discMap[discDestaque[0]] || 'Desconhecida'), sub: `média ${fmtNum(discDestaque[1].pontos / discDestaque[1].qtd)} por atividade`, tom: 'amber', texto: true }
         ]);
 
@@ -557,8 +571,8 @@ async function carregarRankingGeral() {
         const params = new URLSearchParams();
         if (f.periodo && f.periodo > 0) params.append('periodo', f.periodo);
         if (f.mes_atual) params.append('mes_atual', 'true');
-        if (f.start_date) params.append('start_date', f.start_date);
-        if (f.end_date) params.append('end_date', f.end_date);
+        if (f.start_date) params.append('start_date', fmtDateYMDLocal(f.start_date));
+        if (f.end_date) params.append('end_date', fmtDateYMDLocal(f.end_date));
 
         // Busca dados do relatÃ³rio (que jÃ¡ calcula tempo de saÃ­das)
         const [respRelatorios, respFaltas, respAtv] = await Promise.all([
@@ -574,7 +588,7 @@ async function carregarRankingGeral() {
         const usuarios = relatorios.usuarios || [];
 
         if (usuarios.length === 0) {
-            container.innerHTML = estadoVazioHTML('ðŸ‘¥', 'Nenhum aluno cadastrado', 'Cadastre alunos para gerar o ranking.');
+            container.innerHTML = estadoVazioHTML('👤', 'Nenhum aluno cadastrado', 'Cadastre alunos para gerar o ranking.');
             return;
         }
 
@@ -602,8 +616,8 @@ async function carregarRankingGeral() {
 
             // Contribuições lineares conforme regra especificada
             const contribAtividade = 2 * p; // cada ponto de atividade vale +2
-            const contribQtdSaidas = -0.5 * qtdSaidas; // cada saída = -0.5
-            const contribTempo = - (tempo_minutos / 5); // cada 5 minutos = -1
+            const contribQtdSaidas = -0.25 * qtdSaidas; // cada saída = -0.25
+            const contribTempo = -0.5 * (tempo_minutos / 5); // cada 5 minutos = -0.5
             const contribFaltas = -0.5 * fl; // cada falta = -0.5
 
             const score = contribAtividade + contribQtdSaidas + contribTempo + contribFaltas;
@@ -683,7 +697,7 @@ async function carregarRankingGeral() {
                 <div><small>Melhor pontuação</small><strong>${fmtNum(maxScore)}</strong></div>
                 <div class="dash-strip-info">
                                         <div style="display:flex;align-items:center;justify-content:space-between;gap:12px;">
-                                            <small>ComposiÃ§Ã£o da nota final</small>
+                                            <small>Composição da nota final</small>
                                             <!-- Accordion toggle -->
                                             <div>
                                                 <button class="btn ghost" id="rankingRuleToggle" onclick="(function(){ window.rankingRuleCollapsed = !window.rankingRuleCollapsed; const el = document.getElementById('rankingRuleContent'); const ico = document.getElementById('rankingRuleIcon'); if(el) el.style.display = window.rankingRuleCollapsed ? 'none' : 'block'; if(ico) ico.textContent = window.rankingRuleCollapsed ? '▸' : '▾'; localStorage.setItem('rankingRuleCollapsed', window.rankingRuleCollapsed ? '1' : '0'); })();" style="display:flex;align-items:center;gap:8px;">
@@ -694,10 +708,10 @@ async function carregarRankingGeral() {
                                         </div>
                                         <div id="rankingRuleContent" style="display:none;margin-top:8px;">
     <div>• Atividade: cada 1 ponto => <strong>+2</strong></div>
-    <div>• Saídas por quantidade: cada 1 saída => <strong>-0.5</strong></div>
-    <div>• Saídas por tempo: cada 5 minutos => <strong>-1</strong> (equivalente a - (tempo_minutos / 5))</div>
+    <div>• Saídas por quantidade: cada 1 saída => <strong>-0.25</strong></div>
+    <div>• Saídas por tempo: cada 5 minutos => <strong>-0.5</strong> (equivalente a -0.5 × (tempo_minutos / 5))</div>
     <div>• Faltas: cada 1 falta => <strong>-0.5</strong></div>
-    <div style="margin-top:6px;"><code>Score = 2×Pontos_Atividade - 0.5×QtdSaidas - (Tempo_minutos / 5) - 0.5×Faltas</code></div>
+    <div style="margin-top:6px;"><code>Score = 2×Pontos_Atividade - 0.25×QtdSaidas - 0.5×(Tempo_minutos / 5) - 0.5×Faltas</code></div>
     <div style="color:#666;margin-top:6px;">Composição linear, valores positivos somam; itens negativos subtraem. Quanto maior o Score, melhor a posição no ranking.</div>
 </div>
                                         </div>
@@ -710,7 +724,7 @@ async function carregarRankingGeral() {
             const p = pct(al.score);
             html += `
                 <div class="rank-row ${al.posicao <= 3 ? classePodio(al.posicao) : ''}">
-                    <div class="rank-pos">${medalha(al.posicao) || `<span>${al.posicao}Âº</span>`}</div>
+                    <div class="rank-pos">${medalha(al.posicao) || `<span>${al.posicao}º</span>`}</div>
                     ${avatarHTML(al.nome, 40)}
                     <div class="rank-body">
                         <div class="rank-head">
@@ -718,17 +732,17 @@ async function carregarRankingGeral() {
                             <span class="rank-score">${fmtNum(al.score)} pts</span>
                         </div>
                         <div class="rank-breakdown" style="font-size:0.9em;color:#444;margin-top:6px;display:flex;gap:12px;flex-wrap:wrap;">
-                            <span title="Contribuição Atividade">Ativ: ${fmtNum(al.contribAtividade)}</span>
-                            <span title="Contribuição Qtd Saídas">Qtd Saídas: ${fmtNum(al.contribQtdSaidas)}</span>
-                            <span title="Contribuição Tempo">Tempo: ${fmtNum(al.contribTempo)}</span>
-                            <span title="Contribuição Faltas">Faltas: ${fmtNum(al.contribFaltas)}</span>
+                            <span title="Contribuição Atividade">Pontos por Atividade: ${fmtNum(al.contribAtividade)}</span>
+                            <span title="Contribuição Qtd Saídas">| Qtd Saídas: ${fmtNum(al.contribQtdSaidas)}</span>
+                            <span title="Contribuição Tempo">| Tempo: ${fmtNum(al.contribTempo)}</span>
+                            <span title="Contribuição Faltas">| Faltas: ${fmtNum(al.contribFaltas)}</span>
                         </div>
                         <div class="rank-example" style="font-size:0.9em;color:#333;margin-top:6px;">
                             Total = ${fmtNum(al.contribAtividade)} + (${fmtNum(al.contribQtdSaidas)}) + (${fmtNum(al.contribTempo)}) + (${fmtNum(al.contribFaltas)}) = <strong>${fmtNum(al.score)}</strong>
                         </div>
                         ${barraHTML(p, 'blue') }
                         <div class="rank-stats">
-                            <span title="Pontos em atividades">📌 ${fmtNum(al.pontos, 0)}</span>
+                            <span title="Atividades">📌 ${fmtNum(al.pontos, 0)}</span>
                             <span title="Faltas">✖️ ${al.faltas}</span>
                             <span title="Tempo fora da sala">⏱️ ${al.tempo_formatado}</span>
                             <span class="rank-pct">${p}%</span>
