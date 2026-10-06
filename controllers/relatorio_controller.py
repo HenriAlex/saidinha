@@ -330,6 +330,7 @@ def historico_usuario(id_usuario: int, periodo: int = 0, start_date: str = None,
         # Cria evento.
         evento = {
             "id_saida": saida['id_saida'],
+            "id_retorno": retorno_saida['id_retorno'] if retorno_saida else None,
             "data_saida": saida['data_saida'],
             "motivo": saida['motivo'],
             "data_retorno": retorno_saida['data_retorno'] if retorno_saida else None,
